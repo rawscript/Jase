@@ -118,6 +118,14 @@ Design preference: Elegant premium, minimalist and ultramodern design.
   - Implemented DatabaseStorage class using Drizzle ORM
   - Replaced in-memory storage with persistent database storage
   - Contact form submissions now stored in database
+- July 07, 2025: Made application self-contained for deployment outside Replit
+  - Created comprehensive README.md with installation and deployment instructions
+  - Added .env.example file for environment variable configuration
+  - Created automated setup.sh script for easy project initialization
+  - Added deploy.md with deployment guides for multiple platforms
+  - Enhanced server with health check endpoint and better error handling
+  - Improved environment variable handling for PORT configuration
+  - Updated .gitignore to exclude sensitive files and build artifacts
 
 ## Changelog
 
@@ -126,3 +134,4 @@ Changelog:
 - July 07, 2025. Premium minimalist design implementation
 - July 07, 2025. White background with black accents
 - July 07, 2025. PostgreSQL database integration
+- July 07, 2025. Self-contained deployment configuration
