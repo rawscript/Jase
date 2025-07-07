@@ -26,7 +26,7 @@ export default function Navigation() {
       <nav className="fixed top-0 left-0 right-0 z-40 floating-nav">
         <div className="container mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="text-xl font-light gradient-text tracking-wide">AC</div>
+            <div className="text-xl font-light gradient-text tracking-wide">JM</div>
             <div className="hidden md:flex space-x-12">
               {navItems.map((item) => (
                 <button

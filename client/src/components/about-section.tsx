@@ -3,10 +3,10 @@ import { Github, Linkedin, Twitter, Instagram } from "lucide-react";
 
 export default function AboutSection() {
   const socialLinks = [
-    { icon: Github, href: "https://github.com", label: "GitHub" },
-    { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
+    { icon: Github, href: "https://github.com/rawscript", label: "GitHub" },
+    { icon: Linkedin, href: "https://www.linkedin.com/in/james-mwaura-8ba2a5293/", label: "LinkedIn" },
     { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-    { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+    { icon: Instagram, href: "https://www.instagram.com/raw.script/", label: "Instagram" },
   ];
 
   return (
@@ -51,8 +51,8 @@ export default function AboutSection() {
             <div className="relative">
               <div className="premium-card rounded-none p-8">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&h=600"
-                  alt="Professional portrait of Alex Chen"
+                  src="../../../assets/james.jpg"
+                  alt="Professional portrait of James Mwaura"
                   className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-500"
                 />
               </div>

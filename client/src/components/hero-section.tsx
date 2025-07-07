@@ -34,7 +34,7 @@ export default function HeroSection() {
           transition={{ duration: 1.2, ease: "easeOut" }}
         >
           <h1 className="text-6xl md:text-8xl minimal-heading mb-8">
-            <span className="gradient-text">Alex Chen</span>
+            <span className="gradient-text">James Mwaura</span>
           </h1>
           <p className="text-lg md:text-xl mb-12 body-text max-w-2xl mx-auto font-light">
             Full-Stack Developer • AI Engineer • Video Editor • Photographer

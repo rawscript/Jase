@@ -12,7 +12,7 @@ export default function Footer() {
     <footer className="py-16" style={{ backgroundColor: 'var(--portfolio-secondary)' }}>
       <div className="container mx-auto px-8">
         <div className="text-center">
-          <div className="text-xl font-light gradient-text mb-8 tracking-wide">Alex Chen</div>
+          <div className="text-xl font-light gradient-text mb-8 tracking-wide">James Mwaura</div>
           <p className="body-text mb-12 font-light">
             Full-Stack Developer • AI Engineer • Video Editor • Photographer
           </p>
