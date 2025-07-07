@@ -113,7 +113,8 @@ Design preference: Elegant premium, minimalist and ultramodern design.
   - Updated all components to work with white background
   - Maintained premium minimalist design approach
 - July 07, 2025: Added PostgreSQL database integration
-  - Created PostgreSQL database with Neon
+  - Initially created PostgreSQL database with Neon
+  - Switched to Supabase PostgreSQL database
   - Implemented DatabaseStorage class using Drizzle ORM
   - Replaced in-memory storage with persistent database storage
   - Contact form submissions now stored in database
