@@ -8,7 +8,7 @@ This is a modern full-stack web application built with React, Express.js, and Ty
 
 ### Frontend Architecture
 - **Framework**: React with TypeScript
-- **Build Tool**: Vite for fast development and building
+- **Build Tool**: Vite for fast development and building322q
 - **Styling**: TailwindCSS with custom CSS variables for theming
 - **UI Components**: shadcn/ui component library with Radix UI primitives
 - **State Management**: React Query (TanStack Query) for server state management
