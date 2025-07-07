@@ -94,7 +94,7 @@ export default function SkillsSection() {
               <div className="text-center mb-8">
                 <category.icon 
                   size={32} 
-                  className="mx-auto mb-6 text-white/80"
+                  className="mx-auto mb-6 text-black/80"
                 />
                 <h3 className="text-lg font-light mb-2 tracking-wide">{category.title}</h3>
               </div>
@@ -102,12 +102,12 @@ export default function SkillsSection() {
                 {category.skills.map((skill, skillIndex) => (
                   <div key={skill.name} className="skill-item">
                     <div className="flex justify-between mb-3">
-                      <span className="text-sm font-light text-white/80">{skill.name}</span>
-                      <span className="text-sm font-light text-white/60">
+                      <span className="text-sm font-light text-black/80">{skill.name}</span>
+                      <span className="text-sm font-light text-black/60">
                         {skill.level}%
                       </span>
                     </div>
-                    <div className="w-full bg-white/10 h-px">
+                    <div className="w-full bg-black/10 h-px">
                       <motion.div
                         className="skill-bar"
                         initial={{ width: 0 }}

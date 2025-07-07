@@ -73,12 +73,12 @@ export default function TestimonialsSection() {
               className="premium-card rounded-none p-8"
             >
               <div className="flex items-center mb-6">
-                <div className="flex text-white/40 mr-3">
+                <div className="flex text-black/40 mr-3">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star key={i} size={12} fill="currentColor" />
                   ))}
                 </div>
-                <span className="text-white/60 text-sm font-light">5.0</span>
+                <span className="text-black/60 text-sm font-light">5.0</span>
               </div>
               <p className="body-text mb-8 text-sm leading-relaxed italic">{testimonial.content}</p>
               <div className="flex items-center">
@@ -89,7 +89,7 @@ export default function TestimonialsSection() {
                 />
                 <div>
                   <h4 className="font-light text-sm">{testimonial.name}</h4>
-                  <p className="text-xs text-white/60 font-light">
+                  <p className="text-xs text-black/60 font-light">
                     {testimonial.role}, {testimonial.company}
                   </p>
                 </div>

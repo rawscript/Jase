@@ -14,13 +14,13 @@ export default function HeroSection() {
       {/* Subtle geometric background */}
       <div className="absolute inset-0">
         <motion.div
-          className="absolute top-1/4 right-1/4 w-px h-32 bg-white/10"
+          className="absolute top-1/4 right-1/4 w-px h-32 bg-black/10"
           initial={{ opacity: 0, scaleY: 0 }}
           animate={{ opacity: 1, scaleY: 1 }}
           transition={{ duration: 2, delay: 1 }}
         />
         <motion.div
-          className="absolute bottom-1/4 left-1/4 w-32 h-px bg-white/10"
+          className="absolute bottom-1/4 left-1/4 w-32 h-px bg-black/10"
           initial={{ opacity: 0, scaleX: 0 }}
           animate={{ opacity: 1, scaleX: 1 }}
           transition={{ duration: 2, delay: 1.5 }}
@@ -62,7 +62,7 @@ export default function HeroSection() {
 
       {/* Minimal scroll indicator */}
       <motion.div
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-white/40"
+        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-black/40"
         animate={{
           y: [0, 6, 0],
         }}
@@ -72,7 +72,7 @@ export default function HeroSection() {
           ease: "easeInOut",
         }}
       >
-        <div className="w-px h-8 bg-white/20 mx-auto mb-2"></div>
+        <div className="w-px h-8 bg-black/20 mx-auto mb-2"></div>
         <div className="text-xs font-light tracking-widest">SCROLL</div>
       </motion.div>
     </section>

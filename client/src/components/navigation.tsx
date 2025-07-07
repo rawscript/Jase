@@ -32,14 +32,14 @@ export default function Navigation() {
                 <button
                   key={item.href}
                   onClick={() => scrollToSection(item.href)}
-                  className="text-sm font-light text-white/80 hover:text-white transition-colors duration-300 tracking-wide"
+                  className="text-sm font-light text-black/80 hover:text-black transition-colors duration-300 tracking-wide"
                 >
                   {item.label}
                 </button>
               ))}
             </div>
             <button
-              className="md:hidden text-white/80 hover:text-white transition-colors"
+              className="md:hidden text-black/80 hover:text-black transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -50,13 +50,13 @@ export default function Navigation() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-30 flex flex-col items-center justify-center">
+        <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-30 flex flex-col items-center justify-center">
           <div className="space-y-12 text-center">
             {navItems.map((item) => (
               <button
                 key={item.href}
                 onClick={() => scrollToSection(item.href)}
-                className="block text-lg font-light text-white/80 hover:text-white transition-colors duration-300 tracking-wide"
+                className="block text-lg font-light text-black/80 hover:text-black transition-colors duration-300 tracking-wide"
               >
                 {item.label}
               </button>

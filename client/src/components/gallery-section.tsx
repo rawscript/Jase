@@ -69,7 +69,7 @@ export default function GallerySection() {
                 className="w-full h-80 object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               />
               <div className="absolute inset-0 image-overlay flex items-center justify-center">
-                <Expand size={24} className="text-white" />
+                <Expand size={24} className="text-black" />
               </div>
             </motion.div>
           ))}

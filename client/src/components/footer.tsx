@@ -23,14 +23,14 @@ export default function Footer() {
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/40 hover:text-white transition-colors duration-300"
+                className="text-black/40 hover:text-black transition-colors duration-300"
               >
                 <social.icon size={18} />
               </a>
             ))}
           </div>
-          <div className="border-t border-white/10 pt-8">
-            <p className="text-white/40 text-sm font-light tracking-wide">
+          <div className="border-t border-black/10 pt-8">
+            <p className="text-black/40 text-sm font-light tracking-wide">
               &copy; {new Date().getFullYear()} Alex Chen. All rights reserved.
             </p>
           </div>

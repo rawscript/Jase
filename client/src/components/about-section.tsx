@@ -33,7 +33,7 @@ export default function AboutSection() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/60 hover:text-white transition-colors duration-300"
+                  className="text-black/60 hover:text-black transition-colors duration-300"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
@@ -56,7 +56,7 @@ export default function AboutSection() {
                   className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-500"
                 />
               </div>
-              <div className="absolute -top-4 -right-4 w-16 h-16 border border-white/20"></div>
+              <div className="absolute -top-4 -right-4 w-16 h-16 border border-black/20"></div>
             </div>
           </motion.div>
         </div>

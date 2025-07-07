@@ -117,16 +117,16 @@ export default function ContactSection() {
           >
             {contactInfo.map((info, index) => (
               <div key={index} className="flex items-center space-x-6">
-                <div className="w-px h-12 bg-white/20"></div>
+                <div className="w-px h-12 bg-black/20"></div>
                 <div>
-                  <h3 className="font-light text-sm tracking-wide text-white/60 mb-1">{info.title.toUpperCase()}</h3>
-                  <p className="text-white font-light">{info.value}</p>
+                  <h3 className="font-light text-sm tracking-wide text-black/60 mb-1">{info.title.toUpperCase()}</h3>
+                  <p className="text-black font-light">{info.value}</p>
                 </div>
               </div>
             ))}
 
             <div className="pt-12">
-              <h3 className="font-light text-sm tracking-wide text-white/60 mb-6">SOCIAL</h3>
+              <h3 className="font-light text-sm tracking-wide text-black/60 mb-6">SOCIAL</h3>
               <div className="flex space-x-6">
                 {socialLinks.map((social, index) => (
                   <motion.a
@@ -134,7 +134,7 @@ export default function ContactSection() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/60 hover:text-white transition-colors duration-300"
+                    className="text-black/60 hover:text-black transition-colors duration-300"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
@@ -159,12 +159,12 @@ export default function ContactSection() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-light tracking-wide text-white/60">NAME</FormLabel>
+                      <FormLabel className="text-xs font-light tracking-wide text-black/60">NAME</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Your Name"
                           {...field}
-                          className="bg-transparent border-0 border-b border-white/20 rounded-none text-white placeholder-white/40 focus:border-white font-light text-sm pb-3"
+                          className="bg-transparent border-0 border-b border-black/20 rounded-none text-black placeholder-black/40 focus:border-black font-light text-sm pb-3"
                         />
                       </FormControl>
                       <FormMessage />
@@ -177,13 +177,13 @@ export default function ContactSection() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-light tracking-wide text-white/60">EMAIL</FormLabel>
+                      <FormLabel className="text-xs font-light tracking-wide text-black/60">EMAIL</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
                           placeholder="your@email.com"
                           {...field}
-                          className="bg-transparent border-0 border-b border-white/20 rounded-none text-white placeholder-white/40 focus:border-white font-light text-sm pb-3"
+                          className="bg-transparent border-0 border-b border-black/20 rounded-none text-black placeholder-black/40 focus:border-black font-light text-sm pb-3"
                         />
                       </FormControl>
                       <FormMessage />
@@ -196,12 +196,12 @@ export default function ContactSection() {
                   name="subject"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-light tracking-wide text-white/60">SUBJECT</FormLabel>
+                      <FormLabel className="text-xs font-light tracking-wide text-black/60">SUBJECT</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Project Inquiry"
                           {...field}
-                          className="bg-transparent border-0 border-b border-white/20 rounded-none text-white placeholder-white/40 focus:border-white font-light text-sm pb-3"
+                          className="bg-transparent border-0 border-b border-black/20 rounded-none text-black placeholder-black/40 focus:border-black font-light text-sm pb-3"
                         />
                       </FormControl>
                       <FormMessage />
@@ -214,13 +214,13 @@ export default function ContactSection() {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-light tracking-wide text-white/60">MESSAGE</FormLabel>
+                      <FormLabel className="text-xs font-light tracking-wide text-black/60">MESSAGE</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Tell me about your project..."
                           rows={4}
                           {...field}
-                          className="bg-transparent border-0 border-b border-white/20 rounded-none text-white placeholder-white/40 focus:border-white font-light text-sm resize-none"
+                          className="bg-transparent border-0 border-b border-black/20 rounded-none text-black placeholder-black/40 focus:border-black font-light text-sm resize-none"
                         />
                       </FormControl>
                       <FormMessage />

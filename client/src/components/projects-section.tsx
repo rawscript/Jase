@@ -138,8 +138,8 @@ export default function ProjectsSection() {
                 onClick={() => setActiveFilter(filter.id)}
                 className={`font-light text-sm tracking-widest transition-all duration-300 ${
                   activeFilter === filter.id
-                    ? "text-white border-b border-white"
-                    : "text-white/60 hover:text-white"
+                    ? "text-black border-b border-black"
+                    : "text-black/60 hover:text-black"
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -168,8 +168,8 @@ export default function ProjectsSection() {
                 />
                 <div className="absolute inset-0 image-overlay flex items-center justify-center">
                   <div className="text-center">
-                    <ExternalLink size={24} className="mx-auto mb-2" />
-                    <p className="font-light text-sm tracking-wide">VIEW PROJECT</p>
+                    <ExternalLink size={24} className="mx-auto mb-2 text-black" />
+                    <p className="font-light text-sm tracking-wide text-black">VIEW PROJECT</p>
                   </div>
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default function ProjectsSection() {
                   {project.technologies.map((tech) => (
                     <span
                       key={tech}
-                      className="px-3 py-1 text-xs font-light tracking-wide border border-white/20 text-white/80"
+                      className="px-3 py-1 text-xs font-light tracking-wide border border-black/20 text-black/80"
                     >
                       {tech}
                     </span>
@@ -191,7 +191,7 @@ export default function ProjectsSection() {
                     <a
                       key={linkIndex}
                       href={link.url}
-                      className="flex items-center gap-2 text-sm font-light text-white/60 hover:text-white transition-colors duration-300"
+                      className="flex items-center gap-2 text-sm font-light text-black/60 hover:text-black transition-colors duration-300"
                     >
                       <link.icon size={14} />
                       {link.type}

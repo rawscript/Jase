@@ -24,15 +24,15 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
   
-  /* Custom portfolio colors - Premium minimalist palette */
-  --portfolio-primary: hsl(0, 0%, 1%);
-  --portfolio-secondary: hsl(0, 0%, 4%);
-  --portfolio-surface: hsl(0, 0%, 8%);
-  --portfolio-accent: hsl(0, 0%, 100%);
-  --portfolio-accent-soft: hsl(0, 0%, 85%);
-  --portfolio-muted: hsl(0, 0%, 45%);
-  --portfolio-border: hsl(0, 0%, 15%);
-  --portfolio-glass: hsla(0, 0%, 8%, 0.6);
+  /* Custom portfolio colors - White background with black accents */
+  --portfolio-primary: hsl(0, 0%, 100%);
+  --portfolio-secondary: hsl(0, 0%, 98%);
+  --portfolio-surface: hsl(0, 0%, 96%);
+  --portfolio-accent: hsl(0, 0%, 0%);
+  --portfolio-accent-soft: hsl(0, 0%, 20%);
+  --portfolio-muted: hsl(0, 0%, 55%);
+  --portfolio-border: hsl(0, 0%, 90%);
+  --portfolio-glass: hsla(0, 0%, 96%, 0.8);
 }
 
 .dark {
@@ -66,7 +66,7 @@
   body {
     @apply font-sans antialiased;
     background: var(--portfolio-primary);
-    color: white;
+    color: var(--portfolio-accent);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: -0.01em;
   }
@@ -114,7 +114,7 @@
   .floating-nav {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    background: hsla(0, 0%, 1%, 0.8);
+    background: hsla(0, 0%, 100%, 0.9);
     border-bottom: 1px solid var(--portfolio-border);
   }
 
@@ -127,7 +127,7 @@
   }
 
   .image-overlay {
-    background: hsla(0, 0%, 0%, 0.6);
+    background: hsla(0, 0%, 100%, 0.9);
     opacity: 0;
     transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -162,6 +162,7 @@
   .accent-button:hover {
     background: var(--portfolio-accent-soft);
     border-color: var(--portfolio-accent-soft);
+    color: var(--portfolio-primary);
   }
 
   .loading-spinner {
@@ -183,7 +184,7 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: var(--portfolio-secondary);
+    background: var(--portfolio-primary);
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -215,8 +216,8 @@
   }
 
   @keyframes glow {
-    0% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
-    100% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); }
+    0% { box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); }
+    100% { box-shadow: 0 0 30px rgba(0, 0, 0, 0.2); }
   }
 
   .section-spacing {
