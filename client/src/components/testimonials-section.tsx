@@ -39,57 +39,57 @@ export default function TestimonialsSection() {
   ];
 
   return (
-    <section className="py-20" style={{ backgroundColor: 'var(--portfolio-secondary)' }}>
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+    <section className="section-spacing" style={{ backgroundColor: 'var(--portfolio-secondary)' }}>
+      <div className="container mx-auto px-8">
+        <div className="text-center mb-20">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-4xl font-bold mb-6 gradient-text"
+            className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text"
           >
-            Client Testimonials
+            Testimonials
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
+            className="text-lg body-text max-w-2xl mx-auto"
           >
             What clients say about working with me.
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
               viewport={{ once: true }}
-              className="testimonial-card glass-effect rounded-2xl p-6"
+              className="premium-card rounded-none p-8"
             >
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400 mr-2">
+              <div className="flex items-center mb-6">
+                <div className="flex text-white/40 mr-3">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} size={16} fill="currentColor" />
+                    <Star key={i} size={12} fill="currentColor" />
                   ))}
                 </div>
-                <span className="text-gray-400">5.0</span>
+                <span className="text-white/60 text-sm font-light">5.0</span>
               </div>
-              <p className="text-gray-400 mb-4">{testimonial.content}</p>
+              <p className="body-text mb-8 text-sm leading-relaxed italic">{testimonial.content}</p>
               <div className="flex items-center">
                 <img
                   src={testimonial.image}
                   alt={testimonial.name}
-                  className="w-12 h-12 rounded-full mr-4"
+                  className="w-10 h-10 rounded-full mr-4 grayscale"
                 />
                 <div>
-                  <h4 className="font-semibold">{testimonial.name}</h4>
-                  <p className="text-sm text-gray-400">
+                  <h4 className="font-light text-sm">{testimonial.name}</h4>
+                  <p className="text-xs text-white/60 font-light">
                     {testimonial.role}, {testimonial.company}
                   </p>
                 </div>

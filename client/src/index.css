@@ -24,14 +24,15 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
   
-  /* Custom portfolio colors */
-  --portfolio-primary: hsl(0, 0%, 3.9%);
-  --portfolio-secondary: hsl(0, 0%, 10.2%);
-  --portfolio-accent: hsl(250, 84%, 54%);
-  --portfolio-accent-purple: hsl(258, 84%, 67%);
-  --portfolio-accent-cyan: hsl(189, 94%, 43%);
-  --portfolio-muted: hsl(215, 16%, 47%);
-  --portfolio-glass: hsla(0, 0%, 10.2%, 0.8);
+  /* Custom portfolio colors - Premium minimalist palette */
+  --portfolio-primary: hsl(0, 0%, 1%);
+  --portfolio-secondary: hsl(0, 0%, 4%);
+  --portfolio-surface: hsl(0, 0%, 8%);
+  --portfolio-accent: hsl(0, 0%, 100%);
+  --portfolio-accent-soft: hsl(0, 0%, 85%);
+  --portfolio-muted: hsl(0, 0%, 45%);
+  --portfolio-border: hsl(0, 0%, 15%);
+  --portfolio-glass: hsla(0, 0%, 8%, 0.6);
 }
 
 .dark {
@@ -66,6 +67,8 @@
     @apply font-sans antialiased;
     background: var(--portfolio-primary);
     color: white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.01em;
   }
 
   html {
@@ -75,60 +78,98 @@
 
 @layer components {
   .glass-effect {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     background: var(--portfolio-glass);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--portfolio-border);
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, var(--portfolio-accent-purple) 0%, var(--portfolio-accent-cyan) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--portfolio-accent);
+    font-weight: 300;
+    letter-spacing: -0.02em;
   }
 
   .hero-gradient {
-    background: linear-gradient(135deg, var(--portfolio-primary) 0%, var(--portfolio-secondary) 50%, var(--portfolio-primary) 100%);
+    background: radial-gradient(ellipse at center, var(--portfolio-secondary) 0%, var(--portfolio-primary) 70%);
   }
 
   .skill-bar {
-    background: linear-gradient(90deg, var(--portfolio-accent-purple) 0%, var(--portfolio-accent-cyan) 100%);
+    background: var(--portfolio-accent);
+    border-radius: 1px;
+    height: 1px;
+  }
+
+  .premium-card {
+    background: var(--portfolio-surface);
+    border: 1px solid var(--portfolio-border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .premium-card:hover {
+    border-color: var(--portfolio-accent-soft);
+    transform: translateY(-2px);
   }
 
   .floating-nav {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background: hsla(0, 0%, 1%, 0.8);
+    border-bottom: 1px solid var(--portfolio-border);
   }
 
   .project-card {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .project-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
   }
 
   .image-overlay {
-    background: linear-gradient(45deg, rgba(139, 92, 246, 0.9), rgba(6, 182, 212, 0.9));
+    background: hsla(0, 0%, 0%, 0.6);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .image-overlay:hover {
     opacity: 1;
   }
 
-  .testimonial-card {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+  .minimal-button {
+    background: transparent;
+    border: 1px solid var(--portfolio-border);
+    color: var(--portfolio-accent);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .minimal-button:hover {
+    border-color: var(--portfolio-accent);
+    background: var(--portfolio-surface);
+  }
+
+  .accent-button {
+    background: var(--portfolio-accent);
+    color: var(--portfolio-primary);
+    border: 1px solid var(--portfolio-accent);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .accent-button:hover {
+    background: var(--portfolio-accent-soft);
+    border-color: var(--portfolio-accent-soft);
   }
 
   .loading-spinner {
-    border: 3px solid rgba(99, 102, 241, 0.3);
-    border-top: 3px solid var(--portfolio-accent);
+    border: 1px solid var(--portfolio-border);
+    border-top: 1px solid var(--portfolio-accent);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 24px;
+    height: 24px;
     animation: spin 1s linear infinite;
   }
 
@@ -146,8 +187,12 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--portfolio-accent);
+    background: var(--portfolio-border);
     border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--portfolio-accent-soft);
   }
 }
 
@@ -170,7 +215,23 @@
   }
 
   @keyframes glow {
-    0% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
-    100% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.6); }
+    0% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+    100% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); }
+  }
+
+  .section-spacing {
+    padding: 6rem 0;
+  }
+
+  .minimal-heading {
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .body-text {
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--portfolio-muted);
   }
 }

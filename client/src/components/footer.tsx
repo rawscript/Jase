@@ -9,28 +9,28 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="py-12" style={{ backgroundColor: 'var(--portfolio-secondary)' }}>
-      <div className="container mx-auto px-6">
+    <footer className="py-16" style={{ backgroundColor: 'var(--portfolio-secondary)' }}>
+      <div className="container mx-auto px-8">
         <div className="text-center">
-          <div className="text-2xl font-bold gradient-text mb-4">Alex Chen</div>
-          <p className="text-gray-400 mb-6">
+          <div className="text-xl font-light gradient-text mb-8 tracking-wide">Alex Chen</div>
+          <p className="body-text mb-12 font-light">
             Full-Stack Developer • AI Engineer • Video Editor • Photographer
           </p>
-          <div className="flex justify-center space-x-6 mb-8">
+          <div className="flex justify-center space-x-8 mb-12">
             {socialLinks.map((social, index) => (
               <a
                 key={index}
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-[var(--portfolio-accent)] transition-colors"
+                className="text-white/40 hover:text-white transition-colors duration-300"
               >
-                <social.icon size={20} />
+                <social.icon size={18} />
               </a>
             ))}
           </div>
-          <div className="border-t border-white/20 pt-8">
-            <p className="text-gray-400">
+          <div className="border-t border-white/10 pt-8">
+            <p className="text-white/40 text-sm font-light tracking-wide">
               &copy; {new Date().getFullYear()} Alex Chen. All rights reserved.
             </p>
           </div>

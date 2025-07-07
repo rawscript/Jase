@@ -30,46 +30,46 @@ export default function GallerySection() {
   ];
 
   return (
-    <section id="gallery" className="py-20">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+    <section id="gallery" className="section-spacing">
+      <div className="container mx-auto px-8">
+        <div className="text-center mb-20">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-4xl font-bold mb-6 gradient-text"
+            className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text"
           >
-            Creative Gallery
+            Visual Work
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
+            className="text-lg body-text max-w-2xl mx-auto"
           >
             A curated collection of my photography and video work showcasing diverse styles and techniques.
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {galleryImages.map((image, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
               viewport={{ once: true }}
-              className="relative group cursor-pointer"
+              className="relative group cursor-pointer premium-card rounded-none overflow-hidden"
             >
               <img
                 src={image.src}
                 alt={image.alt}
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-full h-80 object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                <Expand size={32} className="text-white" />
+              <div className="absolute inset-0 image-overlay flex items-center justify-center">
+                <Expand size={24} className="text-white" />
               </div>
             </motion.div>
           ))}

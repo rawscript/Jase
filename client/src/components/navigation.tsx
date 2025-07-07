@@ -23,26 +23,26 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-40 floating-nav bg-black/70 border-b border-white/10">
-        <div className="container mx-auto px-6 py-4">
+      <nav className="fixed top-0 left-0 right-0 z-40 floating-nav">
+        <div className="container mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold gradient-text">AC</div>
-            <div className="hidden md:flex space-x-8">
+            <div className="text-xl font-light gradient-text tracking-wide">AC</div>
+            <div className="hidden md:flex space-x-12">
               {navItems.map((item) => (
                 <button
                   key={item.href}
                   onClick={() => scrollToSection(item.href)}
-                  className="text-white hover:text-[var(--portfolio-accent)] transition-colors"
+                  className="text-sm font-light text-white/80 hover:text-white transition-colors duration-300 tracking-wide"
                 >
                   {item.label}
                 </button>
               ))}
             </div>
             <button
-              className="md:hidden text-white"
+              className="md:hidden text-white/80 hover:text-white transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -50,13 +50,13 @@ export default function Navigation() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-30 flex flex-col items-center justify-center">
-          <div className="space-y-8 text-xl">
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-30 flex flex-col items-center justify-center">
+          <div className="space-y-12 text-center">
             {navItems.map((item) => (
               <button
                 key={item.href}
                 onClick={() => scrollToSection(item.href)}
-                className="block text-white hover:text-[var(--portfolio-accent)] transition-colors"
+                className="block text-lg font-light text-white/80 hover:text-white transition-colors duration-300 tracking-wide"
               >
                 {item.label}
               </button>

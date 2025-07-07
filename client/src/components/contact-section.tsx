@@ -84,72 +84,61 @@ export default function ContactSection() {
   ];
 
   return (
-    <section id="contact" className="py-20">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+    <section id="contact" className="section-spacing">
+      <div className="container mx-auto px-8">
+        <div className="text-center mb-20">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-4xl font-bold mb-6 gradient-text"
+            className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text"
           >
-            Get In Touch
+            Contact
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
+            className="text-lg body-text max-w-2xl mx-auto"
           >
             Ready to bring your project to life? Let's discuss how we can work together.
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid md:grid-cols-2 gap-20">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="space-y-8"
+            className="space-y-12"
           >
             {contactInfo.map((info, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--portfolio-accent)' }}
-                >
-                  <info.icon size={20} className="text-white" />
-                </div>
+              <div key={index} className="flex items-center space-x-6">
+                <div className="w-px h-12 bg-white/20"></div>
                 <div>
-                  <h3 className="font-semibold">{info.title}</h3>
-                  <p className="text-gray-400">{info.value}</p>
+                  <h3 className="font-light text-sm tracking-wide text-white/60 mb-1">{info.title.toUpperCase()}</h3>
+                  <p className="text-white font-light">{info.value}</p>
                 </div>
               </div>
             ))}
 
-            <div className="pt-8">
-              <h3 className="font-semibold mb-4">Follow Me</h3>
-              <div className="flex space-x-4">
+            <div className="pt-12">
+              <h3 className="font-light text-sm tracking-wide text-white/60 mb-6">SOCIAL</h3>
+              <div className="flex space-x-6">
                 {socialLinks.map((social, index) => (
                   <motion.a
                     key={index}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 glass-effect rounded-full flex items-center justify-center transition-colors"
-                    style={{ 
-                      color: 'white',
-                    }}
-                    whileHover={{ 
-                      backgroundColor: 'var(--portfolio-accent)',
-                      scale: 1.1 
-                    }}
+                    className="text-white/60 hover:text-white transition-colors duration-300"
+                    whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
-                    <social.icon size={20} />
+                    <social.icon size={18} />
                   </motion.a>
                 ))}
               </div>
@@ -157,25 +146,25 @@ export default function ContactSection() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="glass-effect rounded-2xl p-8"
+            className="premium-card rounded-none p-8"
           >
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Name</FormLabel>
+                      <FormLabel className="text-xs font-light tracking-wide text-white/60">NAME</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Your Name"
                           {...field}
-                          className="bg-black/50 border-white/20 text-white placeholder-gray-400 focus:border-[var(--portfolio-accent)]"
+                          className="bg-transparent border-0 border-b border-white/20 rounded-none text-white placeholder-white/40 focus:border-white font-light text-sm pb-3"
                         />
                       </FormControl>
                       <FormMessage />
@@ -188,13 +177,13 @@ export default function ContactSection() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Email</FormLabel>
+                      <FormLabel className="text-xs font-light tracking-wide text-white/60">EMAIL</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
                           placeholder="your@email.com"
                           {...field}
-                          className="bg-black/50 border-white/20 text-white placeholder-gray-400 focus:border-[var(--portfolio-accent)]"
+                          className="bg-transparent border-0 border-b border-white/20 rounded-none text-white placeholder-white/40 focus:border-white font-light text-sm pb-3"
                         />
                       </FormControl>
                       <FormMessage />
@@ -207,12 +196,12 @@ export default function ContactSection() {
                   name="subject"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Subject</FormLabel>
+                      <FormLabel className="text-xs font-light tracking-wide text-white/60">SUBJECT</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Project Inquiry"
                           {...field}
-                          className="bg-black/50 border-white/20 text-white placeholder-gray-400 focus:border-[var(--portfolio-accent)]"
+                          className="bg-transparent border-0 border-b border-white/20 rounded-none text-white placeholder-white/40 focus:border-white font-light text-sm pb-3"
                         />
                       </FormControl>
                       <FormMessage />
@@ -225,13 +214,13 @@ export default function ContactSection() {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Message</FormLabel>
+                      <FormLabel className="text-xs font-light tracking-wide text-white/60">MESSAGE</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Tell me about your project..."
                           rows={4}
                           {...field}
-                          className="bg-black/50 border-white/20 text-white placeholder-gray-400 focus:border-[var(--portfolio-accent)]"
+                          className="bg-transparent border-0 border-b border-white/20 rounded-none text-white placeholder-white/40 focus:border-white font-light text-sm resize-none"
                         />
                       </FormControl>
                       <FormMessage />
@@ -241,14 +230,10 @@ export default function ContactSection() {
 
                 <Button
                   type="submit"
-                  className="w-full py-3 font-semibold transition-colors"
-                  style={{ 
-                    backgroundColor: 'var(--portfolio-accent)',
-                    color: 'white'
-                  }}
+                  className="accent-button w-full py-4 rounded-none font-light text-sm tracking-wide"
                   disabled={contactMutation.isPending}
                 >
-                  {contactMutation.isPending ? "Sending..." : "Send Message"}
+                  {contactMutation.isPending ? "SENDING..." : "SEND MESSAGE"}
                 </Button>
               </form>
             </Form>

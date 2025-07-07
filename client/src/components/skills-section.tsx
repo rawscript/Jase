@@ -58,62 +58,61 @@ export default function SkillsSection() {
   ];
 
   return (
-    <section id="skills" className="py-20" ref={ref}>
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+    <section id="skills" className="section-spacing" ref={ref}>
+      <div className="container mx-auto px-8">
+        <div className="text-center mb-20">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-4xl font-bold mb-6 gradient-text"
+            className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text"
           >
-            Skills & Expertise
+            Expertise
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
+            className="text-lg body-text max-w-2xl mx-auto"
           >
             A comprehensive skill set covering modern web technologies, AI development, and creative media production.
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
           {skillCategories.map((category, index) => (
             <motion.div
               key={category.title}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
               viewport={{ once: true }}
-              className="glass-effect rounded-2xl p-6 hover:bg-white/10 transition-all"
+              className="premium-card rounded-none p-8"
             >
-              <div className="text-center mb-6">
+              <div className="text-center mb-8">
                 <category.icon 
-                  size={48} 
-                  className="mx-auto mb-4"
-                  style={{ color: 'var(--portfolio-accent)' }}
+                  size={32} 
+                  className="mx-auto mb-6 text-white/80"
                 />
-                <h3 className="text-xl font-semibold mb-2">{category.title}</h3>
+                <h3 className="text-lg font-light mb-2 tracking-wide">{category.title}</h3>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {category.skills.map((skill, skillIndex) => (
                   <div key={skill.name} className="skill-item">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm">{skill.name}</span>
-                      <span className="text-sm" style={{ color: 'var(--portfolio-accent)' }}>
+                    <div className="flex justify-between mb-3">
+                      <span className="text-sm font-light text-white/80">{skill.name}</span>
+                      <span className="text-sm font-light text-white/60">
                         {skill.level}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div className="w-full bg-white/10 h-px">
                       <motion.div
-                        className="skill-bar h-2 rounded-full"
+                        className="skill-bar"
                         initial={{ width: 0 }}
                         animate={isIntersecting ? { width: `${skill.level}%` } : { width: 0 }}
-                        transition={{ duration: 1.5, delay: skillIndex * 0.2 }}
+                        transition={{ duration: 2, delay: skillIndex * 0.3, ease: "easeOut" }}
                       />
                     </div>
                   </div>

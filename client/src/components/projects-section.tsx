@@ -108,100 +108,92 @@ export default function ProjectsSection() {
     : projects.filter(project => project.category === activeFilter);
 
   return (
-    <section id="projects" className="py-20" style={{ backgroundColor: 'var(--portfolio-secondary)' }}>
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+    <section id="projects" className="section-spacing" style={{ backgroundColor: 'var(--portfolio-secondary)' }}>
+      <div className="container mx-auto px-8">
+        <div className="text-center mb-20">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-4xl font-bold mb-6 gradient-text"
+            className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text"
           >
-            Featured Projects
+            Selected Work
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-lg text-gray-400 max-w-2xl mx-auto mb-8"
+            className="text-lg body-text max-w-2xl mx-auto mb-12"
           >
             A showcase of my best work across different domains and technologies.
           </motion.p>
 
           {/* Project Filter */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="flex flex-wrap justify-center gap-8 mb-16">
             {filters.map((filter) => (
               <motion.button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`px-6 py-2 rounded-full font-semibold transition-all ${
+                className={`font-light text-sm tracking-widest transition-all duration-300 ${
                   activeFilter === filter.id
-                    ? "text-white"
-                    : "glass-effect text-white hover:bg-white/10"
+                    ? "text-white border-b border-white"
+                    : "text-white/60 hover:text-white"
                 }`}
-                style={{
-                  backgroundColor: activeFilter === filter.id ? 'var(--portfolio-accent)' : undefined,
-                }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {filter.label}
+                {filter.label.toUpperCase()}
               </motion.button>
             ))}
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
           {filteredProjects.map((project, index) => (
             <motion.div
               key={project.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
               viewport={{ once: true }}
-              className="project-card glass-effect rounded-2xl overflow-hidden"
+              className="project-card premium-card rounded-none overflow-hidden"
             >
-              <div className="relative">
+              <div className="relative group">
                 <img
                   src={project.image}
                   alt={project.title}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-64 object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                 />
                 <div className="absolute inset-0 image-overlay flex items-center justify-center">
                   <div className="text-center">
-                    <ExternalLink size={32} className="mx-auto mb-2" />
-                    <p className="font-semibold">View Project</p>
+                    <ExternalLink size={24} className="mx-auto mb-2" />
+                    <p className="font-light text-sm tracking-wide">VIEW PROJECT</p>
                   </div>
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
-                <p className="text-gray-400 mb-4">{project.description}</p>
-                <div className="flex flex-wrap gap-2 mb-4">
+              <div className="p-8">
+                <h3 className="text-xl font-light mb-4 tracking-wide">{project.title}</h3>
+                <p className="body-text mb-6 text-sm leading-relaxed">{project.description}</p>
+                <div className="flex flex-wrap gap-2 mb-6">
                   {project.technologies.map((tech) => (
                     <span
                       key={tech}
-                      className="px-3 py-1 rounded-full text-sm"
-                      style={{ 
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        color: 'var(--portfolio-accent)'
-                      }}
+                      className="px-3 py-1 text-xs font-light tracking-wide border border-white/20 text-white/80"
                     >
                       {tech}
                     </span>
                   ))}
                 </div>
-                <div className="flex space-x-4">
+                <div className="flex space-x-6">
                   {project.links.map((link, linkIndex) => (
                     <a
                       key={linkIndex}
                       href={link.url}
-                      className="flex items-center gap-1 transition-colors"
-                      style={{ color: 'var(--portfolio-accent)' }}
+                      className="flex items-center gap-2 text-sm font-light text-white/60 hover:text-white transition-colors duration-300"
                     >
-                      <link.icon size={16} />
+                      <link.icon size={14} />
                       {link.type}
                     </a>
                   ))}
