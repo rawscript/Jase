@@ -31,7 +31,7 @@ export default function Footer() {
           </div>
           <div className="border-t border-black/10 pt-8">
             <p className="text-black/40 text-sm font-light tracking-wide">
-              &copy; {new Date().getFullYear()} Alex Chen. All rights reserved.
+              &copy; {new Date().getFullYear()} James Mwaura. All rights reserved.
             </p>
           </div>
         </div>

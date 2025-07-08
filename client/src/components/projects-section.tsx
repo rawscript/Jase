@@ -22,26 +22,26 @@ export default function ProjectsSection() {
   const projects: Project[] = [
     {
       id: "1",
-      title: "E-Commerce Platform",
-      description: "A modern, responsive e-commerce platform built with React and Next.js featuring advanced filtering, payment integration, and admin dashboard.",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
+      title: "Fawe Tuseme Club",
+      description: "Developed an ultramoden club site for less fortunate students in Kajiado county",
+      image: "https://fawe-tuseme.onrender.com/public/images/WhatsApp%20Image%202025-06-28%20at%2010.25.53_e4a68527.jpg",
       category: "frontend",
-      technologies: ["React", "Next.js", "TypeScript"],
+      technologies: ["HTML5", "CSS3", "es6"],
       links: [
-        { type: "Code", url: "#", icon: Github },
-        { type: "Live Demo", url: "#", icon: ExternalLink },
+        { type: "Code", url: "https://github.com/rawscript/fawe-contact", icon: Github },
+        { type: "Live Demo", url: "https://fawe-tuseme.onrender.com/", icon: ExternalLink },
       ],
     },
     {
       id: "2",
-      title: "Microservices API",
-      description: "Scalable microservices architecture with Docker, Redis caching, and comprehensive API documentation using OpenAPI standards.",
+      title: "Energy management system",
+      description: "Aurora is an energy management systrm designed to optimised energy management across African homes",
       image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
       category: "backend",
-      technologies: ["Node.js", "Docker", "PostgreSQL"],
+      technologies: ["Node.js", "ES6", "PostgreSQL"],
       links: [
-        { type: "Code", url: "#", icon: Github },
-        { type: "Documentation", url: "#", icon: Book },
+        { type: "Code", url: "https://github.com/rawscript/aurora-energy-flow", icon: Github },
+        { type: "Documentation", url: "https://main.d2yx2x5zg4eyf4.amplifyapp.com/", icon: Book },
       ],
     },
     {

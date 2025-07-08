@@ -17,7 +17,7 @@ export default function TestimonialsSection() {
       role: "CEO",
       company: "TechStart Inc.",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
-      content: "Alex delivered an exceptional e-commerce platform that exceeded our expectations. The attention to detail and user experience is outstanding.",
+      content: "James delivered an exceptional e-commerce platform that exceeded our expectations. The attention to detail and user experience is outstanding.",
       rating: 5,
     },
     {
@@ -25,7 +25,7 @@ export default function TestimonialsSection() {
       role: "Marketing Director",
       company: "Digital Agency",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
-      content: "The AI content generation tool Alex built for us has revolutionized our content marketing. Highly recommend his technical expertise.",
+      content: "The AI content generation tool James built for us has revolutionized our content marketing. Highly recommend his technical expertise.",
       rating: 5,
     },
     {
@@ -33,7 +33,7 @@ export default function TestimonialsSection() {
       role: "Brand Manager",
       company: "Creative Studio",
       image: "https://images.unsplash.com/photo-1494790108755-2616b45b2ba0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
-      content: "Alex's video work is absolutely stunning. The brand commercial he created for us has significantly boosted our engagement rates.",
+      content: "James's video work is absolutely stunning. The brand commercial he created for us has significantly boosted our engagement rates.",
       rating: 5,
     },
   ];

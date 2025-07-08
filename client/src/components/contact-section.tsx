@@ -62,17 +62,17 @@ export default function ContactSection() {
     {
       icon: Mail,
       title: "Email",
-      value: "alex.chen@example.com",
+      value: "jasemwaura@gmail.com",
     },
     {
       icon: Phone,
       title: "Phone",
-      value: "+1 (555) 123-4567",
+      value: "+254 114841437",
     },
     {
       icon: MapPin,
       title: "Location",
-      value: "San Francisco, CA",
+      value: "Nairoi, KE",
     },
   ];
 
