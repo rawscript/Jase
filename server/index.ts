@@ -4,16 +4,32 @@ import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// Configure port from environment variable
+// Add security headers
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  next();
+});
+
+// Configure port and host from environment variables
 const PORT = process.env.PORT || 5000;
+const HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+
+// Enable trust proxy for cloud deployment
+app.set("trust proxy", 1);
 
 // Configure static file serving based on environment
 if (process.env.NODE_ENV === "production") {
   const staticPath = path.join(import.meta.dirname, "..", "dist", "public");
-  app.use(express.static(staticPath));
+  app.use(express.static(staticPath, {
+    maxAge: "1y",
+    etag: true,
+    lastModified: true
+  }));
 }
 
 // Health check endpoint

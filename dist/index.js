@@ -53,18 +53,51 @@ var { Pool } = pkg;
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL must be set. Did you forget to provision a database?");
 }
-var pool = new Pool({ connectionString: process.env.DATABASE_URL });
+var pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,
+  // Maximum number of clients in the pool
+  idleTimeoutMillis: 3e4,
+  // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2e3,
+  // Return an error after 2 seconds if connection could not be established
+  statement_timeout: 1e4,
+  // Terminate any statement that takes more than 10 seconds
+  query_timeout: 5e3
+  // Terminate any query that takes more than 5 seconds
+});
 var db = drizzle(pool, { schema: schema_exports });
 
 // server/storage.ts
 import { eq } from "drizzle-orm";
+var cache = /* @__PURE__ */ new Map();
+var CACHE_TTL = 5 * 60 * 1e3;
+function getCached(key) {
+  const item = cache.get(key);
+  if (item && Date.now() - item.timestamp < CACHE_TTL) {
+    return item.data;
+  }
+  cache.delete(key);
+  return void 0;
+}
+function setCache(key, data) {
+  cache.set(key, { data, timestamp: Date.now() });
+}
 var DatabaseStorage = class {
   async getUser(id) {
+    const cacheKey = `user:${id}`;
+    const cachedUser = getCached(cacheKey);
+    if (cachedUser) return cachedUser;
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    if (user) setCache(cacheKey, user);
     return user || void 0;
   }
   async getUserByUsername(username) {
+    const cacheKey = `user:username:${username}`;
+    const cachedUser = getCached(cacheKey);
+    if (cachedUser) return cachedUser;
     const [user] = await db.select().from(users).where(eq(users.username, username));
+    if (user) setCache(cacheKey, user);
     return user || void 0;
   }
   async createUser(insertUser) {
@@ -73,10 +106,16 @@ var DatabaseStorage = class {
   }
   async createContact(insertContact) {
     const [contact] = await db.insert(contacts).values(insertContact).returning();
+    cache.delete("all:contacts");
     return contact;
   }
   async getAllContacts() {
-    return await db.select().from(contacts);
+    const cacheKey = "all:contacts";
+    const cachedContacts = getCached(cacheKey);
+    if (cachedContacts) return cachedContacts;
+    const allContacts = await db.select().from(contacts);
+    setCache(cacheKey, allContacts);
+    return allContacts;
   }
 };
 var storage = new DatabaseStorage();
@@ -129,17 +168,8 @@ import { createServer as createViteServer, createLogger } from "vite";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 var vite_config_default = defineConfig({
-  plugins: [
-    react(),
-    runtimeErrorOverlay(),
-    ...process.env.NODE_ENV !== "production" && process.env.REPL_ID !== void 0 ? [
-      await import("@replit/vite-plugin-cartographer").then(
-        (m) => m.cartographer()
-      )
-    ] : []
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -176,7 +206,8 @@ async function setupVite(app2, server) {
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
-    allowedHosts: true
+    allowedHosts: true,
+    host: process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost"
   };
   const vite = await createViteServer({
     ...vite_config_default,
@@ -189,7 +220,10 @@ async function setupVite(app2, server) {
       }
     },
     server: serverOptions,
-    appType: "custom"
+    appType: "custom",
+    optimizeDeps: {
+      force: process.env.NODE_ENV === "production"
+    }
   });
   app2.use(vite.middlewares);
   app2.use("*", async (req, res, next) => {
@@ -214,29 +248,39 @@ async function setupVite(app2, server) {
     }
   });
 }
-function serveStatic(app2) {
-  const distPath = path2.resolve(import.meta.dirname, "public");
-  if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`
-    );
-  }
-  app2.use(express.static(distPath));
-  app2.use("*", (_req, res) => {
-    res.sendFile(path2.resolve(distPath, "index.html"));
-  });
-}
 
 // server/index.ts
+import path3 from "path";
 var app = express2();
-app.use(express2.json());
-app.use(express2.urlencoded({ extended: false }));
+app.use(express2.json({ limit: "50mb" }));
+app.use(express2.urlencoded({ extended: true, limit: "50mb" }));
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  next();
+});
+var PORT = process.env.PORT || 5e3;
+var HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+app.set("trust proxy", 1);
+if (process.env.NODE_ENV === "production") {
+  const staticPath = path3.join(import.meta.dirname, "..", "dist", "public");
+  app.use(express2.static(staticPath, {
+    maxAge: "1y",
+    etag: true,
+    lastModified: true
+  }));
+}
 app.get("/health", (req, res) => {
-  res.json({ status: "healthy", timestamp: (/* @__PURE__ */ new Date()).toISOString() });
+  res.json({
+    status: "healthy",
+    timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+    environment: process.env.NODE_ENV || "development"
+  });
 });
 app.use((req, res, next) => {
   const start = Date.now();
-  const path3 = req.path;
+  const path4 = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
   res.json = function(bodyJson, ...args) {
@@ -245,8 +289,8 @@ app.use((req, res, next) => {
   };
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path3.startsWith("/api")) {
-      let logLine = `${req.method} ${path3} ${res.statusCode} in ${duration}ms`;
+    if (path4.startsWith("/api")) {
+      let logLine = `${req.method} ${path4} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
@@ -263,20 +307,13 @@ app.use((req, res, next) => {
   app.use((err, _req, res, _next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-    if (process.env.NODE_ENV === "development") {
-      console.error(`Error ${status}: ${message}`, err);
-    }
-    res.status(status).json({ message });
+    log(`Error: ${message}`);
+    res.status(status).json({ error: message });
   });
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV !== "production") {
     await setupVite(app, server);
-  } else {
-    serveStatic(app);
   }
-  const port = process.env.PORT || 5e3;
-  server.listen(port, () => {
-    log(`serving on http://localhost:${port}`);
-    log(`environment: ${process.env.NODE_ENV || "development"}`);
-    log(`health check: http://localhost:${port}/health`);
+  server.listen(PORT, () => {
+    log(`Server running on port ${PORT} in ${process.env.NODE_ENV || "development"} mode`);
   });
 })();
