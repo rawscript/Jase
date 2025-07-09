@@ -15,6 +15,31 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    // Optimize build for production
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
+    // Split chunks for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'framer-motion'],
+          utils: ['@/lib/utils']
+        }
+      }
+    },
+    // Generate source maps for production debugging
+    sourcemap: true,
+    // Optimize asset handling
+    assetsInlineLimit: 4096,
+    chunkSizeWarningLimit: 1000,
+    // Improve CSS handling
+    cssCodeSplit: true,
+    cssMinify: true
   },
   server: {
     fs: {

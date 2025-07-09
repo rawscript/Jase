@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# Jase
-James' portfolio
-=======
 # Portfolio Website
 
 A modern, full-stack portfolio website built with React, TypeScript, Express.js, and PostgreSQL. Features an elegant, minimalist design with contact form functionality and database persistence.
@@ -142,4 +138,3 @@ The application will be available at `http://localhost:5000`.
 ## License
 
 MIT License
->>>>>>> 35e141b (Configure the website for deployment outside of the Replit environment)
