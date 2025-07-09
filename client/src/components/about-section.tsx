@@ -5,7 +5,7 @@ export default function AboutSection() {
   const socialLinks = [
     { icon: Github, href: "https://github.com/rawscript", label: "GitHub" },
     { icon: Linkedin, href: "https://www.linkedin.com/in/james-mwaura-8ba2a5293/", label: "LinkedIn" },
-    { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
+    { icon: Twitter, href: "https://x.com/JaseMwaura", label: "Twitter" },
     { icon: Instagram, href: "https://www.instagram.com/raw.script/", label: "Instagram" },
   ];
 
