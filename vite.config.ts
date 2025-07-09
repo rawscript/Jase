@@ -13,33 +13,38 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "amplify-dist"), // ✅ updated for Amplify
     emptyOutDir: true,
+
     // Optimize build for production
-    minify: 'terser',
+    minify: "terser",
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true
-      }
+        drop_debugger: true,
+      },
     },
+
     // Split chunks for better caching
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'framer-motion'],
-          utils: ['@/lib/utils']
-        }
-      }
+          vendor: ["react", "react-dom", "framer-motion"],
+          utils: ["@/lib/utils"],
+        },
+      },
     },
-    // Generate source maps for production debugging
+
+    // Enable production debugging
     sourcemap: true,
+
     // Optimize asset handling
     assetsInlineLimit: 4096,
     chunkSizeWarningLimit: 1000,
-    // Improve CSS handling
+
+    // Improve CSS performance
     cssCodeSplit: true,
-    cssMinify: true
+    cssMinify: true,
   },
   server: {
     fs: {
