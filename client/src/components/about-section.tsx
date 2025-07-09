@@ -51,7 +51,7 @@ export default function AboutSection() {
             <div className="relative">
               <div className="premium-card rounded-none p-8">
                 <img
-                  src="../../../assets/james.jpg"
+                  src="https://jamesmwauraprofile.s3.eu-north-1.amazonaws.com/james.jpg"
                   alt="Professional portrait of James Mwaura"
                   className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-500"
                 />
