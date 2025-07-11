@@ -35,7 +35,7 @@ export default function ProjectsSection() {
     {
       id: "2",
       title: "Energy management system",
-      description: "Aurora is an energy management systrm designed to optimised energy management across African homes",
+      description: "Aurora is an energy management system designed to optimised energy management across African homes",
       image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
       category: "backend",
       technologies: ["Node.js", "ES6", "PostgreSQL"],
