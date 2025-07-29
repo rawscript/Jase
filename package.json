@@ -5,7 +5,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
-    "build": "vite build"
+    "build": "vite build",
+    "start": "node --loader tsx/esm server/index.ts",
+    "build:server": "tsc server/index.ts --outDir dist-server --target es2022 --module esnext --moduleResolution bundler"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
