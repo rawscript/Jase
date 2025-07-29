@@ -41,7 +41,7 @@ export default function ProjectsSection() {
       technologies: ["Node.js", "ES6", "PostgreSQL"],
       links: [
         { type: "Code", url: "https://github.com/rawscript/aurora-energy-flow", icon: Github },
-        { type: "Documentation", url: "https://main.d2yx2x5zg4eyf4.amplifyapp.com/", icon: Book },
+        { type: "Live Demo", url: "https://main.dkpusw32gdhst.amplifyapp.com/", icon: Book },
       ],
     },
     {
@@ -101,7 +101,7 @@ export default function ProjectsSection() {
       technologies: ["Node.js", "ES6", "PostgreSQL", "React", "Next js", "Typescript", "stripe", "Daraja"],
       links: [
         { type: "Code", url: "https://github.com/rawscript/nestie", icon: Github },
-        { type: "Documentation", url: "https://nestiein.vercel.app/", icon: Book },
+        { type: "Live Demo", url: "https://nestiein.vercel.app/", icon: Book },
       ],
     },
   ];
