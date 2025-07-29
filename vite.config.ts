@@ -13,7 +13,7 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist"), // ✅ updated for Netlify
+    outDir: path.resolve(import.meta.dirname, "dist"), // ✅ standardized build output
     emptyOutDir: true,
 
     // Optimize build for production
