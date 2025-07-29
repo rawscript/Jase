@@ -96,9 +96,9 @@ export default function ProjectsSection() {
       id: "7",
       title: "Nestie Homes",
       description: "Nestie is a real estate platform that enable users find their homes and any other real estate lsistings",
-      image: "https://unsplash.com/photos/green-plant-on-brown-wooden-table-I3S-Oha_5k4",
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
       category: "backend",
-      technologies: ["Node.js", "ES6", "PostgreSQL","React","Next js","Typescript","stripe","Daraja"],
+      technologies: ["Node.js", "ES6", "PostgreSQL", "React", "Next js", "Typescript", "stripe", "Daraja"],
       links: [
         { type: "Code", url: "https://github.com/rawscript/nestie", icon: Github },
         { type: "Documentation", url: "https://nestiein.vercel.app/", icon: Book },
@@ -115,8 +115,8 @@ export default function ProjectsSection() {
     { id: "photography", label: "Photography" },
   ];
 
-  const filteredProjects = activeFilter === "all" 
-    ? projects 
+  const filteredProjects = activeFilter === "all"
+    ? projects
     : projects.filter(project => project.category === activeFilter);
 
   return (
@@ -148,11 +148,10 @@ export default function ProjectsSection() {
               <motion.button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`font-light text-sm tracking-widest transition-all duration-300 ${
-                  activeFilter === filter.id
+                className={`font-light text-sm tracking-widest transition-all duration-300 ${activeFilter === filter.id
                     ? "text-black border-b border-black"
                     : "text-black/60 hover:text-black"
-                }`}
+                  }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

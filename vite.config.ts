@@ -13,7 +13,7 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "amplify-dist"), // ✅ updated for Amplify
+    outDir: path.resolve(import.meta.dirname, "dist"), // ✅ updated for Netlify
     emptyOutDir: true,
 
     // Optimize build for production
