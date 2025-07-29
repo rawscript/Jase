@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ExternalLink, Github, Play, Camera, Book } from "lucide-react";
+import { ExternalLink, GitBranch, Play, Camera, Book, Github } from "lucide-react";
 
 interface Project {
   id: string;
