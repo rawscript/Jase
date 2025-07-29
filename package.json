@@ -5,9 +5,10 @@
   "license": "MIT",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
-    "build": "vite build",
-    "start": "node --loader tsx/esm server/index.ts",
-    "build:server": "tsc server/index.ts --outDir dist-server --target es2022 --module esnext --moduleResolution bundler"
+    "build": "npm run build:frontend",
+    "build:frontend": "vite build",
+    "build:server": "echo 'Server runs directly from TypeScript'",
+    "start": "cross-env NODE_ENV=production tsx server/index.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -76,7 +77,9 @@
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
     "zod": "^3.24.2",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "^3.4.0",
+    "tsx": "^4.19.1",
+    "cross-env": "^7.0.3"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "^0.2.7",
@@ -94,13 +97,11 @@
     "@types/ws": "^8.5.13",
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
-    "cross-env": "^7.0.3",
     "drizzle-kit": "^0.31.4",
     "esbuild": "^0.25.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.17",
     "terser": "^5.43.1",
-    "tsx": "^4.19.1",
     "typescript": "5.6.3",
     "vite": "^6.3.5"
   },
