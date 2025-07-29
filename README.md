@@ -22,7 +22,7 @@ A modern, full-stack portfolio website built with React, TypeScript, Express.js,
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd portfolio-website
+cd portfolio
 ```
 
 2. Install dependencies:

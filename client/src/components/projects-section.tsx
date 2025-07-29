@@ -92,6 +92,18 @@ export default function ProjectsSection() {
         { type: "Demo", url: "#", icon: Play },
       ],
     },
+    {
+      id: "7",
+      title: "Nestie Homes",
+      description: "Nestie is a real estate platform that enable users find their homes and any other real estate lsistings",
+      image: "https://unsplash.com/photos/green-plant-on-brown-wooden-table-I3S-Oha_5k4",
+      category: "backend",
+      technologies: ["Node.js", "ES6", "PostgreSQL","React","Next js","Typescript","stripe","Daraja"],
+      links: [
+        { type: "Code", url: "https://github.com/rawscript/nestie", icon: Github },
+        { type: "Documentation", url: "https://nestiein.vercel.app/", icon: Book },
+      ],
+    },
   ];
 
   const filters = [
