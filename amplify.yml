@@ -3,7 +3,8 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci - ls -la ../shared
+        - npm ci 
+        - ls -la ../shared
     build:
       commands:
         - npm run build
