@@ -8,10 +8,8 @@
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
-    "build": "npm run build:frontend",
-    "build:frontend": "vite build",
-    "build:server": "echo 'Server runs directly from TypeScript'",
-    "start": "node --loader tsx/esm server/index.ts"
+    "build": "tsc --project tsconfig.server.json",
+    "start": "NODE_ENV=production node dist/server/index.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

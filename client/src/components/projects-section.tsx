@@ -95,13 +95,13 @@ export default function ProjectsSection() {
     {
       id: "7",
       title: "Nestie Homes",
-      description: "Nestie is a real estate platform that enable users find their homes and any other real estate lsistings",
+      description: "Helped design, develop and deploy a modern real estate platform with advanced search, property management, and user-friendly interface. To add, to this I did SEO optimization and deployed th web app on a popular cloud platform.",
       image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
       category: "backend",
       technologies: ["Node.js", "ES6", "PostgreSQL", "React", "Next js", "Typescript", "stripe", "Daraja"],
       links: [
         { type: "Code", url: "https://github.com/rawscript/nestie", icon: Github },
-        { type: "Live Demo", url: "https://nestiein.vercel.app/", icon: Book },
+        { type: "Live Demo", url: "https://nestie.in/", icon: Book },
       ],
     },
   ];
