@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "CommonJS",
-    "rootDir": "./",
-    "baseUrl": "./",
+    "module": "ES2020",
+    "rootDir": "../",
+    "baseUrl": "../",
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["shared/*"]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["**/*.ts"]
+  "include": ["server/**/*.ts", "shared/**/*.ts"]
 }
