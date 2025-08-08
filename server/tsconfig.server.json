@@ -14,3 +14,5 @@
   },
   "include": ["server/**/*.ts", "shared/**/*.ts"]
 }
+
+// This file is used to configure the TypeScript compiler for the server-side code.
