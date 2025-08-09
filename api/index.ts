@@ -13,8 +13,8 @@ app.use((req, res, next) => {
     const allowedOrigins = [
         'http://localhost:5173', // Vite dev server
         'http://localhost:3000', // Alternative dev port
-        'https://your-amplify-url.amplifyapp.com', // Replace with your actual Amplify URL
-        'https://jasemwaura.com', // Custom domain (if you have one)
+        'https://jasemwaura.com', // Your Amplify frontend URL
+        'https://jase.vercel.app', // Your Vercel backend URL (for testing)
     ];
 
     const origin = req.headers.origin;
