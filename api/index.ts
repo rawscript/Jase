@@ -13,12 +13,22 @@ app.use((req, res, next) => {
     const allowedOrigins = [
         'http://localhost:5173', // Vite dev server
         'http://localhost:3000', // Alternative dev port
-        'https://jasemwaura.com', // Your Amplify frontend URL
+        'https://jasemwautra.com', // Your custom domain
         'https://jase.vercel.app', // Your Vercel backend URL (for testing)
+        // Add your Amplify URL pattern - replace with your actual URL
+        /https:\/\/.*\.amplifyapp\.com$/,
     ];
 
     const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin as string)) {
+    const isAllowed = allowedOrigins.some(allowed => {
+        if (typeof allowed === 'string') {
+            return allowed === origin;
+        } else {
+            return allowed.test(origin as string);
+        }
+    });
+    
+    if (isAllowed) {
         res.setHeader('Access-Control-Allow-Origin', origin as string);
     }
 
