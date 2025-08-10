@@ -64,3 +64,4 @@ jspm_packages/
 # Replit specific files
 .replit
 replit.nix
+.vercel
