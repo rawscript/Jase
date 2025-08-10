@@ -13,7 +13,7 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     'http://localhost:5173', // Vite dev server
     'http://localhost:3000', // Alternative dev port
-    'https://your-amplify-url.amplifyapp.com', // Replace with your actual Amplify URL
+    'https://jase.vercel.app', // Replace with your actual Amplify URL
     'https://jasemwaura.com', // Custom domain (if you have one)
   ];
 
