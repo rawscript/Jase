@@ -17,6 +17,8 @@ app.use((req, res, next) => {
         'https://jase.vercel.app', // Your Vercel backend URL (for testing)
         // Add your Amplify URL pattern - replace with your actual URL
         /https:\/\/.*\.amplifyapp\.com$/,
+        // Add Vercel deployment URLs pattern
+        /https:\/\/.*\.vercel\.app$/,
     ];
 
     const origin = req.headers.origin;
