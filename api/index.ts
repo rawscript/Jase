@@ -14,6 +14,9 @@ app.use((req, res, next) => {
         'http://localhost:5173', // Vite dev server
         'http://localhost:3000', // Alternative dev port
         'https://jasemwaura.com', // Your custom domain
+        'https://www.jasemwaura.com', // Your custom domain with www
+        'https://jasemwautra.com', // Alternative spelling
+        'https://www.jasemwautra.com', // Alternative spelling with www
         'https://jase.vercel.app', // Your Vercel backend URL (for testing)
         // Add your Amplify URL pattern - replace with your actual URL
         /https:\/\/.*\.amplifyapp\.com$/,
@@ -29,7 +32,7 @@ app.use((req, res, next) => {
             return allowed.test(origin as string);
         }
     });
-    
+
     if (isAllowed) {
         res.setHeader('Access-Control-Allow-Origin', origin as string);
     }
