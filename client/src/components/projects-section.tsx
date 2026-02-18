@@ -60,7 +60,7 @@ export default function ProjectsSection() {
       id: "4",
       title: "Mailforge",
       description: "Mailforge an AI text to presentation tool for businesses to create professional presentations in seconds.",
-      image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
+      image: "https://i.postimg.cc/4NN15khR/mailforge.png",
       category: "ai",
       technologies: ["AI", "Machine Learning", "GenAI", "Postgres", "React", "Typescript","nodejs"],
       links: [
