@@ -12,30 +12,30 @@ interface Testimonial {
 
 export default function TestimonialsSection() {
   const testimonials: Testimonial[] = [
-    {
-      name: "Sarah Johnson",
-      role: "CEO",
-      company: "TechStart Inc.",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
-      content: "James delivered an exceptional e-commerce platform that exceeded our expectations. The attention to detail and user experience is outstanding.",
-      rating: 5,
-    },
-    {
-      name: "Michael Chen",
-      role: "Marketing Director",
-      company: "Digital Agency",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
-      content: "The AI content generation tool James built for us has revolutionized our content marketing. Highly recommend his technical expertise.",
-      rating: 5,
-    },
-    {
-      name: "Emily Davis",
-      role: "Brand Manager",
-      company: "Creative Studio",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b45b2ba0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
-      content: "James's video work is absolutely stunning. The brand commercial he created for us has significantly boosted our engagement rates.",
-      rating: 5,
-    },
+    // {
+    //   name: "Sarah Johnson",
+    //   role: "CEO",
+    //   company: "TechStart Inc.",
+    //   image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
+    //   content: "James delivered an exceptional e-commerce platform that exceeded our expectations. The attention to detail and user experience is outstanding.",
+    //   rating: 5,
+    // },
+    // {
+    //   name: "Michael Chen",
+    //   role: "Marketing Director",
+    //   company: "Digital Agency",
+    //   image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
+    //   content: "The AI content generation tool James built for us has revolutionized our content marketing. Highly recommend his technical expertise.",
+    //   rating: 5,
+    // },
+    // {
+    //   name: "Emily Davis",
+    //   role: "Brand Manager",
+    //   company: "Creative Studio",
+    //   image: "https://images.unsplash.com/photo-1494790108755-2616b45b2ba0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50",
+    //   content: "James's video work is absolutely stunning. The brand commercial he created for us has significantly boosted our engagement rates.",
+    //   rating: 5,
+    // },
   ];
 
   return (
@@ -49,7 +49,7 @@ export default function TestimonialsSection() {
             viewport={{ once: true }}
             className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text"
           >
-            Testimonials
+            {/* Testimonials */}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -58,7 +58,7 @@ export default function TestimonialsSection() {
             viewport={{ once: true }}
             className="text-lg body-text max-w-2xl mx-auto"
           >
-            What clients say about working with me.
+            {/* What clients say about working with me. */}
           </motion.p>
         </div>
 

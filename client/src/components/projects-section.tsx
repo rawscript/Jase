@@ -36,7 +36,7 @@ export default function ProjectsSection() {
       id: "2",
       title: "Energy management system",
       description: "Aurora is an energy management system designed to optimised energy management across African homes",
-      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
+      image: "https://i.postimg.cc/GpQ2zNyX/aurora.png",
       category: "backend",
       technologies: ["Node.js", "ES6", "PostgreSQL"],
       links: [
@@ -68,30 +68,30 @@ export default function ProjectsSection() {
         { type: "Demo", url: "https://mailforge.studio/", icon: ExternalLink },
       ],
     },
-    {
-      id: "5",
-      title: "Corporate Portraits",
-      description: "Professional headshots and corporate photography for C-suite executives and marketing teams across various industries.",
-      image: "https://images.unsplash.com/photo-1554844453-7ea2a562a6c8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      category: "photography",
-      technologies: ["Portrait", "Corporate", "Studio"],
-      links: [
-        { type: "Instagram", url: "#", icon: ExternalLink },
-        { type: "Portfolio", url: "#", icon: Camera },
-      ],
-    },
-    {
-      id: "6",
-      title: "Computer Vision App",
-      description: "Real-time object detection and classification system using advanced computer vision algorithms for inventory management.",
-      image: "https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      category: "ai",
-      technologies: ["OpenCV", "YOLO", "Python"],
-      links: [
-        { type: "Code", url: "#", icon: Github },
-        { type: "Demo", url: "#", icon: Play },
-      ],
-    },
+    // {
+    //   id: "5",
+    //   title: "Corporate Portraits",
+    //   description: "Professional headshots and corporate photography for C-suite executives and marketing teams across various industries.",
+    //   image: "https://images.unsplash.com/photo-1554844453-7ea2a562a6c8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
+    //   category: "photography",
+    //   technologies: ["Portrait", "Corporate", "Studio"],
+    //   links: [
+    //     { type: "Instagram", url: "#", icon: ExternalLink },
+    //     { type: "Portfolio", url: "#", icon: Camera },
+    //   ],
+    // },
+    // {
+    //   id: "6",
+    //   title: "Computer Vision App",
+    //   description: "Real-time object detection and classification system using advanced computer vision algorithms for inventory management.",
+    //   image: "https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
+    //   category: "ai",
+    //   technologies: ["OpenCV", "YOLO", "Python"],
+    //   links: [
+    //     { type: "Code", url: "#", icon: Github },
+    //     { type: "Demo", url: "#", icon: Play },
+    //   ],
+    // },
     {
       id: "7",
       title: "Nestie Homes",

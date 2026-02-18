@@ -1,7 +1,6 @@
 import  { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "../server/routes";
 import { log } from "../server/vite";
-import path from "path";
 import express from 'express'
 const app = express();
 app.use(express.json({ limit: "50mb" }));
@@ -15,13 +14,13 @@ app.use((req, res, next) => {
         'http://localhost:3000', // Alternative dev port
         'https://jasemwaura.com', // Your custom domain
         'https://www.jasemwaura.com', // Your custom domain with www
-        'https://jasemwautra.com', // Alternative spelling
-        'https://www.jasemwautra.com', // Alternative spelling with www
-        'https://jase.vercel.app', // Your Vercel backend URL (for testing)
-        // Add your Amplify URL pattern - replace with your actual URL
+        'https://jasemwaura.com', // Alternative spelling
+        'https://www.jasemwaura.com', // Alternative spelling with www
+        'https://jamesmwaura.netlify.app', 
         /https:\/\/.*\.amplifyapp\.com$/,
         // Add Vercel deployment URLs pattern
         /https:\/\/.*\.vercel\.app$/,
+        /https:\/\/.*\.netlify\.app$/,
     ];
 
     const origin = req.headers.origin;
