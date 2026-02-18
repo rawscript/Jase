@@ -41,19 +41,19 @@ export default function ProjectsSection() {
       technologies: ["Node.js", "ES6", "PostgreSQL"],
       links: [
         { type: "Code", url: "https://github.com/rawscript/aurora-energy-flow", icon: Github },
-        { type: "Live Demo", url: "https://main.dkpusw32gdhst.amplifyapp.com/", icon: Book },
+        { type: "Live Demo", url: "https://auroraenergy.app/", icon: Book },
       ],
     },
     {
       id: "3",
-      title: "AI Content Generator",
-      description: "Advanced AI-powered content generation tool using OpenAI's GPT models with custom fine-tuning for specific industries.",
-      image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      category: "ai",
-      technologies: ["Python", "OpenAI", "TensorFlow"],
+      title: "Msitubora",
+      description: "Msitu Bora - Kakamega Forest Monitoring System",
+      image: "https://i.postimg.cc/W1zsm37Q/kilimobunifu.png",
+      category: "backend",
+      technologies: ["Blockchain", "IoT", "React","Typescript", "SatelliteAPI intergration"],
       links: [
-        { type: "Code", url: "#", icon: Github },
-        { type: "Demo", url: "#", icon: Play },
+        { type: "Code", url: "https://github.com/rawscript/msitubora", icon: Github },
+        { type: "Demo", url: "https://msitubora.onrender.com/", icon: Play },
       ],
     },
     {
@@ -61,11 +61,11 @@ export default function ProjectsSection() {
       title: "Brand Commercial",
       description: "High-impact commercial video for a tech startup featuring motion graphics, professional cinematography, and compelling storytelling.",
       image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      category: "video",
+      category: "backend",
       technologies: ["Premiere Pro", "After Effects", "Motion Graphics"],
       links: [
-        { type: "YouTube", url: "#", icon: Play },
-        { type: "Portfolio", url: "#", icon: ExternalLink },
+        { type: "Code", url: "#", icon: Play },
+        { type: "Demo", url: "#", icon: ExternalLink },
       ],
     },
     {

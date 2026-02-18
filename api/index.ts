@@ -1,8 +1,8 @@
-import express, { type Request, Response, NextFunction } from "express";
+import  { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "../server/routes";
 import { log } from "../server/vite";
 import path from "path";
-
+import express from 'express'
 const app = express();
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
