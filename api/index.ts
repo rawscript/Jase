@@ -1,35 +1,34 @@
-import  { type Request, Response, NextFunction } from "express";
+import { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "../server/routes";
 import { log } from "../server/vite";
-import express from 'express'
+import * as  express from 'express';
+
 const app = express();
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
+// Enable trust proxy for cloud deployment
+app.set("trust proxy", 1);
+
 // Add CORS and security headers
 app.use((req, res, next) => {
-    // CORS headers
-    const allowedOrigins = [
-        'http://localhost:5173', // Vite dev server
-        'http://localhost:3000', // Alternative dev port
-        'https://jasemwaura.com', // Your custom domain
-        'https://www.jasemwaura.com', // Your custom domain with www
-        'https://jasemwaura.com', // Alternative spelling
-        'https://www.jasemwaura.com', // Alternative spelling with www
-        'https://jamesmwaura.netlify.app', 
+    const allowedOrigins: (string | RegExp)[] = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://jasemwaura.com',
+        'https://www.jasemwaura.com',
+        'https://jamesmwaura.netlify.app',
         /https:\/\/.*\.amplifyapp\.com$/,
-        // Add Vercel deployment URLs pattern
         /https:\/\/.*\.vercel\.app$/,
         /https:\/\/.*\.netlify\.app$/,
     ];
 
     const origin = req.headers.origin;
-    const isAllowed = allowedOrigins.some(allowed => {
-        if (typeof allowed === 'string') {
-            return allowed === origin;
-        } else {
-            return allowed.test(origin as string);
-        }
+
+    // Guard against undefined origin (e.g. curl, server-to-server requests)
+    const isAllowed = !!origin && allowedOrigins.some(allowed => {
+        if (typeof allowed === 'string') return allowed === origin;
+        return allowed.test(origin);
     });
 
     if (isAllowed) {
@@ -53,9 +52,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Enable trust proxy for cloud deployment
-app.set("trust proxy", 1);
-
 // Health check endpoint
 app.get("/health", (req, res) => {
     res.json({
@@ -72,9 +68,10 @@ app.use((req, res, next) => {
     let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
     const originalResJson = res.json;
-    res.json = function (bodyJson, ...args) {
+    // Fixed: removed spread args to match Express's res.json signature
+    res.json = function (bodyJson) {
         capturedJsonResponse = bodyJson;
-        return originalResJson.apply(res, [bodyJson, ...args]);
+        return originalResJson.call(res, bodyJson);
     };
 
     res.on("finish", () => {
@@ -84,11 +81,9 @@ app.use((req, res, next) => {
             if (capturedJsonResponse) {
                 logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
             }
-
             if (logLine.length > 80) {
                 logLine = logLine.slice(0, 79) + "…";
             }
-
             log(logLine);
         }
     });
@@ -104,20 +99,28 @@ const initializeApp = async () => {
         try {
             await registerRoutes(app);
             routesInitialized = true;
+
+            // Error handler registered AFTER routes so it can catch errors from them
+            app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+                const status = err.status || err.statusCode || 500;
+                const message = err.message || "Internal Server Error";
+                console.error(`Error: ${message}`, err);
+                res.status(status).json({ error: message });
+            });
         } catch (error) {
             console.error("Failed to initialize routes:", error);
+            throw error;
         }
     }
 };
 
-// Error handling middleware
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    console.error(`Error: ${message}`, err);
-    res.status(status).json({ error: message });
-});
+// Local dev server (skipped in production/Vercel)
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 3000;
+    initializeApp().then(() => {
+        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    });
+}
 
 // Export for Vercel
 export default async (req: Request, res: Response) => {
