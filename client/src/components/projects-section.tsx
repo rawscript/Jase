@@ -41,7 +41,7 @@ export default function ProjectsSection() {
       technologies: ["Node.js", "ES6", "PostgreSQL"],
       links: [
         { type: "Code", url: "https://github.com/rawscript/aurora-energy-flow", icon: Github },
-        { type: "Live Demo", url: "https://auroraenergy.app/", icon: Book },
+        { type: "Live Demo", url: "https://auroraenergy.app/", icon: Play },
       ],
     },
     {
@@ -58,14 +58,14 @@ export default function ProjectsSection() {
     },
     {
       id: "4",
-      title: "Brand Commercial",
-      description: "High-impact commercial video for a tech startup featuring motion graphics, professional cinematography, and compelling storytelling.",
+      title: "Mailforge",
+      description: "Mailforge an AI text to presentation tool for businesses to create professional presentations in seconds.",
       image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=400",
-      category: "backend",
-      technologies: ["Premiere Pro", "After Effects", "Motion Graphics"],
+      category: "ai",
+      technologies: ["AI", "Machine Learning", "GenAI", "Postgres", "React", "Typescript","nodejs"],
       links: [
-        { type: "Code", url: "#", icon: Play },
-        { type: "Demo", url: "#", icon: ExternalLink },
+        { type: "Code", url: "https://github.com/rawscript/land-mailforge", icon: Play },
+        { type: "Demo", url: "https://mailforge.studio/", icon: ExternalLink },
       ],
     },
     {
