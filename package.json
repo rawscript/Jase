@@ -1,5 +1,5 @@
 {
-  "name": "rest-express",
+  "name": "James-Mwaura",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
-    "build": "vite build",
+    "build": "vite build && tsc --project tsconfig.server.json",
     "build:server": "tsc --project tsconfig.server.json",
     "start": "NODE_ENV=production node dist/server/index.js"
   },
