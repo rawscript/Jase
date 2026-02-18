@@ -12,10 +12,10 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 // Email transporter setup
 const createTransporter = () => {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.warn('⚠️  Email credentials not configured. Email sending will be skipped.');
+        console.warn('Email credentials not configured. Email sending will be skipped.');
         return null;
     }
-    console.log('📧 Setting up email transporter for:', process.env.EMAIL_USER);
+    console.log('Setting up email transporter for:', process.env.EMAIL_USER);
     return nodemailer_1.default.createTransport({
         service: 'gmail',
         auth: {
@@ -34,7 +34,7 @@ async function registerRoutes(app) {
             const transporter = createTransporter();
             if (transporter) {
                 try {
-                    console.log('📤 Attempting to send email...');
+                    console.log('Attempting to send email...');
                     const mailOptions = {
                         from: process.env.EMAIL_USER,
                         to: 'jasemwaura@gmail.com',
@@ -51,14 +51,14 @@ async function registerRoutes(app) {
             `,
                     };
                     await transporter.sendMail(mailOptions);
-                    console.log('✅ Email sent successfully!');
+                    console.log('Email sent successfully!');
                     res.json({
                         message: "Message sent successfully! I'll get back to you soon.",
                         id: contact.id
                     });
                 }
                 catch (emailError) {
-                    console.error('❌ Failed to contact James, could you kindly write to him. Thank you for your patience:', emailError);
+                    console.error('Failed to contact James, could you kindly write to him. Thank you for your patience:', emailError);
                     res.json({
                         message: "Message received! I'll get back to you soon.",
                         id: contact.id
@@ -66,7 +66,7 @@ async function registerRoutes(app) {
                 }
             }
             else {
-                console.log('📝 Email not configured, message saved to database only');
+                console.log('Email not configured, message saved to database only');
                 res.json({
                     message: "Message received! I'll get back to you soon.",
                     id: contact.id

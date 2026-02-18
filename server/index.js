@@ -14,9 +14,9 @@ app.use(express_1.default.urlencoded({ extended: true, limit: "50mb" }));
 app.use((req, res, next) => {
     // CORS headers
     const allowedOrigins = [
-        'http://localhost:5173', // Vite dev server
-        'http://localhost:3000', // Alternative dev port
-        'https://jamesmwaura.vercel.app/', // Replace with your actual Netlify URL
+        'http://localhost:5173',
+        'http://localhost:3000', 
+        'https://jamesmwaura.netlify.app/',
     ];
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {

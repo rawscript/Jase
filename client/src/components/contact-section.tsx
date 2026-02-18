@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { Mail, Phone, MapPin, Github, Linkedin, Twitter, Instagram } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -78,7 +77,7 @@ export default function ContactSection() {
 
   const socialLinks = [
     { icon: Github, href: "https://github.com/rawscript", label: "GitHub" },
-    { icon: Linkedin, href: "https://www.linkedin.com/in/james-mwaura-8ba2a5293/", label: "LinkedIn" },
+    { icon: Linkedin, href: "https://www.linkedin.com/in/jase-mwaura/", label: "LinkedIn" },
     { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
     { icon: Instagram, href: "https://www.instagram.com/raw.script/", label: "Instagram" },
   ];
