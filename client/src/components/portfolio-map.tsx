@@ -128,27 +128,35 @@ const PortfolioMap = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+    <div className="relative w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+
       {/* Navigation */}
-      <div className="absolute top-6 left-6 z-20 flex gap-3">
-        <button
-          onClick={() => setView('map')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'map' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white'}`}
-        >
-          Map
-        </button>
-        <button
-          onClick={() => setView('contact')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'contact' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white'}`}
-        >
-          Contact
-        </button>
-        <button
-          onClick={() => setView('chat')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'chat' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white'}`}
-        >
-          Ask Me
-        </button>
+      <div className="absolute top-6 left-6 z-20">
+        <div className="flex gap-2 bg-white/80 backdrop-blur-lg rounded-xl p-2 shadow-lg border border-white/50">
+          <button
+            onClick={() => setView('map')}
+            className={`px-5 py-2.5 rounded-lg font-medium transition-all ${view === 'map' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'}`}
+          >
+            🗺️ Map
+          </button>
+          <button
+            onClick={() => setView('contact')}
+            className={`px-5 py-2.5 rounded-lg font-medium transition-all ${view === 'contact' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'}`}
+          >
+            📧 Contact
+          </button>
+          <button
+            onClick={() => setView('chat')}
+            className={`px-5 py-2.5 rounded-lg font-medium transition-all ${view === 'chat' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'}`}
+          >
+            🤖 Ask Me
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -157,14 +165,27 @@ const PortfolioMap = () => {
           <div className="max-w-6xl mx-auto">
             {/* Map Title */}
             <div className="text-center mb-12">
-              <h1 className="text-5xl font-light mb-4">
-                My Work in <span className="gradient-text">Technologia</span>
-              </h1>
-              <p className="text-gray-600 font-light max-w-2xl mx-auto">
-                An imaginary country showcasing my real projects and expertise as a 
-                <span className="font-medium text-blue-600"> Geo Spatial Data Engineer</span> and 
-                <span className="font-medium text-green-600"> Cloud Engineer</span>
-              </p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Technologia
+                </h1>
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  <p className="text-gray-600 font-light text-lg">
+                    An Imaginary Country Showcasing Real Projects
+                  </p>
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                </div>
+                <p className="text-gray-500 font-light max-w-2xl mx-auto">
+                  Explore <span className="font-semibold text-indigo-600">James Mwaura's</span> work as a 
+                  <span className="font-semibold text-green-600"> Geo Spatial Data Engineer</span> and 
+                  <span className="font-semibold text-blue-600"> Cloud Engineer</span>
+                </p>
+              </motion.div>
             </div>
 
             {/* Interactive Map */}
