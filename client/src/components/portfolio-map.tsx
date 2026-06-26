@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Cloud, Database, Cpu, Wind, TreePine, Home, Zap, Mail } from "lucide-react";
+import { MapPin, Cloud, Database, Cpu, Wind, TreePine, Home, Zap, Mail, Search } from "lucide-react";
 
 interface MapLocation {
   id: string;
@@ -20,6 +20,7 @@ interface MapLocation {
 const PortfolioMap = () => {
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [view, setView] = useState<'map' | 'contact' | 'chat'>('map');
+  const [searchQuery, setSearchQuery] = useState("");
   
   const mapLocations: MapLocation[] = [
     {
@@ -132,49 +133,56 @@ const PortfolioMap = () => {
       <div className="absolute top-24 left-6 z-20 flex flex-col sm:flex-row gap-3">
         <button
           onClick={() => setView('map')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'map' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white shadow-sm border border-gray-200'}`}
+          className={`px-5 py-2.5 rounded-xl font-medium tracking-wide transition-all duration-300 ${view === 'map' ? 'bg-black text-white shadow-lg scale-105' : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200'}`}
         >
           Map
         </button>
         <button
           onClick={() => setView('contact')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'contact' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white shadow-sm border border-gray-200'}`}
+          className={`px-5 py-2.5 rounded-xl font-medium tracking-wide transition-all duration-300 ${view === 'contact' ? 'bg-black text-white shadow-lg scale-105' : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200'}`}
         >
           Contact
         </button>
         <button
           onClick={() => setView('chat')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'chat' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white shadow-sm border border-gray-200'}`}
+          className={`px-5 py-2.5 rounded-xl font-medium tracking-wide transition-all duration-300 ${view === 'chat' ? 'bg-black text-white shadow-lg scale-105' : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200'}`}
         >
           Ask Me
         </button>
       </div>
 
       {/* Main Content Area */}
-      <div className="px-6 h-[calc(100vh-6rem)]">
+      <div className="px-6 h-[calc(100vh-6rem)] pb-12 overflow-y-auto">
         {view === 'map' && (
-          <div className="max-w-7xl mx-auto h-full flex flex-col relative pt-14">
+          <div className="max-w-7xl mx-auto h-[80vh] min-h-[600px] flex flex-col relative pt-14">
             {/* Interactive Map */}
-            <div className="relative flex-1 bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl border border-gray-200 overflow-hidden shadow-inner">
-              {/* Background Grid */}
-              <div className="absolute inset-0 opacity-30">
-                <div className="absolute inset-0" style={{
-                  backgroundImage: `
-                    linear-gradient(to right, #E5E7EB 1px, transparent 1px),
-                    linear-gradient(to bottom, #E5E7EB 1px, transparent 1px)
-                  `,
-                  backgroundSize: '50px 50px'
-                }} />
+            <div 
+              className="relative flex-1 bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl border border-gray-200 overflow-hidden shadow-inner"
+              style={{
+                backgroundImage: 'url(/src/assets/fantasy-map.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              {/* Optional dark overlay if needed */}
+              <div className="absolute inset-0 bg-black/10" />
+              
+              {/* Search Overlay */}
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 w-full max-w-md px-4">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search projects or skills..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-black/50 transition-all text-sm font-medium"
+                  />
+                </div>
               </div>
 
-              {/* River/Lake */}
-              <div className="absolute top-1/2 left-1/4 w-1/3 h-40 bg-gradient-to-r from-blue-200 to-blue-300 rounded-full opacity-30" />
-              
-              {/* Mountain Range */}
-              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-300 to-transparent" />
-
               {/* Map Locations */}
-              {mapLocations.map((location) => {
+              {mapLocations.filter(loc => loc.name.toLowerCase().includes(searchQuery.toLowerCase()) || loc.type.toLowerCase().includes(searchQuery.toLowerCase())).map((location) => {
                 const Icon = location.icon;
                 return (
                   <motion.div
@@ -189,30 +197,14 @@ const PortfolioMap = () => {
                   >
                     {/* Location Marker */}
                     <div className="relative">
-                      <motion.div
-                        className="relative z-10"
-                        animate={{
-                          y: [0, -5, 0],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      >
+                      <div className="relative z-10">
                         <div
-                          className="p-3 rounded-full flex items-center justify-center shadow-lg"
+                          className="p-3 rounded-full flex items-center justify-center shadow-lg border-2 border-white/50 hover:border-white transition-colors"
                           style={{ backgroundColor: location.color }}
                         >
                           <Icon className="w-5 h-5 text-white" />
                         </div>
-                      </motion.div>
-
-                      {/* Pulsing Effect */}
-                      <div
-                        className="absolute inset-0 rounded-full opacity-20 animate-ping"
-                        style={{ backgroundColor: location.color }}
-                      />
+                      </div>
 
                       {/* Tooltip */}
                       <div className="absolute left-1/2 -translate-x-1/2 top-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-30">
@@ -367,79 +359,20 @@ const PortfolioMap = () => {
         )}
 
         {view === 'chat' && (
-          <div className="max-w-2xl mx-auto pt-16">
+          <div className="max-w-4xl mx-auto pt-16 h-full flex flex-col pb-8">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Cpu className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-3xl font-light mb-2">Ask Me Anything</h2>
-              <p className="text-gray-600 font-light">Powered by AI</p>
+              <h2 className="text-4xl font-light mb-2">Ask Me Anything</h2>
             </div>
-
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-              {/* Chat Header */}
-              <div className="border-b border-gray-200 p-6 bg-gray-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-sm" />
-                  <div className="text-sm font-light text-gray-700">Ready to answer questions</div>
-                </div>
-              </div>
-
-              {/* Chat Messages */}
-              <div className="h-80 overflow-y-auto p-6 space-y-4 bg-white">
-                <div className="flex justify-start">
-                  <div className="max-w-[80%] bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                    <p className="font-light text-gray-800 leading-relaxed text-sm">
-                      Hi! I can answer questions about my work as a Geo Spatial Data Engineer and Cloud Engineer. 
-                      Ask me about my projects, technologies, or experience!
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chat Input */}
-              <div className="border-t border-gray-200 p-6 bg-gray-50/50">
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black font-light text-sm bg-white"
-                    placeholder="Ask about my work..."
-                  />
-                  <button className="px-6 py-3 bg-black text-white rounded-lg font-light hover:bg-gray-800 transition-colors shadow-md">
-                    Ask
-                  </button>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button className="px-3 py-1.5 text-xs bg-white text-gray-700 rounded-full font-light hover:bg-gray-50 border border-gray-200 transition-colors shadow-sm">
-                    Tell me about Msitubora
-                  </button>
-                  <button className="px-3 py-1.5 text-xs bg-white text-gray-700 rounded-full font-light hover:bg-gray-50 border border-gray-200 transition-colors shadow-sm">
-                    What cloud platforms do you use?
-                  </button>
-                  <button className="px-3 py-1.5 text-xs bg-white text-gray-700 rounded-full font-light hover:bg-gray-50 border border-gray-200 transition-colors shadow-sm">
-                    Explain geo spatial engineering
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Facts */}
-            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 pb-8">
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-sm font-medium text-gray-900 mb-1">Geo Spatial</div>
-                <div className="text-xs text-gray-500 font-light">Satellite data & GIS</div>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-sm font-medium text-gray-900 mb-1">Cloud</div>
-                <div className="text-xs text-gray-500 font-light">AWS, GCP, Docker</div>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-sm font-medium text-gray-900 mb-1">AI/ML</div>
-                <div className="text-xs text-gray-500 font-light">GenAI & ML Ops</div>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-sm font-medium text-gray-900 mb-1">Full Stack</div>
-                <div className="text-xs text-gray-500 font-light">React, Node.js, PostgreSQL</div>
+            
+            <div className="flex-1 min-h-[400px] bg-white rounded-2xl p-6 shadow-xl border border-gray-200 flex flex-col">
+              <textarea
+                className="flex-1 w-full p-4 border-none resize-none focus:outline-none text-xl font-light text-gray-800 placeholder-gray-300 custom-scrollbar"
+                placeholder="Type your question here..."
+              />
+              <div className="mt-4 flex justify-end">
+                <button className="px-8 py-4 bg-black text-white rounded-xl font-medium tracking-wide hover:bg-gray-800 transition-colors shadow-md flex items-center gap-2">
+                  <Mail className="w-5 h-5" /> Send Question
+                </button>
               </div>
             </div>
           </div>
