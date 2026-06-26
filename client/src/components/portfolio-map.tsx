@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Cloud, Database, Cpu, Wind, TreePine, Home, Zap, Mail, Search } from "lucide-react";
+import fantasyMapBg from "@/assets/fantasy-map.png";
 
 interface MapLocation {
   id: string;
@@ -128,38 +129,38 @@ const PortfolioMap = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-br from-gray-50 to-white overflow-hidden pt-24">
+    <div className="relative w-full min-h-screen bg-gradient-to-br from-gray-50 to-white pt-24">
       {/* Navigation */}
-      <div className="absolute top-24 left-6 z-20 flex flex-col sm:flex-row gap-3">
+      <div className="absolute top-24 left-6 z-20 flex flex-col sm:flex-row gap-4">
         <button
           onClick={() => setView('map')}
-          className={`px-5 py-2.5 rounded-xl font-medium tracking-wide transition-all duration-300 ${view === 'map' ? 'bg-black text-white shadow-lg scale-105' : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200'}`}
+          className={`px-2 py-1 text-sm font-medium tracking-widest uppercase transition-colors border-b-2 ${view === 'map' ? 'border-black text-black' : 'border-transparent text-gray-400 hover:text-black'}`}
         >
           Map
         </button>
         <button
           onClick={() => setView('contact')}
-          className={`px-5 py-2.5 rounded-xl font-medium tracking-wide transition-all duration-300 ${view === 'contact' ? 'bg-black text-white shadow-lg scale-105' : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200'}`}
+          className={`px-2 py-1 text-sm font-medium tracking-widest uppercase transition-colors border-b-2 ${view === 'contact' ? 'border-black text-black' : 'border-transparent text-gray-400 hover:text-black'}`}
         >
           Contact
         </button>
         <button
           onClick={() => setView('chat')}
-          className={`px-5 py-2.5 rounded-xl font-medium tracking-wide transition-all duration-300 ${view === 'chat' ? 'bg-black text-white shadow-lg scale-105' : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md border border-gray-200'}`}
+          className={`px-2 py-1 text-sm font-medium tracking-widest uppercase transition-colors border-b-2 ${view === 'chat' ? 'border-black text-black' : 'border-transparent text-gray-400 hover:text-black'}`}
         >
           Ask Me
         </button>
       </div>
 
       {/* Main Content Area */}
-      <div className="px-6 h-[calc(100vh-6rem)] pb-12 overflow-y-auto">
+      <div className="px-6 pb-12 w-full">
         {view === 'map' && (
           <div className="max-w-7xl mx-auto h-[80vh] min-h-[600px] flex flex-col relative pt-14">
             {/* Interactive Map */}
             <div 
-              className="relative flex-1 bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl border border-gray-200 overflow-hidden shadow-inner"
+              className="relative flex-1 rounded-none border border-black overflow-hidden shadow-sm bg-gray-100"
               style={{
-                backgroundImage: 'url(/src/assets/fantasy-map.png)',
+                backgroundImage: `url(${fantasyMapBg})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}
@@ -315,13 +316,12 @@ const PortfolioMap = () => {
 
         {view === 'contact' && (
           <div className="max-w-md mx-auto pt-16">
-            <div className="text-center mb-8">
-              <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-3xl font-light mb-2">Contact Form</h2>
-              <p className="text-gray-600 font-light">Powered by Gmail API</p>
+            <div className="text-center mb-12">
+              <Mail className="w-8 h-8 text-black mx-auto mb-6" strokeWidth={1} />
+              <h2 className="text-4xl font-light mb-2">Contact</h2>
             </div>
             
-            <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200">
+            <div className="bg-transparent border-t border-black pt-8">
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-light text-gray-700 mb-2">Name</label>
@@ -347,33 +347,25 @@ const PortfolioMap = () => {
                     placeholder="Tell me about your project..."
                   />
                 </div>
-                <button className="w-full px-6 py-3 bg-black text-white rounded-lg font-light hover:bg-gray-800 transition-colors">
-                  Send Message via Gmail
+                <button className="w-full px-6 py-4 bg-black text-white font-light tracking-widest uppercase hover:bg-gray-800 transition-colors text-sm">
+                  Send Message
                 </button>
-                <p className="text-xs text-gray-500 text-center font-light">
-                  Your message will be sent directly to my Gmail inbox
-                </p>
               </div>
             </div>
           </div>
         )}
 
         {view === 'chat' && (
-          <div className="max-w-4xl mx-auto pt-16 h-full flex flex-col pb-8">
-            <div className="text-center mb-8">
+          <div className="max-w-4xl mx-auto pt-16 flex flex-col pb-8">
+            <div className="text-center mb-12">
               <h2 className="text-4xl font-light mb-2">Ask Me Anything</h2>
             </div>
             
-            <div className="flex-1 min-h-[400px] bg-white rounded-2xl p-6 shadow-xl border border-gray-200 flex flex-col">
+            <div className="flex-1 bg-transparent border border-black p-2 flex flex-col">
               <textarea
-                className="flex-1 w-full p-4 border-none resize-none focus:outline-none text-xl font-light text-gray-800 placeholder-gray-300 custom-scrollbar"
-                placeholder="Type your question here..."
+                className="flex-1 w-full p-4 border-none resize-none focus:outline-none text-xl font-light text-gray-800 placeholder-gray-400 min-h-[400px] bg-transparent"
+                placeholder="Type your question..."
               />
-              <div className="mt-4 flex justify-end">
-                <button className="px-8 py-4 bg-black text-white rounded-xl font-medium tracking-wide hover:bg-gray-800 transition-colors shadow-md flex items-center gap-2">
-                  <Mail className="w-5 h-5" /> Send Question
-                </button>
-              </div>
             </div>
           </div>
         )}
