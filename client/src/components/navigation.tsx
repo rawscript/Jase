@@ -39,7 +39,6 @@ export default function Navigation() {
             >
               {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-          </div>
         </div>
       </nav>
 
