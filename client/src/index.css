@@ -85,7 +85,10 @@
   }
 
   .gradient-text {
-    color: var(--portfolio-accent);
+    background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-weight: 300;
     letter-spacing: -0.02em;
   }

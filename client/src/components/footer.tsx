@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="text-center">
           <div className="text-xl font-light gradient-text mb-8 tracking-wide">James Mwaura</div>
           <p className="body-text mb-12 font-light">
-            Full-Stack Developer • AI Engineer • Video Editor • Photographer
+            Geo Spatial Data and Cloud Engineer
           </p>
           <div className="flex justify-center space-x-8 mb-12">
             {socialLinks.map((social, index) => (

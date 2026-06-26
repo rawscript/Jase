@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertContactSchema } from "@shared/schema";
 import { z } from "zod";
 import nodemailer from "nodemailer";
+import conversationRoutes from "./api/conversation";
 
 // Email transporter setup
 const createTransporter = () => {
@@ -99,6 +100,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Register conversation routes
+  app.use('/api/conversation', conversationRoutes);
 
   const httpServer = createServer(app);
   return httpServer;

@@ -37,7 +37,7 @@ export default function HeroSection() {
             <span className="gradient-text">James Mwaura</span>
           </h1>
           <p className="text-lg md:text-xl mb-12 body-text max-w-2xl mx-auto font-light">
-            Full-Stack Developer • AI Engineer • Video Editor • Photographer
+            Geo Spatial Data Engineer • Network Engineer • Cloud Engineer
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <motion.button

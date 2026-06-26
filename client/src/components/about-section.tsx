@@ -21,10 +21,10 @@ export default function AboutSection() {
           >
             <h2 className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text">About</h2>
             <p className="text-lg body-text mb-8 leading-relaxed">
-              I'm a passionate full-stack developer and creative professional with expertise spanning web development, AI engineering, video production, and photography. With over 5 years of experience, I bring a unique blend of technical skills and creative vision to every project.
+              I'm a passionate Geo spatial Data Engineer
             </p>
             <p className="text-lg body-text mb-12 leading-relaxed">
-              My journey began with a fascination for technology and visual storytelling. Today, I help businesses and individuals bring their digital visions to life through innovative solutions and compelling visual content.
+              My journey began with a fascination for technology and  Spatial Data. 
             </p>
             <div className="flex space-x-6">
               {socialLinks.map((social) => (
