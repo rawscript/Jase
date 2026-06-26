@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Cloud, Database, Cpu, Wind, TreePine, Home, Zap, Mail } from "lucide-react";
+import { MapPin, Cloud, Database, Cpu, TreePine, Home, Zap, Mail, Sparkles } from "lucide-react";
 
 interface MapLocation {
   id: string;
@@ -395,7 +395,7 @@ const PortfolioMap = () => {
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="text-2xl">🤖</div>
+                <div className="text-2xl">Jase</div>
               </div>
               <h2 className="text-3xl font-light mb-2">Ask Me Anything</h2>
               <p className="text-gray-600 font-light">Powered by NVIDIA DeepSeek V4 Pro</p>
