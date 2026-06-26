@@ -22,6 +22,22 @@ const PortfolioMap = () => {
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [view, setView] = useState<'map' | 'contact' | 'chat'>('map');
   const [searchQuery, setSearchQuery] = useState("");
+  const [terminalHistory, setTerminalHistory] = useState<{role: 'user' | 'system', text: string}[]>([
+    { role: 'system', text: 'Welcome to the James Mwaura terminal. Type your query...' }
+  ]);
+  const [terminalInput, setTerminalInput] = useState('');
+
+  const handleTerminalSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && terminalInput.trim()) {
+      const userText = terminalInput.trim();
+      setTerminalHistory(prev => [...prev, { role: 'user', text: userText }]);
+      setTerminalInput('');
+      
+      setTimeout(() => {
+        setTerminalHistory(prev => [...prev, { role: 'system', text: `Analyzing query: "${userText}"...\nResponse: I am a highly skilled Geo Spatial Data Engineer and Cloud Engineer. I specialize in building robust data pipelines, scalable cloud infrastructure, and integrating AI to solve complex geographic problems.` }]);
+      }, 600);
+    }
+  };
   
   const mapLocations: MapLocation[] = [
     {
@@ -357,15 +373,31 @@ const PortfolioMap = () => {
 
         {view === 'chat' && (
           <div className="max-w-4xl mx-auto pt-16 flex flex-col pb-8">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <h2 className="text-4xl font-light mb-2">Ask Me Anything</h2>
             </div>
             
-            <div className="flex-1 bg-transparent border border-black p-2 flex flex-col">
-              <textarea
-                className="flex-1 w-full p-4 border-none resize-none focus:outline-none text-xl font-light text-gray-800 placeholder-gray-400 min-h-[400px] bg-transparent"
-                placeholder="Type your question..."
-              />
+            <div className="flex-1 bg-[#0a0a0a] rounded-lg p-6 flex flex-col font-mono text-sm min-h-[400px] max-h-[60vh] overflow-y-auto shadow-2xl border border-gray-800">
+              <div className="flex-1 flex flex-col space-y-3">
+                {terminalHistory.map((msg, idx) => (
+                  <div key={idx} className={`${msg.role === 'system' ? 'text-green-400' : 'text-gray-300'}`}>
+                    <span className="opacity-50 mr-3">{msg.role === 'system' ? '>' : '$'}</span>
+                    <span className="whitespace-pre-wrap leading-relaxed">{msg.text}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex items-center text-gray-300 pt-2 border-t border-gray-800/50">
+                <span className="opacity-50 mr-3">$</span>
+                <input
+                  type="text"
+                  value={terminalInput}
+                  onChange={(e) => setTerminalInput(e.target.value)}
+                  onKeyDown={handleTerminalSubmit}
+                  className="flex-1 bg-transparent border-none outline-none focus:ring-0 text-gray-300"
+                  autoFocus
+                  spellCheck={false}
+                />
+              </div>
             </div>
           </div>
         )}
