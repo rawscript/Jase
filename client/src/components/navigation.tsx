@@ -6,11 +6,7 @@ export default function Navigation() {
 
   const navItems = [
     { href: "#home", label: "Home" },
-    { href: "#about", label: "About" },
-    { href: "#skills", label: "Skills" },
-    { href: "#projects", label: "Projects" },
-    { href: "#gallery", label: "Gallery" },
-    { href: "#contact", label: "Contact" },
+    { href: "#portfolio", label: "Portfolio" },
   ];
 
   const scrollToSection = (href: string) => {

@@ -1,55 +1,69 @@
-import rateLimit from 'express-rate-limit';
+import { Request, Response, NextFunction } from 'express';
 
-interface RateLimitOptions {
-  windowMs?: number;
-  max?: number;
-  message?: string;
+interface RateLimitStore {
+  count: number;
+  resetTime: number;
 }
 
-export const rateLimit = (options: RateLimitOptions = {}) => {
-  const {
-    windowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes default
-    max = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
-    message = 'Too many requests from this IP, please try again later.',
-  } = options;
+// Simple in-memory rate limiter — no external dependencies
+function createRateLimiter(options: {
+  windowMs: number;
+  max: number;
+  message: string;
+}) {
+  const store = new Map<string, RateLimitStore>();
 
-  return rateLimit({
-    windowMs,
-    max,
-    message: { error: message },
-    standardHeaders: true,
-    legacyHeaders: false,
-    skipSuccessfulRequests: false,
-    keyGenerator: (req) => {
-      // Use IP address as key
-      return req.ip || req.connection.remoteAddress || 'unknown';
-    },
-    handler: (req, res) => {
+  // Clean up expired entries every 5 minutes
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of store.entries()) {
+      if (now > value.resetTime) store.delete(key);
+    }
+  }, 5 * 60 * 1000);
+
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const entry = store.get(key);
+
+    if (!entry || now > entry.resetTime) {
+      store.set(key, { count: 1, resetTime: now + options.windowMs });
+      next();
+      return;
+    }
+
+    entry.count++;
+
+    if (entry.count > options.max) {
+      const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
+      res.setHeader('Retry-After', String(retryAfter));
       res.status(429).json({
         success: false,
         error: 'Rate limit exceeded',
-        message,
-        retryAfter: Math.ceil(windowMs / 1000),
+        message: options.message,
+        retryAfter,
       });
-    },
-  });
-};
+      return;
+    }
 
-// Specific rate limiters for different endpoints
-export const conversationRateLimit = rateLimit({
-  windowMs: 60000, // 1 minute
-  max: 20, // 20 requests per minute
-  message: 'Too many conversation requests, please slow down.',
+    next();
+  };
+}
+
+export const contactRateLimit = createRateLimiter({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: 'Too many contact form submissions. Please try again in 15 minutes.',
 });
 
-export const contactRateLimit = rateLimit({
-  windowMs: 900000, // 15 minutes
-  max: 5, // 5 contact form submissions per 15 minutes
-  message: 'Too many contact form submissions, please try again later.',
+export const chatRateLimit = createRateLimiter({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20,
+  message: 'Too many chat requests. Please slow down.',
 });
 
-export const authRateLimit = rateLimit({
-  windowMs: 300000, // 5 minutes
-  max: 10, // 10 authentication attempts per 5 minutes
-  message: 'Too many authentication attempts, please try again later.',
+export const generalRateLimit = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again later.',
 });
