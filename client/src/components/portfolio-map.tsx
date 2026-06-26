@@ -44,7 +44,7 @@ const PortfolioMap = () => {
       id: 'msitubora',
       name: 'Msitubora Forest',
       description: 'Kakamega Forest Monitoring with satellite API integration',
-      position: { x: 25, y: 35 },
+      position: { x: 30, y: 40 },
       type: 'project',
       icon: TreePine,
       color: '#10B981',
@@ -58,7 +58,7 @@ const PortfolioMap = () => {
       id: 'aurora',
       name: 'Aurora Energy',
       description: 'Energy management system for African homes',
-      position: { x: 60, y: 45 },
+      position: { x: 50, y: 45 },
       type: 'project',
       icon: Zap,
       color: '#F59E0B',
@@ -72,7 +72,7 @@ const PortfolioMap = () => {
       id: 'mailforge',
       name: 'Mailforge AI',
       description: 'AI text-to-presentation tool for businesses',
-      position: { x: 40, y: 20 },
+      position: { x: 40, y: 35 },
       type: 'project',
       icon: Cpu,
       color: '#8B5CF6',
@@ -86,7 +86,7 @@ const PortfolioMap = () => {
       id: 'nestie',
       name: 'Nestie Homes',
       description: 'Modern real estate platform',
-      position: { x: 75, y: 65 },
+      position: { x: 70, y: 60 },
       type: 'project',
       icon: Home,
       color: '#3B82F6',
@@ -100,7 +100,7 @@ const PortfolioMap = () => {
       id: 'geo-spatial',
       name: 'Geo Spatial Hub',
       description: 'Satellite data processing & spatial analysis',
-      position: { x: 20, y: 60 },
+      position: { x: 35, y: 65 },
       type: 'skill',
       icon: MapPin,
       color: '#EC4899',
@@ -114,7 +114,7 @@ const PortfolioMap = () => {
       id: 'cloud-infra',
       name: 'Cloud Infrastructure',
       description: 'Cloud deployment & server management',
-      position: { x: 80, y: 30 },
+      position: { x: 65, y: 40 },
       type: 'infrastructure',
       icon: Cloud,
       color: '#14B8A6',
@@ -128,7 +128,7 @@ const PortfolioMap = () => {
       id: 'data-pipeline',
       name: 'Data Pipeline',
       description: 'ETL pipelines & data processing',
-      position: { x: 50, y: 75 },
+      position: { x: 55, y: 70 },
       type: 'skill',
       icon: Database,
       color: '#8B5CF6',
@@ -210,13 +210,12 @@ const PortfolioMap = () => {
                       top: `${location.position.y}%`,
                     }}
                     onClick={() => handleLocationClick(location)}
-                    whileHover={{ scale: 1.2 }}
                   >
                     {/* Location Marker */}
                     <div className="relative">
                       <div className="relative z-10">
                         <div
-                          className="p-3 rounded-full flex items-center justify-center shadow-lg border-2 border-white/50 hover:border-white transition-colors"
+                          className="p-3 rounded-full flex items-center justify-center shadow-lg border-2 border-white/50"
                           style={{ backgroundColor: location.color }}
                         >
                           <Icon className="w-5 h-5 text-white" />
@@ -265,14 +264,14 @@ const PortfolioMap = () => {
               </div>
             </div>
 
-            {/* Selected Location Details Overlay */}
+            {/* Selected Location Details Banner */}
             <AnimatePresence>
               {selectedLocation && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: '100%' }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  className="absolute bottom-8 left-8 right-8 sm:left-auto sm:right-8 sm:w-96 bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-2xl border border-gray-200 z-20"
+                  exit={{ opacity: 0, y: '100%' }}
+                  className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t-2 border-black p-8 z-30 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8"
                 >
                   <button 
                     onClick={() => setSelectedLocation(null)}
@@ -280,49 +279,46 @@ const PortfolioMap = () => {
                   >
                     ×
                   </button>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: selectedLocation.color }}
-                        />
-                        <span className="text-xs tracking-wider font-medium text-gray-500 uppercase">
-                          {selectedLocation.type}
-                        </span>
-                      </div>
-                      <h3 className="text-2xl font-light text-gray-900 mb-2">
-                        {selectedLocation.name}
-                      </h3>
-                      <p className="text-gray-600 font-light mb-4 text-sm">
-                        {selectedLocation.description}
-                      </p>
-                      <div className="mb-4">
-                        <div className="flex flex-wrap gap-2">
-                          {selectedLocation.details.technologies.map((tech) => (
-                            <span
-                              key={tech}
-                              className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full font-light border border-gray-200"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="mb-6">
-                        <p className="text-gray-600 font-light text-sm italic">{selectedLocation.details.impact}</p>
-                      </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: selectedLocation.color }}
+                      />
+                      <span className="text-xs tracking-widest font-medium text-gray-500 uppercase">
+                        {selectedLocation.type}
+                      </span>
                     </div>
+                    <h3 className="text-3xl font-light text-gray-900 mb-2">
+                      {selectedLocation.name}
+                    </h3>
+                    <p className="text-gray-600 font-light text-lg mb-4 max-w-2xl">
+                      {selectedLocation.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {selectedLocation.details.technologies.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded-none font-medium tracking-wide uppercase border border-gray-200"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-gray-500 font-light text-sm italic">{selectedLocation.details.impact}</p>
                   </div>
+                  
                   {selectedLocation.details.link && (
-                    <a
-                      href={selectedLocation.details.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-center w-full px-4 py-2 bg-black text-white rounded-lg font-light hover:bg-gray-800 transition-colors text-sm"
-                    >
-                      Visit Project
-                    </a>
+                    <div className="flex-shrink-0 w-full md:w-auto">
+                      <a
+                        href={selectedLocation.details.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block w-full md:w-auto px-8 py-4 bg-black text-white text-center font-medium tracking-widest uppercase hover:bg-gray-800 transition-colors text-sm"
+                      >
+                        View Project
+                      </a>
+                    </div>
                   )}
                 </motion.div>
               )}
