@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Cloud, Database, Cpu, Wind, TreePine, Home, Zap, Mail } from "lucide-react";
 
@@ -21,6 +21,7 @@ const PortfolioMap = () => {
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [view, setView] = useState<'map' | 'contact' | 'chat'>('map');
   
+  // Your REAL projects mapped to imaginary country locations
   const mapLocations: MapLocation[] = [
     {
       id: 'msitubora',
@@ -127,35 +128,47 @@ const PortfolioMap = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-br from-gray-50 to-white overflow-hidden pt-24">
+    <div className="relative w-full min-h-screen bg-gradient-to-br from-gray-50 to-white overflow-hidden">
       {/* Navigation */}
-      <div className="absolute top-24 left-6 z-20 flex flex-col sm:flex-row gap-3">
+      <div className="absolute top-6 left-6 z-20 flex gap-3">
         <button
           onClick={() => setView('map')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'map' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white shadow-sm border border-gray-200'}`}
+          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'map' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white'}`}
         >
           Map
         </button>
         <button
           onClick={() => setView('contact')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'contact' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white shadow-sm border border-gray-200'}`}
+          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'contact' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white'}`}
         >
           Contact
         </button>
         <button
           onClick={() => setView('chat')}
-          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'chat' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white shadow-sm border border-gray-200'}`}
+          className={`px-4 py-2 rounded-lg font-light transition-all ${view === 'chat' ? 'bg-black text-white' : 'bg-white/80 text-gray-700 hover:bg-white'}`}
         >
           Ask Me
         </button>
       </div>
 
       {/* Main Content Area */}
-      <div className="px-6 h-[calc(100vh-6rem)]">
+      <div className="pt-20 px-6">
         {view === 'map' && (
-          <div className="max-w-7xl mx-auto h-full flex flex-col relative pt-14">
+          <div className="max-w-6xl mx-auto">
+            {/* Map Title */}
+            <div className="text-center mb-12">
+              <h1 className="text-5xl font-light mb-4">
+                My Work in <span className="gradient-text">Technologia</span>
+              </h1>
+              <p className="text-gray-600 font-light max-w-2xl mx-auto">
+                An imaginary country showcasing my real projects and expertise as a 
+                <span className="font-medium text-blue-600"> Geo Spatial Data Engineer</span> and 
+                <span className="font-medium text-green-600"> Cloud Engineer</span>
+              </p>
+            </div>
+
             {/* Interactive Map */}
-            <div className="relative flex-1 bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl border border-gray-200 overflow-hidden shadow-inner">
+            <div className="relative h-[500px] bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl border border-gray-200 overflow-hidden">
               {/* Background Grid */}
               <div className="absolute inset-0 opacity-30">
                 <div className="absolute inset-0" style={{
@@ -215,8 +228,8 @@ const PortfolioMap = () => {
                       />
 
                       {/* Tooltip */}
-                      <div className="absolute left-1/2 -translate-x-1/2 top-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-30">
-                        <div className="bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100">
+                      <div className="absolute left-1/2 -translate-x-1/2 top-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap">
+                        <div className="bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl">
                           <div className="text-sm font-medium text-gray-900">{location.name}</div>
                           <div className="text-xs text-gray-600 font-light mt-1">{location.description}</div>
                         </div>
@@ -226,18 +239,8 @@ const PortfolioMap = () => {
                 );
               })}
 
-              {/* Location Count */}
-              <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100 z-10 hidden sm:block">
-                <div className="text-sm font-medium text-gray-900">
-                  {mapLocations.length} Locations
-                </div>
-                <div className="text-xs text-gray-600 font-light mt-1">
-                  Explore my real projects
-                </div>
-              </div>
-
               {/* Legend */}
-              <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100 z-10 hidden sm:block">
+              <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl">
                 <div className="text-sm font-medium text-gray-900 mb-2">Map Legend</div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -254,23 +257,27 @@ const PortfolioMap = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Location Count */}
+              <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl">
+                <div className="text-sm font-medium text-gray-900">
+                  {mapLocations.length} Locations
+                </div>
+                <div className="text-xs text-gray-600 font-light mt-1">
+                  Real projects in imaginary country
+                </div>
+              </div>
             </div>
 
-            {/* Selected Location Details Overlay */}
+            {/* Selected Location Details */}
             <AnimatePresence>
               {selectedLocation && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  className="absolute bottom-8 left-8 right-8 sm:left-auto sm:right-8 sm:w-96 bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-2xl border border-gray-200 z-20"
+                  className="mt-8 bg-white rounded-2xl p-6 shadow-xl border border-gray-200"
                 >
-                  <button 
-                    onClick={() => setSelectedLocation(null)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors"
-                  >
-                    ×
-                  </button>
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-3 mb-4">
@@ -278,51 +285,69 @@ const PortfolioMap = () => {
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: selectedLocation.color }}
                         />
-                        <span className="text-xs tracking-wider font-medium text-gray-500 uppercase">
-                          {selectedLocation.type}
+                        <span className="text-sm font-medium text-gray-700">
+                          {selectedLocation.type.toUpperCase()}
                         </span>
                       </div>
-                      <h3 className="text-2xl font-light text-gray-900 mb-2">
+                      <h3 className="text-2xl font-light text-gray-900 mb-3">
                         {selectedLocation.name}
                       </h3>
-                      <p className="text-gray-600 font-light mb-4 text-sm">
+                      <p className="text-gray-600 font-light mb-6">
                         {selectedLocation.description}
                       </p>
-                      <div className="mb-4">
+                      <div className="mb-6">
+                        <div className="text-sm font-medium text-gray-700 mb-2">Technologies:</div>
                         <div className="flex flex-wrap gap-2">
                           {selectedLocation.details.technologies.map((tech) => (
                             <span
                               key={tech}
-                              className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full font-light border border-gray-200"
+                              className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full font-light"
                             >
                               {tech}
                             </span>
                           ))}
                         </div>
                       </div>
-                      <div className="mb-6">
-                        <p className="text-gray-600 font-light text-sm italic">{selectedLocation.details.impact}</p>
+                      <div>
+                        <div className="text-sm font-medium text-gray-700 mb-2">Impact:</div>
+                        <p className="text-gray-600 font-light">{selectedLocation.details.impact}</p>
                       </div>
                     </div>
+                    {selectedLocation.details.link && (
+                      <a
+                        href={selectedLocation.details.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-black text-white rounded-lg font-light hover:bg-gray-800 transition-colors"
+                      >
+                        Visit Project
+                      </a>
+                    )}
                   </div>
-                  {selectedLocation.details.link && (
-                    <a
-                      href={selectedLocation.details.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-center w-full px-4 py-2 bg-black text-white rounded-lg font-light hover:bg-gray-800 transition-colors text-sm"
-                    >
-                      Visit Project
-                    </a>
-                  )}
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="text-3xl font-light text-gray-900 mb-2">7+</div>
+                <div className="text-gray-600 font-light">Real Projects</div>
+              </div>
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="text-3xl font-light text-gray-900 mb-2">15+</div>
+                <div className="text-gray-600 font-light">Technologies</div>
+              </div>
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="text-3xl font-light text-gray-900 mb-2">100%</div>
+                <div className="text-gray-600 font-light">Cloud Deployed</div>
+              </div>
+            </div>
           </div>
         )}
 
         {view === 'contact' && (
-          <div className="max-w-md mx-auto pt-16">
+          <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
               <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h2 className="text-3xl font-light mb-2">Contact Form</h2>
@@ -367,29 +392,29 @@ const PortfolioMap = () => {
         )}
 
         {view === 'chat' && (
-          <div className="max-w-2xl mx-auto pt-16">
+          <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Cpu className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="text-2xl">≡ƒñû</div>
               </div>
               <h2 className="text-3xl font-light mb-2">Ask Me Anything</h2>
-              <p className="text-gray-600 font-light">Powered by AI</p>
+              <p className="text-gray-600 font-light">Powered by NVIDIA DeepSeek V4 Pro</p>
             </div>
 
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
               {/* Chat Header */}
-              <div className="border-b border-gray-200 p-6 bg-gray-50/50">
+              <div className="border-b border-gray-200 p-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-sm" />
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                   <div className="text-sm font-light text-gray-700">Ready to answer questions</div>
                 </div>
               </div>
 
               {/* Chat Messages */}
-              <div className="h-80 overflow-y-auto p-6 space-y-4 bg-white">
+              <div className="h-96 overflow-y-auto p-6 space-y-4">
                 <div className="flex justify-start">
-                  <div className="max-w-[80%] bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                    <p className="font-light text-gray-800 leading-relaxed text-sm">
+                  <div className="max-w-[80%] bg-gray-50 rounded-2xl p-4">
+                    <p className="font-light text-gray-900">
                       Hi! I can answer questions about my work as a Geo Spatial Data Engineer and Cloud Engineer. 
                       Ask me about my projects, technologies, or experience!
                     </p>
@@ -398,25 +423,25 @@ const PortfolioMap = () => {
               </div>
 
               {/* Chat Input */}
-              <div className="border-t border-gray-200 p-6 bg-gray-50/50">
+              <div className="border-t border-gray-200 p-6">
                 <div className="flex gap-3">
                   <input
                     type="text"
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black font-light text-sm bg-white"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-black font-light"
                     placeholder="Ask about my work..."
                   />
-                  <button className="px-6 py-3 bg-black text-white rounded-lg font-light hover:bg-gray-800 transition-colors shadow-md">
+                  <button className="px-6 py-3 bg-black text-white rounded-lg font-light hover:bg-gray-800 transition-colors">
                     Ask
                   </button>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button className="px-3 py-1.5 text-xs bg-white text-gray-700 rounded-full font-light hover:bg-gray-50 border border-gray-200 transition-colors shadow-sm">
+                  <button className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-full font-light hover:bg-gray-200">
                     Tell me about Msitubora
                   </button>
-                  <button className="px-3 py-1.5 text-xs bg-white text-gray-700 rounded-full font-light hover:bg-gray-50 border border-gray-200 transition-colors shadow-sm">
+                  <button className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-full font-light hover:bg-gray-200">
                     What cloud platforms do you use?
                   </button>
-                  <button className="px-3 py-1.5 text-xs bg-white text-gray-700 rounded-full font-light hover:bg-gray-50 border border-gray-200 transition-colors shadow-sm">
+                  <button className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-full font-light hover:bg-gray-200">
                     Explain geo spatial engineering
                   </button>
                 </div>
@@ -424,22 +449,22 @@ const PortfolioMap = () => {
             </div>
 
             {/* Quick Facts */}
-            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 pb-8">
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-sm font-medium text-gray-900 mb-1">Geo Spatial</div>
-                <div className="text-xs text-gray-500 font-light">Satellite data & GIS</div>
+            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white p-4 rounded-xl border border-gray-200">
+                <div className="text-sm font-light text-gray-900">Geo Spatial</div>
+                <div className="text-xs text-gray-600 font-light">Satellite data & GIS</div>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-sm font-medium text-gray-900 mb-1">Cloud</div>
-                <div className="text-xs text-gray-500 font-light">AWS, GCP, Docker</div>
+              <div className="bg-white p-4 rounded-xl border border-gray-200">
+                <div className="text-sm font-light text-gray-900">Cloud</div>
+                <div className="text-xs text-gray-600 font-light">AWS, GCP, Docker</div>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-sm font-medium text-gray-900 mb-1">AI/ML</div>
-                <div className="text-xs text-gray-500 font-light">GenAI & ML Ops</div>
+              <div className="bg-white p-4 rounded-xl border border-gray-200">
+                <div className="text-sm font-light text-gray-900">AI/ML</div>
+                <div className="text-xs text-gray-600 font-light">GenAI & ML Ops</div>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="text-sm font-medium text-gray-900 mb-1">Full Stack</div>
-                <div className="text-xs text-gray-500 font-light">React, Node.js, PostgreSQL</div>
+              <div className="bg-white p-4 rounded-xl border border-gray-200">
+                <div className="text-sm font-light text-gray-900">Full Stack</div>
+                <div className="text-xs text-gray-600 font-light">React, Node.js, PostgreSQL</div>
               </div>
             </div>
           </div>
