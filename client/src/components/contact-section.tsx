@@ -39,14 +39,14 @@ export default function ContactSection() {
     },
     onSuccess: () => {
       toast({
-        title: "Message sent successfully!",
-        description: "Thank you for your message. I'll get back to you soon.",
+        title: "TRANSMISSION SUCCESSFUL",
+        description: "Message delivered to the core node. Awaiting response.",
       });
       form.reset();
     },
     onError: (error) => {
       toast({
-        title: "Error sending message",
+        title: "TRANSMISSION FAILED",
         description: error.message,
         variant: "destructive",
       });
@@ -60,18 +60,18 @@ export default function ContactSection() {
   const contactInfo = [
     {
       icon: Mail,
-      title: "Email",
+      title: "Encrypted Comms",
       value: "jasemwaura@gmail.com",
     },
     {
       icon: Phone,
-      title: "Phone",
+      title: "Direct Line",
       value: "+254 114841437",
     },
     {
       icon: MapPin,
-      title: "Location",
-      value: "Nairoi, KE",
+      title: "Coordinates",
+      value: "Nairobi, KE // Sector 7",
     },
   ];
 
@@ -83,49 +83,52 @@ export default function ContactSection() {
   ];
 
   return (
-    <section id="contact" className="section-spacing">
-      <div className="container mx-auto px-8">
-        <div className="text-center mb-20">
+    <div className="w-full min-h-full bg-[#0a0a0a] text-white pt-24 pb-12 px-6 flex flex-col font-mono">
+      <div className="container mx-auto max-w-6xl flex-1 flex flex-col justify-center">
+        <div className="text-center mb-16">
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text"
+            className="text-4xl md:text-5xl font-bold mb-4 tracking-widest uppercase text-white"
           >
-            Contact
+            Establish Link
           </motion.h2>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="h-1 w-24 bg-blue-500 mx-auto mb-6"
+          />
           <motion.p
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            viewport={{ once: true }}
-            className="text-lg body-text max-w-2xl mx-auto"
+            className="text-gray-400 max-w-2xl mx-auto"
           >
-            Ready to bring your project to life? Let's discuss how we can work together.
+            &gt; Ready to initiate a new project protocol? Open a secure channel below.
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-20">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            viewport={{ once: true }}
-            className="space-y-12"
+            className="space-y-12 flex flex-col justify-center"
           >
             {contactInfo.map((info, index) => (
               <div key={index} className="flex items-center space-x-6">
-                <div className="w-px h-12 bg-black/20"></div>
+                <div className="w-px h-12 bg-blue-500/50"></div>
                 <div>
-                  <h3 className="font-light text-sm tracking-wide text-black/60 mb-1">{info.title.toUpperCase()}</h3>
-                  <p className="text-black font-light">{info.value}</p>
+                  <h3 className="font-bold text-xs tracking-widest text-blue-400 mb-1 uppercase">{info.title}</h3>
+                  <p className="text-gray-200">{info.value}</p>
                 </div>
               </div>
             ))}
 
-            <div className="pt-12">
-              <h3 className="font-light text-sm tracking-wide text-black/60 mb-6">SOCIAL</h3>
+            <div className="pt-8 border-t border-white/10">
+              <h3 className="font-bold text-xs tracking-widest text-gray-500 mb-6 uppercase">External Nodes</h3>
               <div className="flex space-x-6">
                 {socialLinks.map((social, index) => (
                   <motion.a
@@ -133,11 +136,11 @@ export default function ContactSection() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-black/60 hover:text-black transition-colors duration-300"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    className="text-gray-400 hover:text-blue-400 transition-colors duration-300 p-3 bg-white/5 hover:bg-white/10 rounded"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <social.icon size={18} />
+                    <social.icon size={20} />
                   </motion.a>
                 ))}
               </div>
@@ -146,27 +149,28 @@ export default function ContactSection() {
 
           <motion.div
             initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            viewport={{ once: true }}
-            className="premium-card rounded-none p-8"
+            className="bg-[#111] border border-white/10 p-8 shadow-2xl relative"
           >
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-teal-400"></div>
+            
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-light tracking-wide text-black/60">NAME</FormLabel>
+                      <FormLabel className="text-xs font-bold tracking-widest text-gray-400 uppercase">Identification</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Your Name"
                           {...field}
-                          className="bg-transparent border-0 border-b border-black/20 rounded-none text-black placeholder-black/40 focus:border-black font-light text-sm pb-3"
+                          className="bg-black/50 border-white/20 text-white placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-none h-12"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -176,16 +180,16 @@ export default function ContactSection() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-light tracking-wide text-black/60">EMAIL</FormLabel>
+                      <FormLabel className="text-xs font-bold tracking-widest text-gray-400 uppercase">Return Address</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
                           placeholder="your@email.com"
                           {...field}
-                          className="bg-transparent border-0 border-b border-black/20 rounded-none text-black placeholder-black/40 focus:border-black font-light text-sm pb-3"
+                          className="bg-black/50 border-white/20 text-white placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-none h-12"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -195,15 +199,15 @@ export default function ContactSection() {
                   name="subject"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-light tracking-wide text-black/60">SUBJECT</FormLabel>
+                      <FormLabel className="text-xs font-bold tracking-widest text-gray-400 uppercase">Transmission Subject</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Project Inquiry"
                           {...field}
-                          className="bg-transparent border-0 border-b border-black/20 rounded-none text-black placeholder-black/40 focus:border-black font-light text-sm pb-3"
+                          className="bg-black/50 border-white/20 text-white placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-none h-12"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -213,32 +217,32 @@ export default function ContactSection() {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-light tracking-wide text-black/60">MESSAGE</FormLabel>
+                      <FormLabel className="text-xs font-bold tracking-widest text-gray-400 uppercase">Payload</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Tell me about your project..."
-                          rows={4}
+                          placeholder="Enter your message sequence here..."
+                          rows={5}
                           {...field}
-                          className="bg-transparent border-0 border-b border-black/20 rounded-none text-black placeholder-black/40 focus:border-black font-light text-sm resize-none"
+                          className="bg-black/50 border-white/20 text-white placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-none resize-none"
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
 
                 <Button
                   type="submit"
-                  className="accent-button w-full py-4 rounded-none font-light text-sm tracking-wide"
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-bold tracking-widest uppercase rounded-none transition-colors mt-4"
                   disabled={contactMutation.isPending}
                 >
-                  {contactMutation.isPending ? "SENDING..." : "SEND MESSAGE"}
+                  {contactMutation.isPending ? "TRANSMITTING..." : "SEND TRANSMISSION"}
                 </Button>
               </form>
             </Form>
           </motion.div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
