@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Cloud, Database, Cpu, Wind, TreePine, Home, Zap, Mail, Search } from "lucide-react";
+import { MapPin, Cloud, Database, Cpu, Wind, TreePine, Home, Zap, Mail, Search, ZoomIn, ZoomOut, Compass } from "lucide-react";
 import fantasyMapBg from "@/assets/fantasy-map.png";
 
 interface MapLocation {
@@ -26,6 +26,49 @@ const PortfolioMap = () => {
     { role: 'system', text: 'Welcome to the James Mwaura terminal. Type your query...' }
   ]);
   const [terminalInput, setTerminalInput] = useState('');
+
+  const [zoom, setZoom] = useState(1);
+  const [viewOffset, setViewOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.2, 3));
+  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.2, 0.5));
+  const handleResetView = () => { setZoom(1); setViewOffset({ x: 0, y: 0 }); };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - viewOffset.x, y: e.clientY - viewOffset.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setViewOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
+  };
+
+  useEffect(() => {
+    const currentRef = mapRef.current;
+    if (currentRef) {
+      currentRef.addEventListener('wheel', handleWheel as any, { passive: false });
+    }
+    return () => {
+      if (currentRef) {
+        currentRef.removeEventListener('wheel', handleWheel as any);
+      }
+    };
+  }, []);
 
   const handleTerminalSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && terminalInput.trim()) {
@@ -175,17 +218,94 @@ const PortfolioMap = () => {
             {/* Interactive Map */}
             <div 
               className="relative flex-1 rounded-none border border-black overflow-hidden shadow-sm bg-gray-100"
-              style={{
-                backgroundImage: `url(${fantasyMapBg})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
+              ref={mapRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
             >
-              {/* Optional dark overlay if needed */}
-              <div className="absolute inset-0 bg-black/10" />
+              {/* Map Canvas (Pannable/Zoomable) */}
+              <div 
+                className="absolute inset-0 transition-transform duration-75 ease-out cursor-grab active:cursor-grabbing"
+                style={{
+                  transform: `translate(${viewOffset.x}px, ${viewOffset.y}px) scale(${zoom})`,
+                  transformOrigin: 'center center',
+                  backgroundImage: `url(${fantasyMapBg})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
+                {/* Optional dark overlay if needed */}
+                <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+                
+                {/* Map Locations */}
+                {mapLocations.filter(loc => loc.name.toLowerCase().includes(searchQuery.toLowerCase()) || loc.type.toLowerCase().includes(searchQuery.toLowerCase())).map((location) => {
+                  const Icon = location.icon;
+                  return (
+                    <motion.div
+                      key={location.id}
+                      className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                      style={{
+                        left: `${location.position.x}%`,
+                        top: `${location.position.y}%`,
+                        scale: 1 / zoom,
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLocationClick(location);
+                      }}
+                    >
+                      {/* Location Marker */}
+                      <div className="relative">
+                        <div className="relative z-10">
+                          <div
+                            className="p-3 rounded-full flex items-center justify-center shadow-lg border-2 border-white/50 hover:scale-110 transition-transform"
+                            style={{ backgroundColor: location.color }}
+                          >
+                            <Icon className="w-5 h-5 text-white" />
+                          </div>
+                        </div>
+
+                        {/* Tooltip */}
+                        <div className="absolute left-1/2 -translate-x-1/2 top-14 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-30">
+                          <div className="bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100">
+                            <div className="text-sm font-medium text-gray-900">{location.name}</div>
+                            <div className="text-xs text-gray-600 font-light mt-1">{location.description}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Map Controls */}
+              <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}
+                  className="bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 hover:bg-white transition-colors"
+                  title="Zoom In"
+                >
+                  <ZoomIn className="w-5 h-5 text-gray-700" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}
+                  className="bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 hover:bg-white transition-colors"
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="w-5 h-5 text-gray-700" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleResetView(); }}
+                  className="bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md border border-gray-200 hover:bg-white transition-colors"
+                  title="Reset View"
+                >
+                  <Compass className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
               
               {/* Search Overlay */}
-              <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 w-full max-w-md px-4">
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 w-full max-w-md px-4 pointer-events-auto">
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
@@ -193,49 +313,14 @@ const PortfolioMap = () => {
                     placeholder="Search projects or skills..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onMouseDown={(e) => e.stopPropagation()}
                     className="w-full pl-12 pr-4 py-3 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-black/50 transition-all text-sm font-medium"
                   />
                 </div>
               </div>
 
-              {/* Map Locations */}
-              {mapLocations.filter(loc => loc.name.toLowerCase().includes(searchQuery.toLowerCase()) || loc.type.toLowerCase().includes(searchQuery.toLowerCase())).map((location) => {
-                const Icon = location.icon;
-                return (
-                  <motion.div
-                    key={location.id}
-                    className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-                    style={{
-                      left: `${location.position.x}%`,
-                      top: `${location.position.y}%`,
-                    }}
-                    onClick={() => handleLocationClick(location)}
-                  >
-                    {/* Location Marker */}
-                    <div className="relative">
-                      <div className="relative z-10">
-                        <div
-                          className="p-3 rounded-full flex items-center justify-center shadow-lg border-2 border-white/50"
-                          style={{ backgroundColor: location.color }}
-                        >
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
-                      </div>
-
-                      {/* Tooltip */}
-                      <div className="absolute left-1/2 -translate-x-1/2 top-12 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-30">
-                        <div className="bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100">
-                          <div className="text-sm font-medium text-gray-900">{location.name}</div>
-                          <div className="text-xs text-gray-600 font-light mt-1">{location.description}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-
               {/* Location Count */}
-              <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100 z-10 hidden sm:block">
+              <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100 z-10 hidden sm:block pointer-events-auto">
                 <div className="text-sm font-medium text-gray-900">
                   {mapLocations.length} Locations
                 </div>
@@ -245,7 +330,7 @@ const PortfolioMap = () => {
               </div>
 
               {/* Legend */}
-              <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100 z-10 hidden sm:block">
+              <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-xl border border-gray-100 z-10 hidden sm:block pointer-events-auto">
                 <div className="text-sm font-medium text-gray-900 mb-2">Map Legend</div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
