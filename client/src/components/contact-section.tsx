@@ -39,14 +39,14 @@ export default function ContactSection() {
     },
     onSuccess: () => {
       toast({
-        title: "TRANSMISSION SUCCESSFUL",
-        description: "Message delivered to the core node. Awaiting response.",
+        title: "Message sent!",
+        description: "Thanks for reaching out. I'll get back to you soon.",
       });
       form.reset();
     },
     onError: (error) => {
       toast({
-        title: "TRANSMISSION FAILED",
+        title: "Something went wrong",
         description: error.message,
         variant: "destructive",
       });
@@ -60,18 +60,18 @@ export default function ContactSection() {
   const contactInfo = [
     {
       icon: Mail,
-      title: "Encrypted Comms",
+      title: "Email",
       value: "jasemwaura@gmail.com",
     },
     {
       icon: Phone,
-      title: "Direct Line",
-      value: "+254 114841437",
+      title: "Phone",
+      value: "+254 114 841 437",
     },
     {
       icon: MapPin,
-      title: "Coordinates",
-      value: "Nairobi, KE // Sector 7",
+      title: "Location",
+      value: "Nairobi, Kenya",
     },
   ];
 
@@ -83,94 +83,97 @@ export default function ContactSection() {
   ];
 
   return (
-    <div className="w-full min-h-full bg-[#0a0a0a] text-white pt-24 pb-12 px-6 flex flex-col font-mono">
-      <div className="container mx-auto max-w-6xl flex-1 flex flex-col justify-center">
-        <div className="text-center mb-16">
+    <div className="w-full min-h-full bg-white text-gray-900 pt-24 pb-12 px-6 flex flex-col">
+      <div className="container mx-auto max-w-5xl flex-1 flex flex-col justify-center">
+        <div className="text-center mb-14">
           <motion.h2
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-4xl md:text-5xl font-bold mb-4 tracking-widest uppercase text-white"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight"
           >
-            Establish Link
+            Get in touch
           </motion.h2>
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="h-1 w-24 bg-blue-500 mx-auto mb-6"
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="h-1 w-16 bg-blue-500 mx-auto mb-5 rounded-full"
           />
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="text-gray-400 max-w-2xl mx-auto"
+            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+            className="text-gray-500 max-w-xl mx-auto"
           >
-            &gt; Ready to initiate a new project protocol? Open a secure channel below.
+            Have a project in mind or want to collaborate? Send me a message and I'll respond promptly.
           </motion.p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
+          {/* Left — Contact Info */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -24 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="space-y-12 flex flex-col justify-center"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="space-y-8 flex flex-col justify-center"
           >
             {contactInfo.map((info, index) => (
-              <div key={index} className="flex items-center space-x-6">
-                <div className="w-px h-12 bg-blue-500/50"></div>
+              <div key={index} className="flex items-center space-x-5">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <info.icon className="w-5 h-5 text-blue-500" />
+                </div>
                 <div>
-                  <h3 className="font-bold text-xs tracking-widest text-blue-400 mb-1 uppercase">{info.title}</h3>
-                  <p className="text-gray-200">{info.value}</p>
+                  <h3 className="font-semibold text-xs text-gray-400 uppercase tracking-wider mb-0.5">{info.title}</h3>
+                  <p className="text-gray-800 font-medium">{info.value}</p>
                 </div>
               </div>
             ))}
 
-            <div className="pt-8 border-t border-white/10">
-              <h3 className="font-bold text-xs tracking-widest text-gray-500 mb-6 uppercase">External Nodes</h3>
-              <div className="flex space-x-6">
+            <div className="pt-6 border-t border-gray-100">
+              <h3 className="font-semibold text-xs text-gray-400 uppercase tracking-wider mb-4">Find me online</h3>
+              <div className="flex space-x-3">
                 {socialLinks.map((social, index) => (
                   <motion.a
                     key={index}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-blue-400 transition-colors duration-300 p-3 bg-white/5 hover:bg-white/10 rounded"
+                    title={social.label}
+                    className="text-gray-500 hover:text-blue-500 transition-colors duration-200 p-3 bg-gray-50 hover:bg-blue-50 rounded-xl"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <social.icon size={20} />
+                    <social.icon size={18} />
                   </motion.a>
                 ))}
               </div>
             </div>
           </motion.div>
 
+          {/* Right — Contact Form */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="bg-[#111] border border-white/10 p-8 shadow-2xl relative"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="bg-gray-50 border border-gray-200 rounded-2xl p-8 shadow-sm"
           >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-teal-400"></div>
-            
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold tracking-widest text-gray-400 uppercase">Identification</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-gray-700">Name</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Your Name"
+                          placeholder="Your name"
                           {...field}
-                          className="bg-black/50 border-white/20 text-white placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-none h-12"
+                          className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl h-11"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -180,16 +183,16 @@ export default function ContactSection() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold tracking-widest text-gray-400 uppercase">Return Address</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-gray-700">Email</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
                           placeholder="your@email.com"
                           {...field}
-                          className="bg-black/50 border-white/20 text-white placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-none h-12"
+                          className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl h-11"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -199,15 +202,15 @@ export default function ContactSection() {
                   name="subject"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold tracking-widest text-gray-400 uppercase">Transmission Subject</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-gray-700">Subject</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Project Inquiry"
+                          placeholder="What's this about?"
                           {...field}
-                          className="bg-black/50 border-white/20 text-white placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-none h-12"
+                          className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl h-11"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -217,26 +220,26 @@ export default function ContactSection() {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold tracking-widest text-gray-400 uppercase">Payload</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-gray-700">Message</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Enter your message sequence here..."
+                          placeholder="Tell me about your project or idea..."
                           rows={5}
                           {...field}
-                          className="bg-black/50 border-white/20 text-white placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-none resize-none"
+                          className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl resize-none"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-400" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
 
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-bold tracking-widest uppercase rounded-none transition-colors mt-4"
+                  className="w-full h-11 bg-gray-900 hover:bg-gray-700 text-white font-semibold tracking-wide rounded-xl transition-colors mt-2"
                   disabled={contactMutation.isPending}
                 >
-                  {contactMutation.isPending ? "TRANSMITTING..." : "SEND TRANSMISSION"}
+                  {contactMutation.isPending ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </Form>

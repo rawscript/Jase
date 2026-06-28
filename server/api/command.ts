@@ -71,8 +71,7 @@ export async function processCommand(input: string): Promise<CommandResponse> {
           { role: 'user', content: input }
         ],
         temperature: 0.1,
-        max_tokens: 150,
-        response_format: { type: "json_object" }
+        max_tokens: 200,
       }),
     });
 
@@ -83,15 +82,21 @@ export async function processCommand(input: string): Promise<CommandResponse> {
     }
 
     const data = await response.json() as any;
-    const content = data.choices?.[0]?.message?.content;
+    const content = data.choices?.[0]?.message?.content ?? '';
     
     try {
-      const parsed = JSON.parse(content);
+      // Try direct parse first, then extract JSON from markdown code fences
+      let jsonStr = content.trim();
+      const fenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (fenceMatch) jsonStr = fenceMatch[1].trim();
+      const braceMatch = jsonStr.match(/{[\s\S]*}/);
+      if (braceMatch) jsonStr = braceMatch[0];
+      const parsed = JSON.parse(jsonStr);
       const validated = commandSchema.parse(parsed);
       return validated;
     } catch (parseError) {
       console.error("Failed to parse JSON command response:", content);
-      return { action: "UNKNOWN", message: "Error parsing command." };
+      return { action: "UNKNOWN", message: "Could not parse command. Try asking about a specific project or skill." };
     }
   } catch (error) {
     console.error('Command error:', error);
