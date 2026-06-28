@@ -5,6 +5,7 @@ import { insertContactSchema } from "@shared/schema";
 import { z } from "zod";
 import nodemailer from "nodemailer";
 import { chat, type ChatMessage } from "./api/conversation";
+import { processCommand } from "./api/command";
 import { contactRateLimit, chatRateLimit } from "./middleware/rateLimit";
 
 // ─── Email transporter ────────────────────────────────────────────────────────
@@ -89,7 +90,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // POST /api/chat — LLM chat about James
   app.post("/api/chat", chatRateLimit, async (req, res) => {
     try {
       const { messages } = req.body as { messages: ChatMessage[] };
@@ -110,6 +110,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Chat route error:", error);
       res.status(500).json({ error: "Failed to generate response. Please try again." });
+    }
+  });
+
+  // POST /api/command - AI Terminal Command Processor
+  app.post("/api/command", chatRateLimit, async (req, res) => {
+    try {
+      const { command } = req.body;
+      if (!command || typeof command !== "string") {
+        res.status(400).json({ error: "command string is required" });
+        return;
+      }
+      
+      const response = await processCommand(command);
+      res.json(response);
+    } catch (error) {
+      console.error("Command route error:", error);
+      res.status(500).json({ action: "UNKNOWN", message: "Internal server error" });
     }
   });
 
