@@ -81,37 +81,14 @@ export default function Navigation({
         </div>
       </nav>
 
-      {/* ── Bottom-left hint ─────────────────────────────── */}
-      {!isMobile && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 24,
-            left: 32,
-            zIndex: 20,
-            pointerEvents: "none",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 9,
-              letterSpacing: "0.18em",
-              color: "#9CA3AF",
-              margin: 0,
-            }}
-          >
-            SCROLL TO ZOOM · DRAG TO PAN · CLICK PINS
-          </p>
-        </div>
-      )}
+      {/* ── Bottom-left hint (hidden – now shown inside map component) ─── */}
 
-      {/* ── Bottom-right legend ──────────────────────────── */}
+      {/* ── Bottom-right legend (moved up to avoid zoom controls) ─── */}
       {!isMobile && (
         <div
           style={{
             position: "absolute",
-            bottom: 24,
+            bottom: 180,
             right: 32,
             zIndex: 20,
             display: "flex",
