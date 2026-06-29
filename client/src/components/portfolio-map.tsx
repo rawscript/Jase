@@ -161,6 +161,18 @@ export default function PortfolioMap({
     }
   }, [isContactOpen]);
 
+  useEffect(() => {
+    if (activeProject) {
+      const { x, y } = latLngToXY(activeProject.lat, activeProject.lng);
+      const targetZoom = 2.5;
+      setZoom(targetZoom);
+      setPan({
+        x: targetZoom * (500 - x),
+        y: targetZoom * (250 - y),
+      });
+    }
+  }, [activeProject]);
+
   const handleWheel = (e: React.WheelEvent) => {
     if (isContactOpen) return;
     e.preventDefault();

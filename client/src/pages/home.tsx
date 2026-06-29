@@ -33,6 +33,8 @@ export default function Home() {
       <Navigation
         onOpenTerminal={() => setShowTerminal(true)}
         onOpenContact={() => setShowContact(true)}
+        activeProject={activeProject}
+        onSelectProject={setActiveProject}
       />
 
       {/* Overlays */}
