@@ -1,48 +1,24 @@
-import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Github, Linkedin, Twitter, Instagram } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
+import RocketLaunch from "./rocket-launch";
 
-const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  subject: z.string().min(5, "Subject must be at least 5 characters"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
+interface ContactScreenProps {
+  onClose: () => void;
+}
 
-type ContactForm = z.infer<typeof contactSchema>;
-
-export default function ContactSection() {
+export default function ContactScreen({ onClose }: ContactScreenProps) {
   const { toast } = useToast();
-  
-  const form = useForm<ContactForm>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    },
-  });
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [launching, setLaunching] = useState(false);
 
   const contactMutation = useMutation({
-    mutationFn: async (data: ContactForm) => {
+    mutationFn: async (data: { name: string; email: string; subject: string; message: string }) => {
       return await apiRequest("POST", "/api/contact", data);
     },
     onSuccess: () => {
-      toast({
-        title: "Message sent!",
-        description: "Thanks for reaching out. I'll get back to you soon.",
-      });
-      form.reset();
+      setLaunching(true);
     },
     onError: (error) => {
       toast({
@@ -53,197 +29,217 @@ export default function ContactSection() {
     },
   });
 
-  const onSubmit = (data: ContactForm) => {
-    contactMutation.mutate(data);
+  const valid =
+    form.name.trim() && form.email.trim() && form.message.trim();
+
+  const handleTransmit = () => {
+    if (!valid || contactMutation.isPending) return;
+    contactMutation.mutate({
+      name: form.name,
+      email: form.email,
+      subject: "Portfolio inquiry",
+      message: form.message,
+    });
   };
 
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: "Email",
-      value: "jasemwaura@gmail.com",
-    },
-    {
-      icon: Phone,
-      title: "Phone",
-      value: "+254 114 841 437",
-    },
-    {
-      icon: MapPin,
-      title: "Location",
-      value: "Nairobi, Kenya",
-    },
-  ];
-
-  const socialLinks = [
-    { icon: Github, href: "https://github.com/rawscript", label: "GitHub" },
-    { icon: Linkedin, href: "https://www.linkedin.com/in/jase-mwaura/", label: "LinkedIn" },
-    { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-    { icon: Instagram, href: "https://www.instagram.com/raw.script/", label: "Instagram" },
-  ];
+  if (launching) {
+    return <RocketLaunch onComplete={onClose} />;
+  }
 
   return (
-    <div className="w-full min-h-full bg-white text-gray-900 pt-24 pb-12 px-6 flex flex-col">
-      <div className="container mx-auto max-w-5xl flex-1 flex flex-col justify-center">
-        <div className="text-center mb-14">
-          <motion.h2
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight"
-          >
-            Get in touch
-          </motion.h2>
-          <motion.div
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="h-1 w-16 bg-blue-500 mx-auto mb-5 rounded-full"
-          />
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            className="text-gray-500 max-w-xl mx-auto"
-          >
-            Have a project in mind or want to collaborate? Send me a message and I'll respond promptly.
-          </motion.p>
-        </div>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        background: "#FAF8F4",
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: "'IBM Plex Mono', monospace",
+        overflowY: "auto",
+      }}
+    >
+      <button
+        onClick={onClose}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#9CA3AF")}
+        style={{
+          position: "absolute",
+          top: 32,
+          left: 40,
+          background: "none",
+          border: "none",
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 11,
+          letterSpacing: "0.18em",
+          color: "#9CA3AF",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          transition: "color 0.2s",
+        }}
+      >
+        ← BACK TO MAP
+      </button>
 
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
-          {/* Left — Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="space-y-8 flex flex-col justify-center"
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "80px 40px 40px",
+        }}
+      >
+        <div style={{ width: "min(640px, 100%)" }}>
+          <p
+            style={{
+              margin: "0 0 18px",
+              fontSize: 10,
+              letterSpacing: "0.22em",
+              color: "#9CA3AF",
+            }}
           >
-            {contactInfo.map((info, index) => (
-              <div key={index} className="flex items-center space-x-5">
-                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                  <info.icon className="w-5 h-5 text-blue-500" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-xs text-gray-400 uppercase tracking-wider mb-0.5">{info.title}</h3>
-                  <p className="text-gray-800 font-medium">{info.value}</p>
-                </div>
+            TRANSMISSION CONSOLE
+          </p>
+          <h2
+            style={{
+              margin: "0 0 48px",
+              fontFamily: "'Syne', sans-serif",
+              fontWeight: 800,
+              fontSize: "clamp(40px, 7vw, 80px)",
+              color: "#111",
+              lineHeight: 0.95,
+              letterSpacing: "-0.04em",
+            }}
+          >
+            Get in
+            <br />
+            touch.
+          </h2>
+
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {[
+              {
+                key: "name" as const,
+                label: "FULL NAME",
+                placeholder: "Your name",
+                type: "text",
+              },
+              {
+                key: "email" as const,
+                label: "EMAIL ADDRESS",
+                placeholder: "your@email.com",
+                type: "email",
+              },
+            ].map((f) => (
+              <div
+                key={f.key}
+                style={{
+                  borderBottom: "1.5px solid #E5E7EB",
+                  paddingBottom: 4,
+                }}
+              >
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 9,
+                    letterSpacing: "0.22em",
+                    color: "#9CA3AF",
+                    paddingTop: 28,
+                    marginBottom: 6,
+                  }}
+                >
+                  {f.label}
+                </label>
+                <input
+                  type={f.type}
+                  value={form[f.key]}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, [f.key]: e.target.value }))
+                  }
+                  placeholder={f.placeholder}
+                  style={{
+                    width: "100%",
+                    background: "none",
+                    border: "none",
+                    outline: "none",
+                    fontFamily: "'Syne', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "clamp(22px, 3.5vw, 32px)",
+                    color: "#111",
+                    paddingBottom: 14,
+                    letterSpacing: "-0.02em",
+                    caretColor: "#D4500A",
+                  }}
+                />
               </div>
             ))}
 
-            <div className="pt-6 border-t border-gray-100">
-              <h3 className="font-semibold text-xs text-gray-400 uppercase tracking-wider mb-4">Find me online</h3>
-              <div className="flex space-x-3">
-                {socialLinks.map((social, index) => (
-                  <motion.a
-                    key={index}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={social.label}
-                    className="text-gray-500 hover:text-blue-500 transition-colors duration-200 p-3 bg-gray-50 hover:bg-blue-50 rounded-xl"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <social.icon size={18} />
-                  </motion.a>
-                ))}
-              </div>
+            <div
+              style={{
+                borderBottom: "1.5px solid #E5E7EB",
+                paddingBottom: 4,
+              }}
+            >
+              <label
+                style={{
+                  display: "block",
+                  fontSize: 9,
+                  letterSpacing: "0.22em",
+                  color: "#9CA3AF",
+                  paddingTop: 28,
+                  marginBottom: 6,
+                }}
+              >
+                MESSAGE
+              </label>
+              <textarea
+                value={form.message}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, message: e.target.value }))
+                }
+                placeholder="What are you working on?"
+                rows={3}
+                style={{
+                  width: "100%",
+                  background: "none",
+                  border: "none",
+                  outline: "none",
+                  resize: "none",
+                  fontFamily: "'Syne', sans-serif",
+                  fontWeight: 700,
+                  fontSize: "clamp(18px, 3vw, 26px)",
+                  color: "#111",
+                  paddingBottom: 14,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.35,
+                  caretColor: "#D4500A",
+                }}
+              />
             </div>
-          </motion.div>
 
-          {/* Right — Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="bg-gray-50 border border-gray-200 rounded-2xl p-8 shadow-sm"
-          >
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700">Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Your name"
-                          {...field}
-                          className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl h-11"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700">Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="your@email.com"
-                          {...field}
-                          className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl h-11"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="subject"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700">Subject</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="What's this about?"
-                          {...field}
-                          className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl h-11"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700">Message</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Tell me about your project or idea..."
-                          rows={5}
-                          {...field}
-                          className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl resize-none"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full h-11 bg-gray-900 hover:bg-gray-700 text-white font-semibold tracking-wide rounded-xl transition-colors mt-2"
-                  disabled={contactMutation.isPending}
-                >
-                  {contactMutation.isPending ? "Sending..." : "Send Message"}
-                </Button>
-              </form>
-            </Form>
-          </motion.div>
+            <div style={{ marginTop: 36 }}>
+              <button
+                onClick={handleTransmit}
+                disabled={!valid || contactMutation.isPending}
+                style={{
+                  background: valid ? "#111" : "#E5E7EB",
+                  border: "none",
+                  color: valid ? "#FAF8F4" : "#9CA3AF",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.2em",
+                  padding: "16px 36px",
+                  cursor: valid ? "pointer" : "default",
+                  transition: "all 0.25s",
+                }}
+              >
+                {contactMutation.isPending ? "TRANSMITTING..." : "TRANSMIT MESSAGE"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

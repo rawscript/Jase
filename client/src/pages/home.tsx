@@ -1,59 +1,48 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Navigation from "@/components/navigation";
 import PortfolioMap from "@/components/portfolio-map";
+import Navigation from "@/components/navigation";
 import AITerminal from "@/components/ai-terminal";
-import ContactSection from "@/components/contact-section";
+import ContactScreen from "@/components/contact-section";
+import { PROJECTS } from "@/lib/world-data";
 
-export type ViewState = 'map' | 'terminal' | 'contact';
+type Project = (typeof PROJECTS)[number];
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<ViewState>('map');
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [showTerminal, setShowTerminal] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden bg-white text-gray-900">
-      <Navigation currentView={currentView} setCurrentView={setCurrentView} />
-      
-      {/* Main Content Area */}
-      <div className="flex-1 relative w-full h-full overflow-hidden">
-        {/* Map View */}
-        <div 
-          className={`absolute inset-0 transition-opacity duration-500 ${
-            currentView === 'map' ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
-          }`}
-        >
-          {/* We only mount PortfolioMap once so it doesn't re-initialize Leaflet */}
-          <PortfolioMap isActive={currentView === 'map'} />
-        </div>
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+        background: "#FAF8F4",
+        position: "relative",
+      }}
+    >
+      {/* Map layer */}
+      <PortfolioMap
+        activeProject={activeProject}
+        onSelectProject={setActiveProject}
+      />
 
-        {/* Terminal View */}
-        <AnimatePresence>
-          {currentView === 'terminal' && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="absolute inset-0 z-20 bg-white flex flex-col"
-            >
-              <AITerminal />
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* Floating navigation overlay */}
+      <Navigation
+        onOpenTerminal={() => setShowTerminal(true)}
+        onOpenContact={() => setShowContact(true)}
+      />
 
-        {/* Contact View */}
-        <AnimatePresence>
-          {currentView === 'contact' && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="absolute inset-0 z-20 bg-white text-gray-900 overflow-y-auto"
-            >
-              <ContactSection />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {/* Overlays */}
+      {showTerminal && (
+        <AITerminal onClose={() => setShowTerminal(false)} />
+      )}
+
+      {/* Contact screen overlay */}
+      {showContact && (
+        <ContactScreen onClose={() => setShowContact(false)} />
+      )}
     </div>
   );
 }

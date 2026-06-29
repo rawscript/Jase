@@ -1,142 +1,444 @@
-import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Send, Terminal } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { PROJECTS } from "@/lib/world-data";
 
-export interface AICommandResult {
-  action: "NAVIGATE" | "FILTER" | "INFO" | "UNKNOWN";
-  target?: string;
-  message: string;
+// ─── STATIC COMMAND DATA ──────────────────────────────────────────────────────
+const HELP_TEXT = [
+  "Available commands:",
+  "  about          — Who is James Mwaura",
+  "  skills         — Technical skills & stack",
+  "  projects       — List all projects",
+  "  project <id>   — Detail on a project  (e.g. project msitubora)",
+  "  experience     — Work history",
+  "  contact        — How to reach James",
+  "  ask <question> — Ask anything via AI",
+  "  clear          — Clear terminal",
+  "  help           — Show this menu",
+];
+
+const STATIC_COMMANDS: Record<string, string[]> = {
+  about: [
+    "James Mwaura",
+    "Full-Stack · Cloud · Data Engineer — Nairobi, Kenya",
+    "",
+    "Builds high-throughput data pipelines, cloud-native infrastructure,",
+    "and full-stack products deployed across multiple continents.",
+    "Works at the intersection of data engineering and cloud architecture.",
+  ],
+  skills: [
+    "CLOUD        AWS · GCP · Docker · Kubernetes · CI/CD",
+    "DATA         PostgreSQL · PostGIS · Python · GDAL · GIS",
+    "LANGUAGES    TypeScript · JavaScript · Node.js · Python · SQL",
+    "DATABASES    PostgreSQL · Redis · MongoDB · BigQuery",
+    "FULL-STACK   Next.js · React · Node.js · REST · GraphQL",
+    "AI/ML        GenAI · LLM integration · Model monitoring",
+    "BLOCKCHAIN   Smart contracts · IoT · Satellite API",
+  ],
+  experience: [
+    "Full-Stack Engineer       2022–present   (Remote, global clients)",
+    "Cloud Solutions Architect 2022–2023      (Nairobi + Cape Town)",
+    "Full-Stack Engineer       2020–2022      (Nairobi)",
+    "Data Analyst              2018–2020      (Nairobi)",
+  ],
+  projects: PROJECTS.map(
+    (p) => `  ${p.id.padEnd(14)} ${p.name.padEnd(22)} ${p.region}`
+  ),
+  contact: [
+    "Email     jasemwaura@gmail.com",
+    "Phone     +254 114 841 437",
+    "GitHub    github.com/rawscript",
+    "LinkedIn  linkedin.com/in/jase-mwaura",
+    "Location  Nairobi, Kenya (UTC+3)",
+  ],
+};
+
+// ─── TYPES ────────────────────────────────────────────────────────────────────
+type BlockType = "banner" | "cmd" | "output" | "error" | "loading";
+
+interface HistoryBlock {
+  type: BlockType;
+  text?: string;
+  lines?: string[];
 }
 
-export default function AITerminal() {
-  const [history, setHistory] = useState<{role: 'system' | 'user', text: string}[]>([
-    { role: 'system', text: 'JASE TERMINAL [Version 1.0.0]\nType a natural language command to query information about James\'s skills, projects, or experience.' }
+// ─── BLINK CURSOR ─────────────────────────────────────────────────────────────
+function BlinkCursor() {
+  const [on, setOn] = useState(true);
+  useEffect(() => {
+    const t = setInterval(() => setOn((v) => !v), 530);
+    return () => clearInterval(t);
+  }, []);
+  return <span style={{ color: "#3FB950" }}>{on ? "█" : "\u00A0"}</span>;
+}
+
+// ─── TERMINAL ─────────────────────────────────────────────────────────────────
+interface TerminalProps {
+  onClose: () => void;
+}
+
+export default function AITerminal({ onClose }: TerminalProps) {
+  const [history, setHistory] = useState<HistoryBlock[]>([
+    {
+      type: "banner",
+      lines: [
+        "╔══════════════════════════════════════════════════════════╗",
+        "║      JAMES MWAURA — PORTFOLIO TERMINAL v1.0.0          ║",
+        "║      Full-Stack · Cloud · Data Engineering             ║",
+        "╚══════════════════════════════════════════════════════════╝",
+        "",
+        'Type "help" to see available commands.',
+        "",
+      ],
+    },
   ]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const endOfHistoryRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [cmdHistory, setCmdHistory] = useState<string[]>([]);
+  const [histIdx, setHistIdx] = useState(-1);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    endOfHistoryRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || isLoading) return;
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
-    const userText = input.trim();
-    setHistory(prev => [...prev, { role: 'user', text: userText }]);
+  const push = (cmd: string, lines: string[], type: BlockType = "output") => {
+    setHistory((h) => [
+      ...h,
+      { type: "cmd", text: cmd },
+      { type, lines },
+    ]);
+  };
+
+  const run = useCallback(async () => {
+    const raw = input.trim();
+    if (!raw) return;
     setInput("");
-    setIsLoading(true);
+    setCmdHistory((h) => [raw, ...h]);
+    setHistIdx(-1);
 
-    try {
-      const res = await fetch("/api/command", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: userText })
-      });
-      
-      if (!res.ok) throw new Error("Failed to execute command");
-      const data = await res.json() as AICommandResult;
-      
-      setHistory(prev => [...prev, { role: 'system', text: data.message }]);
-    } catch (err) {
-      setHistory(prev => [...prev, { role: 'system', text: "Unable to process command. Please try again." }]);
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 10);
+    const parts = raw.toLowerCase().split(/\s+/);
+    const cmd = parts[0];
+    const args = parts.slice(1).join(" ");
+
+    if (cmd === "clear") {
+      setHistory([]);
+      return;
+    }
+    if (cmd === "help") {
+      push(raw, HELP_TEXT);
+      return;
+    }
+    if (STATIC_COMMANDS[cmd]) {
+      push(raw, STATIC_COMMANDS[cmd]);
+      return;
+    }
+
+    if (cmd === "project") {
+      const proj = PROJECTS.find((p) => p.id === args.trim());
+      if (!proj) {
+        push(
+          raw,
+          [`project: unknown id '${args}'. Run 'projects' to list all.`],
+          "error"
+        );
+        return;
+      }
+      push(raw, [
+        `${proj.name} — ${proj.type}`,
+        `Region   ${proj.region}`,
+        `Year     ${proj.year}`,
+        `Stack    ${proj.stack.join(" · ")}`,
+        `Impact   ${proj.impact}`,
+        "",
+        proj.description,
+      ]);
+      return;
+    }
+
+    if (cmd === "ask") {
+      if (!args) {
+        push(raw, ["Usage: ask <your question>"], "error");
+        return;
+      }
+      // Show loading
+      setHistory((h) => [
+        ...h,
+        { type: "cmd", text: raw },
+        { type: "loading", lines: [] },
+      ]);
+      setLoading(true);
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [{ role: "user", content: args }],
+          }),
+        });
+        if (!res.ok) throw new Error("server error");
+        const data = await res.json() as { reply: string };
+        const lines = data.reply
+          .split("\n")
+          .slice(0, 14);
+        setHistory((h) => [
+          ...h.slice(0, -1),
+          { type: "output", lines },
+        ]);
+      } catch {
+        setHistory((h) => [
+          ...h.slice(0, -1),
+          { type: "error", lines: ["error: failed to reach AI endpoint"] },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    push(
+      raw,
+      [`${cmd}: command not found. Type 'help' for available commands.`],
+      "error"
+    );
+  }, [input]);
+
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      run();
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const idx = Math.min(histIdx + 1, cmdHistory.length - 1);
+      setHistIdx(idx);
+      setInput(cmdHistory[idx] || "");
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const idx = Math.max(histIdx - 1, -1);
+      setHistIdx(idx);
+      setInput(idx === -1 ? "" : cmdHistory[idx] || "");
     }
   };
 
   return (
-    <div className="flex flex-col w-full h-full bg-gray-50 pt-16 overflow-hidden">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center gap-3">
-        <div className="flex gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-red-400" />
-          <div className="w-3 h-3 rounded-full bg-amber-400" />
-          <div className="w-3 h-3 rounded-full bg-green-400" />
-        </div>
-        <div className="flex items-center gap-2 ml-2">
-          <Terminal className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-mono text-gray-500 tracking-wider">jase@portfolio — terminal</span>
-        </div>
-      </div>
-
-      {/* History */}
+    /* Backdrop */
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        background: "rgba(0,0,0,0.7)",
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      {/* Window */}
       <div
-        className="flex-1 overflow-y-auto px-6 py-6 space-y-4 custom-scrollbar"
-        onClick={() => inputRef.current?.focus()}
+        style={{
+          width: "min(820px, 96vw)",
+          height: "min(540px, 90vh)",
+          background: "#0D1117",
+          border: "1px solid #30363D",
+          boxShadow: "0 32px 96px rgba(0,0,0,0.7)",
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 13,
+        }}
       >
-        {history.map((msg, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            {msg.role === 'system' && (
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
-                <Terminal className="w-3.5 h-3.5 text-blue-600" />
-              </div>
-            )}
+        {/* Title bar */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 16px",
+            background: "#161B22",
+            borderBottom: "1px solid #30363D",
+            userSelect: "none",
+          }}
+        >
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              onClick={onClose}
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                background: "#FF5F57",
+                border: "none",
+                cursor: "pointer",
+              }}
+            />
             <div
-              className={`max-w-xl px-4 py-3 rounded-2xl text-sm font-mono leading-relaxed whitespace-pre-wrap ${
-                msg.role === 'user'
-                  ? 'bg-gray-900 text-white rounded-tr-sm'
-                  : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm shadow-sm'
-              }`}
-            >
-              {msg.text}
-            </div>
-          </motion.div>
-        ))}
-
-        {isLoading && (
-          <div className="flex gap-3 justify-start">
-            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center">
-              <Terminal className="w-3.5 h-3.5 text-blue-600" />
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-              <div className="flex gap-1.5 items-center h-4">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                background: "#FEBC2E",
+              }}
+            />
+            <div
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                background: "#28C840",
+              }}
+            />
           </div>
-        )}
+          <span
+            style={{
+              flex: 1,
+              textAlign: "center",
+              color: "#8B949E",
+              fontSize: 12,
+              letterSpacing: "0.05em",
+            }}
+          >
+            jm — portfolio terminal
+          </span>
+        </div>
 
-        <div ref={endOfHistoryRef} className="h-2" />
-      </div>
+        {/* Output area */}
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "16px 20px",
+            lineHeight: "1.6",
+          }}
+          onClick={() => inputRef.current?.focus()}
+        >
+          {history.map((block, bi) => {
+            if (block.type === "banner") {
+              return (
+                <div key={bi} style={{ color: "#3FB950", marginBottom: 8 }}>
+                  {block.lines!.map((l, li) => (
+                    <div key={li}>{l || "\u00A0"}</div>
+                  ))}
+                </div>
+              );
+            }
+            if (block.type === "cmd") {
+              return (
+                <div
+                  key={bi}
+                  style={{ color: "#E6EDF3", marginTop: 6 }}
+                >
+                  <span style={{ color: "#3FB950" }}>jm</span>
+                  <span style={{ color: "#8B949E" }}>@portfolio</span>
+                  <span style={{ color: "#E6EDF3" }}>:~$ </span>
+                  <span>{block.text}</span>
+                </div>
+              );
+            }
+            if (block.type === "loading") {
+              return (
+                <div
+                  key={bi}
+                  style={{ color: "#8B949E", marginTop: 2 }}
+                >
+                  <BlinkCursor />
+                </div>
+              );
+            }
+            if (block.type === "error") {
+              return (
+                <div
+                  key={bi}
+                  style={{ color: "#F85149", marginTop: 2 }}
+                >
+                  {block.lines!.map((l, li) => (
+                    <div key={li}>{l || "\u00A0"}</div>
+                  ))}
+                </div>
+              );
+            }
+            // output
+            return (
+              <div
+                key={bi}
+                style={{ color: "#C9D1D9", marginTop: 2 }}
+              >
+                {block.lines!.map((l, li) => (
+                  <div key={li}>{l || "\u00A0"}</div>
+                ))}
+              </div>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
 
-      {/* Input Area */}
-      <div className="px-6 py-4 border-t border-gray-200 bg-white">
-        <form onSubmit={handleSubmit} className="flex items-center gap-3">
-          <span className="text-xs font-mono text-gray-400 tracking-wider shrink-0">visitor@jase:~$</span>
+        {/* Input row */}
+        <div
+          style={{
+            borderTop: "1px solid #30363D",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            background: "#0D1117",
+          }}
+        >
+          <span
+            style={{
+              color: "#3FB950",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 13,
+              whiteSpace: "nowrap",
+            }}
+          >
+            jm
+          </span>
+          <span
+            style={{
+              color: "#8B949E",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 13,
+            }}
+          >
+            @portfolio
+          </span>
+          <span
+            style={{
+              color: "#E6EDF3",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 13,
+              marginRight: 6,
+            }}
+          >
+            :~$
+          </span>
           <input
             ref={inputRef}
-            type="text"
             value={input}
-            onChange={e => setInput(e.target.value)}
-            disabled={isLoading}
-            placeholder="Ask about projects, skills, or experience..."
-            className="flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-400 text-sm font-mono focus:ring-0 p-0"
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            disabled={loading}
+            autoComplete="off"
             spellCheck={false}
-            autoFocus
+            style={{
+              flex: 1,
+              background: "none",
+              border: "none",
+              outline: "none",
+              color: "#E6EDF3",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 13,
+              caretColor: "#3FB950",
+            }}
           />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="p-2 rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <Send className="w-3.5 h-3.5" />
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

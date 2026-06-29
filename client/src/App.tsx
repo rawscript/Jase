@@ -3,19 +3,18 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import LoadingScreen from "@/components/loading-screen";
-import { Suspense, lazy, useState, useEffect } from "react";
+import { Suspense, lazy } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import LoadingScreen from "@/components/loading-screen";
 
-// Type-safe lazy imports
 const LazyHome = lazy(() => import("@/pages/home"));
 const LazyNotFound = lazy(() => import("@/pages/not-found"));
 
 function ErrorFallback({ error }: { error: Error }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h2 className="text-2xl font-semibold mb-4">Something went wrong</h2>
-      <pre className="text-sm text-red-500">{error.message}</pre>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 font-mono bg-gray-50 text-gray-900">
+      <h2 className="text-xl font-semibold mb-4">Something went wrong</h2>
+      <pre className="text-sm text-red-500 max-w-lg overflow-x-auto bg-white p-4 border border-gray-200">{error.message}</pre>
     </div>
   );
 }
@@ -26,7 +25,6 @@ function Router() {
       <Suspense fallback={<LoadingScreen />}>
         <Switch>
           <Route path="/" component={() => <LazyHome />} />
-          {/* Wildcard fallback for unmatched routes */}
           <Route component={() => <LazyNotFound />} />
         </Switch>
       </Suspense>
@@ -34,31 +32,13 @@ function Router() {
   );
 }
 
-function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="custom-scrollbar">
-          <Toaster />
-          <Router />
-        </div>
+        <Router />
+        <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;
