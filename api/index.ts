@@ -24,19 +24,27 @@ app.use((req, res, next) => {
     ];
 
     const origin = req.headers.origin;
+    const host = req.headers.host;
 
     // Guard against undefined origin (e.g. curl, server-to-server requests)
-    const isAllowed = !!origin && allowedOrigins.some(allowed => {
+    let isAllowed = !!origin && allowedOrigins.some(allowed => {
         if (typeof allowed === 'string') return allowed === origin;
         return allowed.test(origin);
     });
 
-    if (isAllowed) {
-        res.setHeader('Access-Control-Allow-Origin', origin as string);
+    // If not already allowed, check if same-origin (matches request host)
+    if (!isAllowed && origin && host) {
+        if (origin === `http://${host}` || origin === `https://${host}`) {
+            isAllowed = true;
+        }
+    }
+
+    if (isAllowed && origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
     }
 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
 
     // Handle preflight requests

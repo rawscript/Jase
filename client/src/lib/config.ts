@@ -2,7 +2,9 @@
 const config = {
   // API base URL - will be different for development vs production
   // Remove trailing slash to prevent double slashes
-  apiUrl: (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, ''),
+  apiUrl: import.meta.env.VITE_API_URL 
+    ? import.meta.env.VITE_API_URL.replace(/\/$/, '') 
+    : (import.meta.env.DEV ? 'http://localhost:5000' : ''),
   
   // Other environment variables can go here
   isDevelopment: import.meta.env.DEV,
