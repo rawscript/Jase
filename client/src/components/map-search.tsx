@@ -69,8 +69,7 @@ export default function MapSearch({ activeProject, onSelectProject }: MapSearchP
       ref={containerRef}
       style={{
         position: "relative",
-        width: "min(360px, 100%)",
-        margin: "0 16px",
+        width: "100%",
       }}
     >
       <div

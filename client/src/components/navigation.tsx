@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-import { typeColor, type PROJECTS } from "@/lib/world-data";
-import MapSearch from "@/components/map-search";
-
-type Project = (typeof PROJECTS)[number];
+import { typeColor } from "@/lib/world-data";
 
 // ─── TYPE LEGEND DATA ─────────────────────────────────────────────────────────
 const LEGEND_TYPES = [
@@ -15,15 +12,11 @@ const LEGEND_TYPES = [
 interface NavigationProps {
   onOpenTerminal: () => void;
   onOpenContact: () => void;
-  activeProject: Project | null;
-  onSelectProject: (p: Project | null) => void;
 }
 
 export default function Navigation({
   onOpenTerminal,
   onOpenContact,
-  activeProject,
-  onSelectProject,
 }: NavigationProps) {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -78,20 +71,6 @@ export default function Navigation({
             FULL-STACK · CLOUD · DATA
           </p>
         </div>
-
-        {/* Search bar */}
-        {!isMobile && (
-          <div
-            style={{
-              pointerEvents: "auto",
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <MapSearch activeProject={activeProject} onSelectProject={onSelectProject} />
-          </div>
-        )}
 
         {/* Action buttons */}
         <div
