@@ -97,6 +97,14 @@ export default function AITerminal({ onClose }: TerminalProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
@@ -232,8 +240,8 @@ export default function AITerminal({ onClose }: TerminalProps) {
         position: "fixed",
         inset: 0,
         zIndex: 50,
-        background: "rgba(0,0,0,0.7)",
-        backdropFilter: "blur(6px)",
+        background: isMobile ? "#0D1117" : "rgba(0,0,0,0.7)",
+        backdropFilter: isMobile ? "none" : "blur(6px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -245,15 +253,15 @@ export default function AITerminal({ onClose }: TerminalProps) {
       {/* Window */}
       <div
         style={{
-          width: "min(820px, 96vw)",
-          height: "min(540px, 90vh)",
+          width: isMobile ? "100%" : "min(820px, 96vw)",
+          height: isMobile ? "100%" : "min(540px, 90vh)",
           background: "#0D1117",
-          border: "1px solid #30363D",
-          boxShadow: "0 32px 96px rgba(0,0,0,0.7)",
+          border: isMobile ? "none" : "1px solid #30363D",
+          boxShadow: isMobile ? "none" : "0 32px 96px rgba(0,0,0,0.7)",
           display: "flex",
           flexDirection: "column",
           fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 13,
+          fontSize: isMobile ? 12 : 13,
         }}
       >
         {/* Title bar */}

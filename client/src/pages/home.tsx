@@ -26,6 +26,7 @@ export default function Home() {
       <PortfolioMap
         activeProject={activeProject}
         onSelectProject={setActiveProject}
+        isContactOpen={showContact}
       />
 
       {/* Floating navigation overlay */}

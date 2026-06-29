@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { typeColor } from "@/lib/world-data";
 
 // ─── TYPE LEGEND DATA ─────────────────────────────────────────────────────────
@@ -17,6 +18,14 @@ export default function Navigation({
   onOpenTerminal,
   onOpenContact,
 }: NavigationProps) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <>
       {/* ── Top floating nav ─────────────────────────────── */}
@@ -29,7 +38,7 @@ export default function Navigation({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "22px 32px",
+          padding: isMobile ? "14px 16px" : "22px 32px",
           zIndex: 20,
           background:
             "linear-gradient(to bottom, rgba(250,248,244,0.95) 70%, transparent)",
@@ -42,7 +51,7 @@ export default function Navigation({
             style={{
               fontFamily: "'Syne', sans-serif",
               fontWeight: 800,
-              fontSize: 17,
+              fontSize: isMobile ? 14 : 17,
               color: "#111",
               letterSpacing: "-0.02em",
               margin: 0,
@@ -52,7 +61,7 @@ export default function Navigation({
           </p>
           <p
             style={{
-              fontSize: 9,
+              fontSize: isMobile ? 7 : 9,
               color: "#9CA3AF",
               letterSpacing: "0.2em",
               marginTop: 2,
@@ -65,74 +74,78 @@ export default function Navigation({
 
         {/* Action buttons */}
         <div
-          style={{ display: "flex", gap: 8, pointerEvents: "auto" }}
+          style={{ display: "flex", gap: isMobile ? 6 : 8, pointerEvents: "auto" }}
         >
-          <NavButton onClick={onOpenTerminal}>_ TERMINAL</NavButton>
-          <NavButton onClick={onOpenContact}>REACH OUT</NavButton>
+          <NavButton onClick={onOpenTerminal} isMobile={isMobile}>_ TERMINAL</NavButton>
+          <NavButton onClick={onOpenContact} isMobile={isMobile}>REACH OUT</NavButton>
         </div>
       </nav>
 
       {/* ── Bottom-left hint ─────────────────────────────── */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 24,
-          left: 32,
-          zIndex: 20,
-          pointerEvents: "none",
-        }}
-      >
-        <p
+      {!isMobile && (
+        <div
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9,
-            letterSpacing: "0.18em",
-            color: "#9CA3AF",
-            margin: 0,
+            position: "absolute",
+            bottom: 24,
+            left: 32,
+            zIndex: 20,
+            pointerEvents: "none",
           }}
         >
-          SCROLL TO ZOOM · DRAG TO PAN · CLICK PINS
-        </p>
-      </div>
+          <p
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 9,
+              letterSpacing: "0.18em",
+              color: "#9CA3AF",
+              margin: 0,
+            }}
+          >
+            SCROLL TO ZOOM · DRAG TO PAN · CLICK PINS
+          </p>
+        </div>
+      )}
 
       {/* ── Bottom-right legend ──────────────────────────── */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 24,
-          right: 32,
-          zIndex: 20,
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-          alignItems: "flex-end",
-          pointerEvents: "none",
-        }}
-      >
-        {LEGEND_TYPES.map((t) => (
-          <div key={t} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <span
-              style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 9,
-                letterSpacing: "0.12em",
-                color: "#9CA3AF",
-              }}
-            >
-              {t}
-            </span>
-            <div
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                background: typeColor(t),
-                border: `2px solid ${typeColor(t)}`,
-              }}
-            />
-          </div>
-        ))}
-      </div>
+      {!isMobile && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 24,
+            right: 32,
+            zIndex: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            alignItems: "flex-end",
+            pointerEvents: "none",
+          }}
+        >
+          {LEGEND_TYPES.map((t) => (
+            <div key={t} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <span
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 9,
+                  letterSpacing: "0.12em",
+                  color: "#9CA3AF",
+                }}
+              >
+                {t}
+              </span>
+              <div
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: typeColor(t),
+                  border: `2px solid ${typeColor(t)}`,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
@@ -141,9 +154,11 @@ export default function Navigation({
 function NavButton({
   onClick,
   children,
+  isMobile = false,
 }: {
   onClick: () => void;
   children: React.ReactNode;
+  isMobile?: boolean;
 }) {
   return (
     <button
@@ -162,9 +177,9 @@ function NavButton({
         background: "none",
         border: "1px solid #D1D5DB",
         color: "#6B7280",
-        padding: "9px 18px",
+        padding: isMobile ? "6px 10px" : "9px 18px",
         fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: 10,
+        fontSize: isMobile ? 8 : 10,
         letterSpacing: "0.18em",
         cursor: "pointer",
         transition: "all 0.2s",

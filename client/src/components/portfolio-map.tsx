@@ -130,11 +130,13 @@ function PinTooltip({
 interface WorldMapProps {
   onSelectProject: (p: Project | null) => void;
   activeProject: Project | null;
+  isContactOpen?: boolean;
 }
 
 export default function PortfolioMap({
   onSelectProject,
   activeProject,
+  isContactOpen = false,
 }: WorldMapProps) {
   const [hoveredPin, setHoveredPin] = useState<Project | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -144,18 +146,36 @@ export default function PortfolioMap({
   const lastPt = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isContactOpen) {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+    }
+  }, [isContactOpen]);
+
   const handleWheel = (e: React.WheelEvent) => {
+    if (isContactOpen) return;
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.88 : 1.14;
     setZoom((z) => Math.min(Math.max(z * delta, 1), 5));
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isContactOpen) return;
     dragging.current = true;
     lastPt.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (isContactOpen) return;
     if (!dragging.current) return;
     const dx = e.clientX - lastPt.current.x;
     const dy = e.clientY - lastPt.current.y;
@@ -185,7 +205,7 @@ export default function PortfolioMap({
           width: "100%",
           height: "100%",
           overflow: "hidden",
-          cursor: dragging.current ? "grabbing" : "grab",
+          cursor: isContactOpen ? "default" : dragging.current ? "grabbing" : "grab",
         }}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
@@ -206,7 +226,7 @@ export default function PortfolioMap({
           <svg
             ref={svgRef}
             viewBox="0 0 1000 500"
-            preserveAspectRatio="xMidYMid meet"
+            preserveAspectRatio={isMobile ? "xMidYMid slice" : "xMidYMid meet"}
             style={{ width: "100%", height: "100%", display: "block" }}
           >
             <defs>
