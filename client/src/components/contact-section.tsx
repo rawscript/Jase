@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import RocketLaunch from "./rocket-launch";
 
 interface ContactScreenProps {
@@ -12,6 +10,7 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [launching, setLaunching] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -21,33 +20,45 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const contactMutation = useMutation({
-    mutationFn: async (data: { name: string; email: string; subject: string; message: string }) => {
-      return await apiRequest("POST", "/api/contact", data);
-    },
-    onSuccess: () => {
-      setLaunching(true);
-    },
-    onError: (error) => {
+  const valid = form.name.trim() && form.email.trim() && form.message.trim();
+
+  const handleTransmit = async () => {
+    if (!valid || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("email", form.email);
+      formData.append("subject", "Portfolio inquiry from " + form.name);
+      formData.append("message", form.message);
+      
+      // Send to Formspree
+      const response = await fetch("https://formspree.io/f/xeebvqvz", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+      
+      if (response.ok) {
+        setLaunching(true);
+        // Clear form
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        throw new Error("Failed to send message");
+      }
+    } catch (error) {
       toast({
         title: "Something went wrong",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
-
-  const valid =
-    form.name.trim() && form.email.trim() && form.message.trim();
-
-  const handleTransmit = () => {
-    if (!valid || contactMutation.isPending) return;
-    contactMutation.mutate({
-      name: form.name,
-      email: form.email,
-      subject: "Portfolio inquiry",
-      message: form.message,
-    });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (launching) {
@@ -232,7 +243,7 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
             <div style={{ marginTop: isMobile ? 24 : 36 }}>
               <button
                 onClick={handleTransmit}
-                disabled={!valid || contactMutation.isPending}
+                disabled={!valid || isSubmitting}
                 style={{
                   background: valid ? "#111" : "#E5E7EB",
                   border: "none",
@@ -246,7 +257,7 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
                   width: isMobile ? "100%" : "auto",
                 }}
               >
-                {contactMutation.isPending ? "TRANSMITTING..." : "TRANSMIT MESSAGE"}
+                {isSubmitting ? "TRANSMITTING..." : "TRANSMIT MESSAGE"}
               </button>
             </div>
           </div>

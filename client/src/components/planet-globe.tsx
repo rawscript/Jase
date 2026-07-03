@@ -23,22 +23,11 @@ function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector
   return new THREE.Vector3(x, y, z);
 }
 
-// ─── SPINNING GLOBE (Planet + Markers rotate together) ────────────────────────
-function SpinningGlobe({
-  activeProject,
-  hoveredPin,
-  setHoveredPin,
-  onSelectProject,
-}: {
-  activeProject: Project | null;
-  hoveredPin: Project | null;
-  setHoveredPin: (p: Project | null) => void;
-  onSelectProject: (p: Project | null) => void;
-}) {
+// ─── FIXED GLOBE (No rotation, just planet mesh) ──────────────────────────────
+function PlanetMesh() {
   const fbx = useFBX("/planet/planet.fbx");
   const albedo = useTexture("/planet/albedo.webp");
   const orm = useTexture("/planet/orm.webp");
-  const groupRef = useRef<THREE.Group>(null);
 
   const model = useMemo(() => {
     const clone = fbx.clone(true);
@@ -72,32 +61,7 @@ function SpinningGlobe({
     return clone;
   }, [fbx, albedo, orm]);
 
-  // Spin the globe on Y-axis
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.15; // Slow spin on Y-axis
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <primitive object={model} />
-      {/* Markers are children of the spinning group so they stay on surface */}
-      {PROJECTS.map((p) => (
-        <Marker
-          key={p.id}
-          project={p}
-          hovered={hoveredPin?.id === p.id}
-          active={activeProject?.id === p.id}
-          dimmed={!!activeProject && activeProject.id !== p.id}
-          onHover={setHoveredPin}
-          onClick={(proj) =>
-            onSelectProject(activeProject?.id === proj.id ? null : proj)
-          }
-        />
-      ))}
-    </group>
-  );
+  return <primitive object={model} />;
 }
 
 function LoadingFallback() {
@@ -313,12 +277,20 @@ function Scene({
       <directionalLight position={[4, 3, 5]} intensity={1.35} />
       <directionalLight position={[-5, -2, -4]} intensity={0.25} />
       <Suspense fallback={<LoadingFallback />}>
-        <SpinningGlobe
-          activeProject={activeProject}
-          hoveredPin={hoveredPin}
-          setHoveredPin={setHoveredPin}
-          onSelectProject={onSelectProject}
-        />
+        <PlanetMesh />
+        {PROJECTS.map((p) => (
+          <Marker
+            key={p.id}
+            project={p}
+            hovered={hoveredPin?.id === p.id}
+            active={activeProject?.id === p.id}
+            dimmed={!!activeProject && activeProject.id !== p.id}
+            onHover={setHoveredPin}
+            onClick={(proj) =>
+              onSelectProject(activeProject?.id === proj.id ? null : proj)
+            }
+          />
+        ))}
       </Suspense>
     </>
   );
@@ -474,10 +446,9 @@ export default function PlanetGlobe({
             enableZoom={!isMobile}
             minDistance={RADIUS * 1.15}
             maxDistance={RADIUS * 4.5}
-            autoRotate={false}
             rotateSpeed={0.5}
             enabled={!isContactOpen}
-            // Lock vertical axis completely - no tilt, only horizontal rotation
+            // Fixed axis - can only rotate horizontally, no tilt
             minPolarAngle={Math.PI / 2}
             maxPolarAngle={Math.PI / 2}
           />
