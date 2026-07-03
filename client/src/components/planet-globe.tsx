@@ -28,37 +28,51 @@ function PlanetMesh() {
   const fbx = useFBX("/planet/planet.fbx");
   const albedo = useTexture("/planet/albedo.webp");
   const orm = useTexture("/planet/orm.webp");
+  const [error, setError] = useState(false);
 
   const model = useMemo(() => {
-    const clone = fbx.clone(true);
+    try {
+      const clone = fbx.clone(true);
 
-    albedo.colorSpace = THREE.SRGBColorSpace;
-    albedo.wrapS = albedo.wrapT = THREE.RepeatWrapping;
-    orm.wrapS = orm.wrapT = THREE.RepeatWrapping;
-    albedo.anisotropy = 4;
-    orm.anisotropy = 4;
+      albedo.colorSpace = THREE.SRGBColorSpace;
+      albedo.wrapS = albedo.wrapT = THREE.RepeatWrapping;
+      orm.wrapS = orm.wrapT = THREE.RepeatWrapping;
+      albedo.anisotropy = 4;
+      orm.anisotropy = 4;
 
-    // Center + normalize scale so the model always reads as a fixed-size sphere
-    const box = new THREE.Box3().setFromObject(clone);
-    const sphere = new THREE.Sphere();
-    box.getBoundingSphere(sphere);
-    clone.position.sub(sphere.center);
-    clone.scale.setScalar(RADIUS / sphere.radius);
+      // Center + normalize scale so the model always reads as a fixed-size sphere
+      const box = new THREE.Box3().setFromObject(clone);
+      const sphere = new THREE.Sphere();
+      box.getBoundingSphere(sphere);
+      clone.position.sub(sphere.center);
+      clone.scale.setScalar(RADIUS / sphere.radius);
 
-    clone.traverse((child) => {
-      const mesh = child as THREE.Mesh;
-      if ((mesh as THREE.Mesh).isMesh) {
-        mesh.material = new THREE.MeshStandardMaterial({
-          map: albedo,
-          roughnessMap: orm,
-          metalnessMap: orm,
-          roughness: 1,
-          metalness: 1,
-        });
-      }
-    });
+      clone.traverse((child) => {
+        const mesh = child as THREE.Mesh;
+        if ((mesh as THREE.Mesh).isMesh) {
+          mesh.material = new THREE.MeshStandardMaterial({
+            map: albedo,
+            roughnessMap: orm,
+            metalnessMap: orm,
+            roughness: 1,
+            metalness: 1,
+          });
+        }
+      });
 
-    return clone;
+      return clone;
+    } catch (err) {
+      console.error("Failed to load FBX model:", err);
+      setError(true);
+      // Create a simple sphere as fallback
+      const geometry = new THREE.SphereGeometry(RADIUS, 64, 64);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x1a3f7a,
+        roughness: 0.8,
+        metalness: 0.2,
+      });
+      return new THREE.Mesh(geometry, material);
+    }
   }, [fbx, albedo, orm]);
 
   return <primitive object={model} />;
@@ -404,6 +418,8 @@ export default function PlanetGlobe({
     controlsRef.current?.reset();
   };
 
+  const [webglError, setWebglError] = useState(false);
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <style>{`
@@ -427,7 +443,17 @@ export default function PlanetGlobe({
         <Canvas
           camera={{ position: [0, 0, 5.5], fov: 42 }}
           dpr={[1, 2]}
-          gl={{ antialias: true, alpha: true }}
+          gl={{ 
+            antialias: true, 
+            alpha: true,
+            powerPreference: "high-performance"
+          }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(0x000000, 0);
+          }}
+          onError={(error) => {
+            console.error("WebGL error:", error);
+          }}
           onPointerMissed={() => {
             if (activeProject) onSelectProject(null);
           }}
