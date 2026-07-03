@@ -43,8 +43,8 @@ export const PROJECTS = [
     link: "https://mailforge.studio/",
   },
   {
-    id: "nestie",
-    name: "Nestie",
+    id: "Veni",
+    name: "Veni Spaces",
     lat: -1.28,
     lng: 36.82,
     region: "Nairobi, Kenya",
@@ -54,7 +54,7 @@ export const PROJECTS = [
     description:
       "Modern real estate platform with advanced topological search and intelligent property matching. Streamlines habitat allocation with integrated payments and virtual tours.",
     impact: "Habitat allocation with advanced topological search",
-    link: "https://nestie.in/",
+    link: "https://venispaces.com/",
   },
   {
     id: "geospatial",

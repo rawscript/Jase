@@ -11,6 +11,8 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [launching, setLaunching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -18,6 +20,35 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Check if content overflows and needs scrolling
+  useEffect(() => {
+    const checkScroll = () => {
+      if (containerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+        const isOverflowing = scrollHeight > clientHeight;
+        const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
+        
+        setShowScrollIndicator(isOverflowing && !isAtBottom);
+      }
+    };
+
+    // Initial check
+    checkScroll();
+    
+    // Check on resize and scroll
+    if (containerRef.current) {
+      containerRef.current.addEventListener("scroll", checkScroll);
+      window.addEventListener("resize", checkScroll);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.removeEventListener("scroll", checkScroll);
+      }
+      window.removeEventListener("resize", checkScroll);
+    };
   }, []);
 
   const valid = form.name.trim() && form.email.trim() && form.message.trim();
