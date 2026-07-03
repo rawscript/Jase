@@ -8,7 +8,7 @@ import ProjectPanel from "@/components/project-panel";
 type Project = (typeof PROJECTS)[number];
 
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const RADIUS = 2;
+const RADIUS = 0.01;
 // If the generated planet's texture doesn't line up with real-world
 // longitudes, nudge this value (in degrees) until markers sit correctly.
 const LNG_OFFSET = 0;
@@ -114,7 +114,7 @@ function Marker3D({
 }) {
   // Position marker ON the surface (slightly above to avoid Z-fighting)
   const pos = useMemo(
-    () => latLngToVector3(project.lat, project.lng, RADIUS * -1.01),
+    () => latLngToVector3(project.lat, project.lng, RADIUS * 3.01),
     [project]
   );
   const col = typeColor(project.type);
