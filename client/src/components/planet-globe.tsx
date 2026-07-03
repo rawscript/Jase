@@ -11,7 +11,7 @@ type Project = (typeof PROJECTS)[number];
 const RADIUS = 4;
 // If the generated planet's texture doesn't line up with real-world
 // longitudes, nudge this value (in degrees) until markers sit correctly.
-const LNG_OFFSET = 0;
+const LNG_OFFSET = -2;
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector3 {
