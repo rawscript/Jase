@@ -10,42 +10,17 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // Enable trust proxy for cloud deployment
 app.set("trust proxy", 1);
 
-// Add CORS and security headers
+// Add CORS and security headers - MUST be first and handle all cases
 app.use((req, res, next) => {
-    const allowedOrigins: (string | RegExp)[] = [
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'https://jasemwaura.com',
-        'https://www.jasemwaura.com',
-        'https://jamesmwaura.netlify.app',
-        'https://jase.vercel.app',
-        'https://jase-server.vercel.app',
-        /https:\/\/.*\.amplifyapp\.com$/,
-        /https:\/\/.*\.vercel\.app$/,
-        /https:\/\/.*\.netlify\.app$/,
-    ];
-
-    const origin = req.headers.origin;
-
-    // Check if origin is allowed
-    let isAllowed = false;
-    if (origin) {
-        isAllowed = allowedOrigins.some(allowed => {
-            if (typeof allowed === 'string') return allowed === origin;
-            return allowed.test(origin);
-        });
-    }
-
-    // Always set CORS headers for allowed origins
-    if (isAllowed && origin) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-    }
-
+    const origin = req.headers.origin || '*';
+    
+    // Always set these headers for all requests including OPTIONS
+    res.setHeader('Access-Control-Allow-Origin', origin === '*' ? '*' : origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-    // Handle preflight requests - must respond before any other middleware
+    // Handle preflight requests immediately
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
