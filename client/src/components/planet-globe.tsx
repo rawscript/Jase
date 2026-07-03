@@ -23,11 +23,22 @@ function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector
   return new THREE.Vector3(x, y, z);
 }
 
-// ─── PLANET MESH ────────────────────────────────────────────────────────────
-function PlanetMesh() {
+// ─── SPINNING GLOBE (Planet + Markers rotate together) ────────────────────────
+function SpinningGlobe({
+  activeProject,
+  hoveredPin,
+  setHoveredPin,
+  onSelectProject,
+}: {
+  activeProject: Project | null;
+  hoveredPin: Project | null;
+  setHoveredPin: (p: Project | null) => void;
+  onSelectProject: (p: Project | null) => void;
+}) {
   const fbx = useFBX("/planet/planet.fbx");
   const albedo = useTexture("/planet/albedo.webp");
   const orm = useTexture("/planet/orm.webp");
+  const groupRef = useRef<THREE.Group>(null);
 
   const model = useMemo(() => {
     const clone = fbx.clone(true);
@@ -61,7 +72,32 @@ function PlanetMesh() {
     return clone;
   }, [fbx, albedo, orm]);
 
-  return <primitive object={model} />;
+  // Spin the globe on Y-axis
+  useFrame((_, delta) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.15; // Slow spin on Y-axis
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <primitive object={model} />
+      {/* Markers are children of the spinning group so they stay on surface */}
+      {PROJECTS.map((p) => (
+        <Marker
+          key={p.id}
+          project={p}
+          hovered={hoveredPin?.id === p.id}
+          active={activeProject?.id === p.id}
+          dimmed={!!activeProject && activeProject.id !== p.id}
+          onHover={setHoveredPin}
+          onClick={(proj) =>
+            onSelectProject(activeProject?.id === proj.id ? null : proj)
+          }
+        />
+      ))}
+    </group>
+  );
 }
 
 function LoadingFallback() {
@@ -98,7 +134,7 @@ function Marker({
   onHover: (p: Project | null) => void;
   onClick: (proj: Project) => void;
 }) {
-  // Position markers exactly on the planet surface (RADIUS = 2)
+  // Position markers exactly on the planet surface
   const pos = useMemo(
     () => latLngToVector3(project.lat, project.lng, RADIUS),
     [project]
@@ -107,10 +143,9 @@ function Marker({
   const scale = active ? 1.5 : hovered ? 1.25 : 1;
 
   return (
-    <Html 
-      position={pos} 
-      occlude 
-      distanceFactor={6} 
+    <Html
+      position={pos}
+      distanceFactor={6}
       style={{ pointerEvents: "none" }}
       sprite
     >
@@ -263,14 +298,9 @@ function Scene({
   }, [activeProject, camera]);
 
   useFrame((_, delta) => {
-    const controls = controlsRef.current;
-    if (controls) {
-      // AutoRotate when not focused on a project and not interacting
-      controls.autoRotate = !activeProject && !isContactOpen && !hoveredPin;
-    }
     if (focusTarget.current) {
       camera.position.lerp(focusTarget.current, Math.min(1, delta * 2.2));
-      controls?.update();
+      controlsRef.current?.update();
       if (camera.position.distanceTo(focusTarget.current) < 0.02) {
         focusTarget.current = null;
       }
@@ -283,20 +313,12 @@ function Scene({
       <directionalLight position={[4, 3, 5]} intensity={1.35} />
       <directionalLight position={[-5, -2, -4]} intensity={0.25} />
       <Suspense fallback={<LoadingFallback />}>
-        <PlanetMesh />
-        {PROJECTS.map((p) => (
-          <Marker
-            key={p.id}
-            project={p}
-            hovered={hoveredPin?.id === p.id}
-            active={activeProject?.id === p.id}
-            dimmed={!!activeProject && activeProject.id !== p.id}
-            onHover={setHoveredPin}
-            onClick={(proj) =>
-              onSelectProject(activeProject?.id === proj.id ? null : proj)
-            }
-          />
-        ))}
+        <SpinningGlobe
+          activeProject={activeProject}
+          hoveredPin={hoveredPin}
+          setHoveredPin={setHoveredPin}
+          onSelectProject={onSelectProject}
+        />
       </Suspense>
     </>
   );
@@ -452,14 +474,12 @@ export default function PlanetGlobe({
             enableZoom={!isMobile}
             minDistance={RADIUS * 1.15}
             maxDistance={RADIUS * 4.5}
-            autoRotate
-            autoRotateSpeed={0.4}
+            autoRotate={false}
             rotateSpeed={0.5}
             enabled={!isContactOpen}
-            // Globe behavior: spin on vertical axis (Y-axis)
-            // Polar angles allow slight tilt but keep mostly upright
-            minPolarAngle={Math.PI * 0.35}
-            maxPolarAngle={Math.PI * 0.65}
+            // Lock vertical axis completely - no tilt, only horizontal rotation
+            minPolarAngle={Math.PI / 2}
+            maxPolarAngle={Math.PI / 2}
           />
         </Canvas>
       </div>
