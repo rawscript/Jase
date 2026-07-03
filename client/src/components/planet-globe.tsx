@@ -11,7 +11,7 @@ type Project = (typeof PROJECTS)[number];
 const RADIUS = 4;
 // If the generated planet's texture doesn't line up with real-world
 // longitudes, nudge this value (in degrees) until markers sit correctly.
-const LNG_OFFSET = -8;
+const LNG_OFFSET = 0;
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector3 {
@@ -114,7 +114,7 @@ function Marker3D({
 }) {
   // Position marker ON the surface (slightly above to avoid Z-fighting)
   const pos = useMemo(
-    () => latLngToVector3(project.lat, project.lng, RADIUS * 3.01),
+    () => latLngToVector3(project.lat, project.lng, RADIUS * 0.01),
     [project]
   );
   const col = typeColor(project.type);
