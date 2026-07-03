@@ -264,7 +264,10 @@ function Scene({
 
   useFrame((_, delta) => {
     const controls = controlsRef.current;
-    // AutoRotate is disabled - globe stays fixed on vertical axis
+    if (controls) {
+      // AutoRotate when not focused on a project and not interacting
+      controls.autoRotate = !activeProject && !isContactOpen && !hoveredPin;
+    }
     if (focusTarget.current) {
       camera.position.lerp(focusTarget.current, Math.min(1, delta * 2.2));
       controls?.update();
@@ -447,14 +450,16 @@ export default function PlanetGlobe({
             ref={controlsRef}
             enablePan={false}
             enableZoom={!isMobile}
-            minDistance={RADIUS * 1.5}
+            minDistance={RADIUS * 1.15}
             maxDistance={RADIUS * 4.5}
-            autoRotate={false}
+            autoRotate
+            autoRotateSpeed={0.4}
             rotateSpeed={0.5}
             enabled={!isContactOpen}
-            // Lock vertical axis - prevent tilting up/down
-            minPolarAngle={Math.PI / 2}
-            maxPolarAngle={Math.PI / 2}
+            // Globe behavior: spin on vertical axis (Y-axis)
+            // Polar angles allow slight tilt but keep mostly upright
+            minPolarAngle={Math.PI * 0.35}
+            maxPolarAngle={Math.PI * 0.65}
           />
         </Canvas>
       </div>
