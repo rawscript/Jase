@@ -98,15 +98,22 @@ function Marker({
   onHover: (p: Project | null) => void;
   onClick: (proj: Project) => void;
 }) {
+  // Position markers exactly on the planet surface (RADIUS = 2)
   const pos = useMemo(
-    () => latLngToVector3(project.lat, project.lng, RADIUS * 1.012),
+    () => latLngToVector3(project.lat, project.lng, RADIUS),
     [project]
   );
   const col = typeColor(project.type);
   const scale = active ? 1.5 : hovered ? 1.25 : 1;
 
   return (
-    <Html position={pos} occlude distanceFactor={7} style={{ pointerEvents: "none" }}>
+    <Html 
+      position={pos} 
+      occlude 
+      distanceFactor={6} 
+      style={{ pointerEvents: "none" }}
+      sprite
+    >
       <div
         onClick={(e) => {
           e.stopPropagation();
