@@ -96,8 +96,8 @@ function LoadingFallback() {
   );
 }
 
-// ─── 3D MARKER (3D object that rotates with globe) ──────────────────────────
-function Marker3D({
+// ─── VIDEO GAME POWER-UP MARKER (CSS/HTML style) ──────────────────────────
+function VideoGameMarker({
   project,
   hovered,
   active,
@@ -112,35 +112,171 @@ function Marker3D({
   onHover: (p: Project | null) => void;
   onClick: (proj: Project) => void;
 }) {
-  // Position marker ON the surface (slightly above to avoid Z-fighting)
+  // Position markers ON the surface
   const pos = useMemo(
-    () => latLngToVector3(project.lat, project.lng, RADIUS * 0.01),
+    () => latLngToVector3(project.lat, project.lng, RADIUS * 1.02),
     [project]
   );
   const col = typeColor(project.type);
-  const scale = active ? 1.5 : hovered ? 1.25 : 1;
-  const color = new THREE.Color(col);
+  const scale = active ? 1.6 : hovered ? 1.3 : 1;
 
   return (
-    <mesh
+    <Html
       position={pos}
-      scale={scale}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick(project);
-      }}
-      onPointerEnter={() => onHover(project)}
-      onPointerLeave={() => onHover(null)}
+      distanceFactor={8}
+      style={{ pointerEvents: "none" }}
+      sprite
     >
-      <sphereGeometry args={[0.07, 16, 16]} />
-      <meshStandardMaterial
-        color={active ? color : 0xffffff}
-        emissive={active ? color : 0x000000}
-        emissiveIntensity={active ? 0.3 : 0}
-        metalness={0.5}
-        roughness={0.5}
-      />
-    </mesh>
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick(project);
+        }}
+        onPointerEnter={() => onHover(project)}
+        onPointerLeave={() => onHover(null)}
+        style={{
+          position: "relative",
+          width: 0,
+          height: 0,
+          cursor: "pointer",
+          pointerEvents: "auto",
+          opacity: dimmed ? 0.4 : 1,
+          transition: "opacity 0.2s, transform 0.2s",
+          transform: `scale(${scale})`,
+          filter: active ? "drop-shadow(0 0 12px rgba(255,255,255,0.8))" : "none",
+        }}
+      >
+        {/* Glowing outer ring (video game power-up effect) */}
+        <div
+          style={{
+            position: "absolute",
+            left: -18,
+            top: -18,
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            background: `radial-gradient(circle, ${col}40 0%, ${col}20 30%, transparent 70%)`,
+            animation: hovered || active ? "powerupPulse 1.5s ease-in-out infinite" : "none",
+          }}
+        />
+        
+        {/* Outer glow ring */}
+        <div
+          style={{
+            position: "absolute",
+            left: -14,
+            top: -14,
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            border: `2px solid ${col}`,
+            boxShadow: `0 0 8px ${col}, inset 0 0 8px ${col}`,
+            opacity: 0.7,
+          }}
+        />
+        
+        {/* Main power-up body */}
+        <div
+          style={{
+            position: "absolute",
+            left: -10,
+            top: -10,
+            width: 20,
+            height: 20,
+            borderRadius: "50%",
+            background: active ? col : `linear-gradient(135deg, #fff 0%, ${col}30 100%)`,
+            border: active ? `2px solid #fff` : `2px solid ${col}`,
+            boxShadow: active 
+              ? `0 0 12px ${col}, inset 0 0 6px #fff` 
+              : `0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.6)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+          }}
+        >
+          {/* Inner glow */}
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: active ? "#fff" : col,
+              boxShadow: active ? `0 0 6px #fff` : "none",
+            }}
+          />
+        </div>
+        
+        {/* Connection line to surface */}
+        <div
+          style={{
+            position: "absolute",
+            left: -1,
+            top: 12,
+            width: 2,
+            height: 16,
+            background: `linear-gradient(to bottom, ${col}80, ${col}20)`,
+            borderRadius: "1px",
+            transform: "rotate(45deg)",
+            transformOrigin: "top center",
+          }}
+        />
+        
+        {/* Project type indicator */}
+        <div
+          style={{
+            position: "absolute",
+            left: -6,
+            top: -30,
+            width: 12,
+            height: 12,
+            borderRadius: "2px",
+            background: col,
+            transform: "rotate(45deg)",
+            opacity: 0.9,
+            display: hovered || active ? "block" : "none",
+          }}
+        />
+        
+        {/* Tooltip */}
+        {hovered && !active && (
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: 32,
+              transform: "translateX(-50%)",
+              background: "rgba(17, 17, 17, 0.95)",
+              backdropFilter: "blur(4px)",
+              color: "#FAF8F4",
+              padding: "10px 16px",
+              whiteSpace: "nowrap",
+              zIndex: 35,
+              borderRadius: "4px",
+              border: `1px solid ${col}80`,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              fontFamily: "'Syne', sans-serif",
+              fontWeight: 700,
+              fontSize: 14,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            {project.name}
+            <div
+              style={{
+                marginTop: "3px",
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                color: "#9CA3AF",
+                letterSpacing: "0.08em",
+              }}
+            >
+              {project.region}
+            </div>
+          </div>
+        )}
+      </div>
+    </Html>
   );
 }
 
@@ -193,9 +329,9 @@ function GlobeScene({
       <Suspense fallback={<LoadingFallback />}>
         {/* Globe is fixed - rotation controlled by OrbitControls */}
         <PlanetMesh />
-        {/* Markers are separate but positioned relative to fixed globe */}
+        {/* Video game power-up markers on surface */}
         {PROJECTS.map((p) => (
-          <Marker3D
+          <VideoGameMarker
             key={p.id}
             project={p}
             hovered={hoveredPin?.id === p.id}
@@ -325,12 +461,16 @@ export default function PlanetGlobe({
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <style>{`
-        @keyframes pinPulse {
-          0% { transform: scale(0.8); opacity: 0.25; }
-          70% { transform: scale(1.8); opacity: 0; }
-          100% { transform: scale(1.8); opacity: 0; }
+        @keyframes powerupPulse {
+          0% { transform: scale(0.8); opacity: 0.6; }
+          50% { transform: scale(1.2); opacity: 0.3; }
+          100% { transform: scale(0.8); opacity: 0.6; }
         }
-        .pin-pulse { animation: pinPulse 1.8s ease-out infinite; }
+        
+        @keyframes innerGlow {
+          0% { opacity: 0.6; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1.1); }
+        }
       `}</style>
       <div
         style={{
