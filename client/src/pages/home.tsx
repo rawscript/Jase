@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import PortfolioMap from "@/components/portfolio-map";
+import PortfolioMap from "@/components/planet-globe";
 import Navigation from "@/components/navigation";
 import AITerminal from "@/components/ai-terminal";
 import ContactScreen from "@/components/contact-section";
