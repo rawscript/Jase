@@ -96,8 +96,8 @@ function LoadingFallback() {
   );
 }
 
-// ─── MARKER ─────────────────────────────────────────────────────────────────
-function Marker({
+// ─── 3D MARKER (3D object that rotates with globe) ──────────────────────────
+function Marker3D({
   project,
   hovered,
   active,
@@ -112,142 +112,40 @@ function Marker({
   onHover: (p: Project | null) => void;
   onClick: (proj: Project) => void;
 }) {
-  // Position markers exactly on the planet surface
+  // Position marker ON the surface (slightly above to avoid Z-fighting)
   const pos = useMemo(
-    () => latLngToVector3(project.lat, project.lng, RADIUS),
+    () => latLngToVector3(project.lat, project.lng, RADIUS * 1.01),
     [project]
   );
   const col = typeColor(project.type);
   const scale = active ? 1.5 : hovered ? 1.25 : 1;
+  const color = new THREE.Color(col);
 
   return (
-    <Html
+    <mesh
       position={pos}
-      distanceFactor={6}
-      style={{ pointerEvents: "none" }}
-      sprite
+      scale={scale}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(project);
+      }}
+      onPointerEnter={() => onHover(project)}
+      onPointerLeave={() => onHover(null)}
     >
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick(project);
-        }}
-        onPointerEnter={() => onHover(project)}
-        onPointerLeave={() => onHover(null)}
-        style={{
-          position: "relative",
-          width: 0,
-          height: 0,
-          cursor: "pointer",
-          pointerEvents: "auto",
-          opacity: dimmed ? 0.35 : 1,
-          transition: "opacity .2s",
-        }}
-      >
-        {/* Pulse ring */}
-        {(active || hovered) && (
-          <div
-            className="pin-pulse"
-            style={{
-              position: "absolute",
-              left: -20 * scale,
-              top: -20 * scale,
-              width: 40 * scale,
-              height: 40 * scale,
-              borderRadius: "50%",
-              background: col,
-              opacity: 0.12,
-            }}
-          />
-        )}
-        {/* Outer ring */}
-        <div
-          style={{
-            position: "absolute",
-            left: -12 * scale,
-            top: -12 * scale,
-            width: 24 * scale,
-            height: 24 * scale,
-            borderRadius: "50%",
-            border: `1.5px solid ${col}`,
-            opacity: 0.35,
-            transition: "all .2s",
-          }}
-        />
-        {/* Pin body */}
-        <div
-          style={{
-            position: "absolute",
-            left: -7 * scale,
-            top: -7 * scale,
-            width: 14 * scale,
-            height: 14 * scale,
-            borderRadius: "50%",
-            background: active ? col : "#fff",
-            border: active ? "none" : `2px solid ${col}`,
-            boxShadow: "0 2px 6px rgba(0,0,0,.25)",
-            transition: "all .2s",
-          }}
-        />
-        {/* Inner dot */}
-        <div
-          style={{
-            position: "absolute",
-            left: -3 * scale,
-            top: -3 * scale,
-            width: 6 * scale,
-            height: 6 * scale,
-            borderRadius: "50%",
-            background: active ? "#fff" : col,
-          }}
-        />
-        {/* Tooltip */}
-        {hovered && !active && (
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              bottom: 26,
-              transform: "translateX(-50%)",
-              background: "#111",
-              color: "#FAF8F4",
-              padding: "10px 16px",
-              whiteSpace: "nowrap",
-              zIndex: 35,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "'Syne', sans-serif",
-                fontWeight: 700,
-                fontSize: 14,
-                letterSpacing: "-0.01em",
-              }}
-            >
-              {project.name}
-            </p>
-            <p
-              style={{
-                margin: "3px 0 0",
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10,
-                color: "#9CA3AF",
-                letterSpacing: "0.08em",
-              }}
-            >
-              {project.region}
-            </p>
-          </div>
-        )}
-      </div>
-    </Html>
+      <sphereGeometry args={[0.07, 16, 16]} />
+      <meshStandardMaterial
+        color={active ? color : 0xffffff}
+        emissive={active ? color : 0x000000}
+        emissiveIntensity={active ? 0.3 : 0}
+        metalness={0.5}
+        roughness={0.5}
+      />
+    </mesh>
   );
 }
 
-// ─── SCENE ──────────────────────────────────────────────────────────────────
-function Scene({
+// ─── ROTATING GLOBE SCENE (Globe + markers rotate together) ─────────────────
+function GlobeScene({
   activeProject,
   onSelectProject,
   hoveredPin,
@@ -264,6 +162,23 @@ function Scene({
 }) {
   const { camera } = useThree();
   const focusTarget = useRef<THREE.Vector3 | null>(null);
+  const globeGroupRef = useRef<THREE.Group>(null);
+
+  // Slow, continuous rotation of the globe (like a physical globe)
+  useFrame((_, delta) => {
+    if (globeGroupRef.current && !isContactOpen && !hoveredPin && !activeProject) {
+      // Rotate the entire globe group (planet + markers) around Y-axis
+      globeGroupRef.current.rotation.y += delta * 0.1; // Gentle rotation
+    }
+    
+    if (focusTarget.current) {
+      camera.position.lerp(focusTarget.current, Math.min(1, delta * 2.2));
+      controlsRef.current?.update();
+      if (camera.position.distanceTo(focusTarget.current) < 0.02) {
+        focusTarget.current = null;
+      }
+    }
+  });
 
   useEffect(() => {
     if (activeProject) {
@@ -275,36 +190,28 @@ function Scene({
     }
   }, [activeProject, camera]);
 
-  useFrame((_, delta) => {
-    if (focusTarget.current) {
-      camera.position.lerp(focusTarget.current, Math.min(1, delta * 2.2));
-      controlsRef.current?.update();
-      if (camera.position.distanceTo(focusTarget.current) < 0.02) {
-        focusTarget.current = null;
-      }
-    }
-  });
-
   return (
     <>
       <ambientLight intensity={0.75} />
       <directionalLight position={[4, 3, 5]} intensity={1.35} />
       <directionalLight position={[-5, -2, -4]} intensity={0.25} />
       <Suspense fallback={<LoadingFallback />}>
-        <PlanetMesh />
-        {PROJECTS.map((p) => (
-          <Marker
-            key={p.id}
-            project={p}
-            hovered={hoveredPin?.id === p.id}
-            active={activeProject?.id === p.id}
-            dimmed={!!activeProject && activeProject.id !== p.id}
-            onHover={setHoveredPin}
-            onClick={(proj) =>
-              onSelectProject(activeProject?.id === proj.id ? null : proj)
-            }
-          />
-        ))}
+        <group ref={globeGroupRef}>
+          <PlanetMesh />
+          {PROJECTS.map((p) => (
+            <Marker3D
+              key={p.id}
+              project={p}
+              hovered={hoveredPin?.id === p.id}
+              active={activeProject?.id === p.id}
+              dimmed={!!activeProject && activeProject.id !== p.id}
+              onHover={setHoveredPin}
+              onClick={(proj) =>
+                onSelectProject(activeProject?.id === proj.id ? null : proj)
+              }
+            />
+          ))}
+        </group>
       </Suspense>
     </>
   );
@@ -458,7 +365,7 @@ export default function PlanetGlobe({
             if (activeProject) onSelectProject(null);
           }}
         >
-          <Scene
+          <GlobeScene
             activeProject={activeProject}
             onSelectProject={onSelectProject}
             hoveredPin={hoveredPin}
