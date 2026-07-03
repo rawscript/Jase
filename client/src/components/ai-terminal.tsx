@@ -1,6 +1,27 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { PROJECTS } from "@/lib/world-data";
 
+// NVIDIA API Configuration - uses environment variables
+const NVIDIA_CONFIG = {
+  baseUrl: import.meta.env.VITE_NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1",
+  model: import.meta.env.VITE_NVIDIA_MODEL || "deepseek-ai/deepseek-v4-pro",
+  temperature: 1.0,
+  topP: 0.95,
+  maxTokens: 2000,
+};
+
+// System prompt for context about James Mwaura
+const SYSTEM_PROMPT = `You are an AI assistant for James Mwaura's portfolio website. James is a:
+- Full-Stack Engineer specializing in cloud infrastructure and data engineering
+- Based in Nairobi, Kenya (UTC+3)
+- Works on: Cloud (AWS/GCP), Data Engineering (PostGIS/Python), Full-Stack (React/Node.js), AI/ML integration
+- Key projects: Msitubora (forest monitoring), Aurora Energy (grid optimization), Mailforge AI (presentation generation)
+- Skills: TypeScript, Python, PostgreSQL, Docker, Kubernetes, GIS, Satellite APIs, GenAI
+- Experience: 6+ years in software engineering, data engineering, and cloud architecture
+- Contact: jasemwaura@gmail.com, GitHub: rawscript, LinkedIn: jase-mwaura
+
+Always be helpful, concise, and professional. If asked about topics outside James's expertise, politely redirect to relevant skills or offer to help with related topics.`;
+
 // ─── STATIC COMMAND DATA ──────────────────────────────────────────────────────
 const HELP_TEXT = [
   "Available commands:",
@@ -10,7 +31,7 @@ const HELP_TEXT = [
   "  project <id>   — Detail on a project  (e.g. project msitubora)",
   "  experience     — Work history",
   "  contact        — How to reach James",
-  "  ask <question> — Ask anything via AI",
+  "  ask <question> — Ask anything via AI (DeepSeek V4 Pro)",
   "  clear          — Clear terminal",
   "  help           — Show this menu",
 ];
@@ -172,6 +193,7 @@ export default function AITerminal({ onClose }: TerminalProps) {
         push(raw, ["Usage: ask <your question>"], "error");
         return;
       }
+      
       // Show loading
       setHistory((h) => [
         ...h,
@@ -179,27 +201,63 @@ export default function AITerminal({ onClose }: TerminalProps) {
         { type: "loading", lines: [] },
       ]);
       setLoading(true);
+      
       try {
-        const res = await fetch("/api/chat", {
+        // Get API key from environment or use fallback
+        const nvidiaApiKey = import.meta.env.VITE_NVIDIA_API_KEY || "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";
+        
+        // Call NVIDIA API directly from browser
+        const response = await fetch(`${NVIDIA_CONFIG.baseUrl}/chat/completions`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${nvidiaApiKey}`,
+          },
           body: JSON.stringify({
-            messages: [{ role: "user", content: args }],
+            model: NVIDIA_CONFIG.model,
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              { role: "user", content: args }
+            ],
+            temperature: NVIDIA_CONFIG.temperature,
+            top_p: NVIDIA_CONFIG.topP,
+            max_tokens: NVIDIA_CONFIG.maxTokens,
+            stream: false,
           }),
         });
-        if (!res.ok) throw new Error("server error");
-        const data = await res.json() as { reply: string };
-        const lines = data.reply
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("NVIDIA API error:", response.status, errorText);
+          throw new Error(`API error ${response.status}`);
+        }
+
+        const data = await response.json();
+        const aiResponse = data.choices[0]?.message?.content || "No response from AI";
+        
+        // Format the response
+        const lines = aiResponse
           .split("\n")
-          .slice(0, 14);
+          .slice(0, 14)
+          .map(line => line.trim());
+        
         setHistory((h) => [
           ...h.slice(0, -1),
           { type: "output", lines },
         ]);
-      } catch {
+        
+      } catch (error) {
+        console.error("AI Error:", error);
         setHistory((h) => [
           ...h.slice(0, -1),
-          { type: "error", lines: ["error: failed to reach AI endpoint"] },
+          { 
+            type: "error", 
+            lines: [
+              "AI service temporarily unavailable",
+              "Try again in a moment, or use other commands:",
+              "  about, skills, projects, experience, contact"
+            ]
+          },
         ]);
       } finally {
         setLoading(false);
