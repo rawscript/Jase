@@ -8,7 +8,7 @@ import ProjectPanel from "@/components/project-panel";
 type Project = (typeof PROJECTS)[number];
 
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const RADIUS = 0.01;
+const RADIUS = 4;
 // If the generated planet's texture doesn't line up with real-world
 // longitudes, nudge this value (in degrees) until markers sit correctly.
 const LNG_OFFSET = 0;
