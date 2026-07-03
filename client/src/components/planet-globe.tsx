@@ -144,7 +144,7 @@ function Marker3D({
   );
 }
 
-// ─── ROTATING GLOBE SCENE (Globe + markers rotate together) ─────────────────
+// ─── STATIC GLOBE SCENE (Globe fixed, rotation controlled by OrbitControls) ─
 function GlobeScene({
   activeProject,
   onSelectProject,
@@ -162,24 +162,8 @@ function GlobeScene({
 }) {
   const { camera } = useThree();
   const focusTarget = useRef<THREE.Vector3 | null>(null);
-  const globeGroupRef = useRef<THREE.Group>(null);
 
-  // Slow, continuous rotation of the globe (like a physical globe)
-  useFrame((_, delta) => {
-    if (globeGroupRef.current && !isContactOpen && !hoveredPin && !activeProject) {
-      // Rotate the entire globe group (planet + markers) around Y-axis
-      globeGroupRef.current.rotation.y += delta * 0.1; // Gentle rotation
-    }
-    
-    if (focusTarget.current) {
-      camera.position.lerp(focusTarget.current, Math.min(1, delta * 2.2));
-      controlsRef.current?.update();
-      if (camera.position.distanceTo(focusTarget.current) < 0.02) {
-        focusTarget.current = null;
-      }
-    }
-  });
-
+  // Camera focus on selected project
   useEffect(() => {
     if (activeProject) {
       const dir = latLngToVector3(activeProject.lat, activeProject.lng, 1).normalize();
@@ -190,28 +174,39 @@ function GlobeScene({
     }
   }, [activeProject, camera]);
 
+  // Smooth camera movement to focus target
+  useFrame((_, delta) => {
+    if (focusTarget.current) {
+      camera.position.lerp(focusTarget.current, Math.min(1, delta * 2.2));
+      controlsRef.current?.update();
+      if (camera.position.distanceTo(focusTarget.current) < 0.02) {
+        focusTarget.current = null;
+      }
+    }
+  });
+
   return (
     <>
       <ambientLight intensity={0.75} />
       <directionalLight position={[4, 3, 5]} intensity={1.35} />
       <directionalLight position={[-5, -2, -4]} intensity={0.25} />
       <Suspense fallback={<LoadingFallback />}>
-        <group ref={globeGroupRef}>
-          <PlanetMesh />
-          {PROJECTS.map((p) => (
-            <Marker3D
-              key={p.id}
-              project={p}
-              hovered={hoveredPin?.id === p.id}
-              active={activeProject?.id === p.id}
-              dimmed={!!activeProject && activeProject.id !== p.id}
-              onHover={setHoveredPin}
-              onClick={(proj) =>
-                onSelectProject(activeProject?.id === proj.id ? null : proj)
-              }
-            />
-          ))}
-        </group>
+        {/* Globe is fixed - rotation controlled by OrbitControls */}
+        <PlanetMesh />
+        {/* Markers are separate but positioned relative to fixed globe */}
+        {PROJECTS.map((p) => (
+          <Marker3D
+            key={p.id}
+            project={p}
+            hovered={hoveredPin?.id === p.id}
+            active={activeProject?.id === p.id}
+            dimmed={!!activeProject && activeProject.id !== p.id}
+            onHover={setHoveredPin}
+            onClick={(proj) =>
+              onSelectProject(activeProject?.id === proj.id ? null : proj)
+            }
+          />
+        ))}
       </Suspense>
     </>
   );
@@ -376,14 +371,18 @@ export default function PlanetGlobe({
           <OrbitControls
             ref={controlsRef}
             enablePan={false}
-            enableZoom={!isMobile}
+            enableZoom={true}
             minDistance={RADIUS * 1.15}
             maxDistance={RADIUS * 4.5}
-            rotateSpeed={0.5}
+            rotateSpeed={0.8}
+            zoomSpeed={0.8}
             enabled={!isContactOpen}
-            // Fixed axis - can only rotate horizontally, no tilt
+            // Allow horizontal rotation around the globe
+            // Fixed vertical angle (no tilting up/down)
             minPolarAngle={Math.PI / 2}
             maxPolarAngle={Math.PI / 2}
+            // Orbit around the globe center
+            target={[0, 0, 0]}
           />
         </Canvas>
       </div>
@@ -414,7 +413,7 @@ export default function PlanetGlobe({
             zIndex: 20,
           }}
         >
-          DRAG TO ROTATE · SCROLL TO ZOOM · CLICK A PIN
+          DRAG TO SPIN GLOBE · SCROLL TO ZOOM · CLICK PROJECT PINS
         </div>
       )}
 
