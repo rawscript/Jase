@@ -202,66 +202,196 @@ export default function AITerminal({ onClose }: TerminalProps) {
       ]);
       setLoading(true);
       
-      try {
-        // Get API key from environment or use fallback
-        const nvidiaApiKey = import.meta.env.VITE_NVIDIA_API_KEY || "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";
-        
-        // Call NVIDIA API directly from browser
-        const response = await fetch(`${NVIDIA_CONFIG.baseUrl}/chat/completions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${nvidiaApiKey}`,
-          },
-          body: JSON.stringify({
-            model: NVIDIA_CONFIG.model,
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              { role: "user", content: args }
-            ],
-            temperature: NVIDIA_CONFIG.temperature,
-            top_p: NVIDIA_CONFIG.topP,
-            max_tokens: NVIDIA_CONFIG.maxTokens,
-            stream: false,
-          }),
-        });
+      // Simulate AI thinking with timeout
+      setTimeout(() => {
+        try {
+          // Get question in lowercase for matching
+          const question = args.toLowerCase();
+          let response = "";
+          
+          // Handle common questions with intelligent responses
+          if (question.includes("project") || question.includes("work on") || question.includes("built")) {
+            response = `James has worked on ${PROJECTS.length} key projects globally:
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("NVIDIA API error:", response.status, errorText);
-          throw new Error(`API error ${response.status}`);
+1. MSITUBORA - Forest monitoring with satellite APIs & blockchain
+   • Location: Nairobi, Kenya
+   • Tech: Blockchain, IoT, React, Satellite APIs
+   • Impact: Planetary conservation monitoring
+
+2. AURORA ENERGY - Energy grid optimization
+   • Location: London, UK
+   • Tech: Node.js, PostgreSQL, React
+   • Impact: Energy optimization across grid networks
+
+3. MAILFORGE AI - AI presentation generation
+   • Location: San Francisco, USA
+   • Tech: AI, GenAI, PostgreSQL, React
+   • Impact: Rapid structural presentation generation
+
+4. NESTIE - Real estate platform
+   • Location: Nairobi, Kenya
+   • Tech: Node.js, React, Next.js, Stripe
+   • Impact: Advanced habitat allocation
+
+5. GEO-SPATIAL LAB - Satellite data processing
+   • Location: Berlin, Germany
+   • Tech: Satellite APIs, GIS, PostGIS, Python
+   • Impact: Geo-spatial data engineering
+
+6. CLOUD INFRASTRUCTURE - Multi-cloud deployment
+   • Location: Cape Town, South Africa
+   • Tech: AWS, GCP, Docker, Kubernetes
+   • Impact: Scalable structural deployment
+
+All projects combine cloud infrastructure, data engineering, and full-stack development with global impact.`;
+          
+          } else if (question.includes("skill") || question.includes("tech") || question.includes("stack")) {
+            response = `James specializes in 7 core technical areas:
+
+CLOUD INFRASTRUCTURE
+• AWS, GCP, Docker, Kubernetes, CI/CD
+• Multi-cloud deployment architectures
+• Serverless & containerized applications
+
+DATA ENGINEERING
+• PostgreSQL, PostGIS, Python, GDAL
+• GIS & spatial data processing
+• Satellite API integration
+
+FULL-STACK DEVELOPMENT
+• TypeScript, JavaScript, Node.js
+• React, Next.js, REST, GraphQL
+• Modern web applications
+
+AI/ML INTEGRATION
+• GenAI & LLM implementation
+• Model monitoring & deployment
+• AI-powered applications
+
+BLOCKCHAIN & IOT
+• Smart contract development
+• IoT device integration
+• Decentralized applications
+
+DATABASES
+• PostgreSQL, Redis, MongoDB
+• BigQuery, data warehousing
+• Database optimization
+
+DEVOPS & TOOLING
+• CI/CD pipelines, Git, Docker
+• Infrastructure as Code
+• Monitoring & observability
+
+He combines these skills to build scalable, data-intensive applications across multiple continents.`;
+          
+          } else if (question.includes("experience") || question.includes("work history") || question.includes("career")) {
+            response = `James has 6+ years of progressive engineering experience:
+
+2022–PRESENT  • FULL-STACK ENGINEER (Remote, Global Clients)
+• Building cloud-native applications for international clients
+• Specializing in data pipelines & AI integration
+• Technologies: TypeScript, Python, AWS, PostgreSQL
+
+2022–2023     • CLOUD SOLUTIONS ARCHITECT (Nairobi + Cape Town)
+• Designed multi-cloud deployment architectures
+• Led migration projects for enterprise clients
+• Technologies: AWS, GCP, Kubernetes, Docker
+
+2020–2022     • FULL-STACK ENGINEER (Nairobi)
+• Developed full-stack applications for local enterprises
+• Implemented data visualization & analytics platforms
+• Technologies: React, Node.js, MongoDB, Python
+
+2018–2020     • DATA ANALYST (Nairobi)
+• Data analysis & reporting for business intelligence
+• Built early data pipelines & dashboards
+• Technologies: Python, SQL, Tableau, Excel
+
+He has progressed from data analysis to full-stack development to cloud architecture, building expertise across the entire technology stack.`;
+          
+          } else if (question.includes("contact") || question.includes("reach") || question.includes("email")) {
+            response = `You can contact James through:
+
+PRIMARY CONTACT
+• Email: jasemwaura@gmail.com
+• Phone: +254 114 841 437 (Kenya, UTC+3)
+• Location: Nairobi, Kenya
+
+PROFESSIONAL PROFILES
+• GitHub: github.com/rawscript (code & projects)
+• LinkedIn: linkedin.com/in/jase-mwaura (professional)
+• Portfolio: jase.vercel.app (current site)
+
+PREFERRED COMMUNICATION
+• Email for detailed inquiries
+• LinkedIn for professional connections
+• GitHub for technical discussions
+
+RESPONSE TIME
+• Typically responds within 24 hours
+• Available for technical consultations
+• Open to collaboration on interesting projects
+
+Best to email jasemwaura@gmail.com with specific questions about projects, collaboration, or technical work.`;
+          
+          } else {
+            // Generic intelligent response
+            response = `James Mwaura is a full-stack, cloud, and data engineer based in Nairobi, Kenya.
+
+Based on your question "${args}", here's what I can tell you:
+
+James specializes in building scalable applications that combine:
+• Cloud infrastructure (AWS/GCP/Docker/Kubernetes)
+• Data engineering (PostgreSQL/PostGIS/Python/GIS)
+• Full-stack development (React/Node.js/TypeScript)
+• AI/ML integration (GenAI/LLMs/model deployment)
+
+He has worked on projects across 4 continents including:
+• Environmental monitoring in East Africa
+• Energy grid optimization in Europe
+• AI presentation tools in North America
+• Cloud infrastructure in South Africa
+
+For specific information, try these commands:
+• "projects" - List all projects
+• "skills" - Technical skills & stack
+• "experience" - Work history timeline
+• "contact" - How to reach James
+• "about" - Overview of background
+
+Or ask more specific questions about his work, technologies, or experience.`;
+          }
+          
+          // Format the response
+          const lines = response
+            .split("\n")
+            .slice(0, 14)
+            .map(line => line.trim());
+          
+          setHistory((h) => [
+            ...h.slice(0, -1),
+            { type: "output", lines },
+          ]);
+          
+        } catch (error) {
+          console.error("AI Error:", error);
+          setHistory((h) => [
+            ...h.slice(0, -1),
+            { 
+              type: "error", 
+              lines: [
+                "AI service temporarily unavailable",
+                "Try again in a moment, or use other commands:",
+                "  about, skills, projects, experience, contact"
+              ]
+            },
+          ]);
+        } finally {
+          setLoading(false);
         }
-
-        const data = await response.json();
-        const aiResponse = data.choices[0]?.message?.content || "No response from AI";
-        
-        // Format the response
-        const lines = aiResponse
-          .split("\n")
-          .slice(0, 14)
-          .map(line => line.trim());
-        
-        setHistory((h) => [
-          ...h.slice(0, -1),
-          { type: "output", lines },
-        ]);
-        
-      } catch (error) {
-        console.error("AI Error:", error);
-        setHistory((h) => [
-          ...h.slice(0, -1),
-          { 
-            type: "error", 
-            lines: [
-              "AI service temporarily unavailable",
-              "Try again in a moment, or use other commands:",
-              "  about, skills, projects, experience, contact"
-            ]
-          },
-        ]);
-      } finally {
-        setLoading(false);
-      }
+      }, 800); // Simulate AI thinking time
+      
       return;
     }
 

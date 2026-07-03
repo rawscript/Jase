@@ -114,7 +114,7 @@ function Marker3D({
 }) {
   // Position marker ON the surface (slightly above to avoid Z-fighting)
   const pos = useMemo(
-    () => latLngToVector3(project.lat, project.lng, RADIUS * 1.01),
+    () => latLngToVector3(project.lat, project.lng, RADIUS * -1.01),
     [project]
   );
   const col = typeColor(project.type);
