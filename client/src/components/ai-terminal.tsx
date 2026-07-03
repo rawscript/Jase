@@ -81,8 +81,8 @@ export default function AITerminal({ onClose }: TerminalProps) {
       type: "banner",
       lines: [
         "╔══════════════════════════════════════════════════════════╗",
-        "║      JAMES MWAURA — PORTFOLIO TERMINAL v1.0.0            ║",
-        "║      Full-Stack · Cloud · Data Engineer                  ║",
+        "║      JAMES MWAURA — PORTFOLIO TERMINAL v1.0.0                   ║",
+        "║      Full-Stack · Cloud · Data Engineer                          ║",
         "╚══════════════════════════════════════════════════════════╝",
         "",
         'Type "help" to see available commands.',
