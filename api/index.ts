@@ -18,38 +18,36 @@ app.use((req, res, next) => {
         'https://jasemwaura.com',
         'https://www.jasemwaura.com',
         'https://jamesmwaura.netlify.app',
+        'https://jase.vercel.app',
+        'https://jase-server.vercel.app',
         /https:\/\/.*\.amplifyapp\.com$/,
         /https:\/\/.*\.vercel\.app$/,
         /https:\/\/.*\.netlify\.app$/,
     ];
 
     const origin = req.headers.origin;
-    const host = req.headers.host;
 
-    // Guard against undefined origin (e.g. curl, server-to-server requests)
-    let isAllowed = !!origin && allowedOrigins.some(allowed => {
-        if (typeof allowed === 'string') return allowed === origin;
-        return allowed.test(origin);
-    });
-
-    // If not already allowed, check if same-origin (matches request host)
-    if (!isAllowed && origin && host) {
-        if (origin === `http://${host}` || origin === `https://${host}`) {
-            isAllowed = true;
-        }
+    // Check if origin is allowed
+    let isAllowed = false;
+    if (origin) {
+        isAllowed = allowedOrigins.some(allowed => {
+            if (typeof allowed === 'string') return allowed === origin;
+            return allowed.test(origin);
+        });
     }
 
+    // Always set CORS headers for allowed origins
     if (isAllowed && origin) {
         res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-    // Handle preflight requests
+    // Handle preflight requests - must respond before any other middleware
     if (req.method === 'OPTIONS') {
-        res.sendStatus(200);
+        res.status(200).end();
         return;
     }
 
