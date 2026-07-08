@@ -21,7 +21,7 @@ My modern, full-stack portfolio website built with React, TypeScript, Express.js
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/rawscript/jasw
+git clone https://github.com/rawscript/jase
 cd portfolio
 ```
 
