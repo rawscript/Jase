@@ -21,7 +21,7 @@ My modern, full-stack portfolio website built with React, TypeScript, Express.js
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/rawscript/jasw
 cd portfolio
 ```
 
@@ -36,11 +36,6 @@ Create a `.env` file in the root directory:
 DATABASE_URL=your_postgresql_connection_string
 ```
 
-For Supabase:
-- Go to [Supabase Dashboard](https://supabase.com/dashboard/projects)
-- Create a new project
-- Get your connection string from Connect → Transaction pooler
-- Replace `[YOUR-PASSWORD]` with your actual password
 
 4. Set up the database:
 ```bash
