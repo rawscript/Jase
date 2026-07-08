@@ -8,6 +8,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import LoadingScreen from "@/components/loading-screen";
 
 const LazyHome = lazy(() => import("@/pages/home"));
+const LazyAbout = lazy(() => import("@/pages/about"));
 const LazyNotFound = lazy(() => import("@/pages/not-found"));
 
 function ErrorFallback({ error }: { error: Error }) {
@@ -25,6 +26,7 @@ function Router() {
       <Suspense fallback={<LoadingScreen />}>
         <Switch>
           <Route path="/" component={() => <LazyHome />} />
+          <Route path="/about" component={() => <LazyAbout />} />
           <Route component={() => <LazyNotFound />} />
         </Switch>
       </Suspense>
