@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { typeColor } from "@/lib/world-data";
 
-// ─── TYPE LEGEND DATA ─────────────────────────────────────────────────────────
+// ─── TYPE LEGEND DATA ───────────────────────────────────────────────────────
 const LEGEND_TYPES = [
   "Cloud Infrastructure",
   "Data Engineering",
@@ -19,12 +20,19 @@ export default function Navigation({
   onOpenContact,
 }: NavigationProps) {
   const [isMobile, setIsMobile] = useState(false);
+  const [location] = useLocation();
+  
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Only show navigation on home page
+  if (location !== "/") {
+    return null;
+  }
 
   return (
     <>
@@ -77,6 +85,7 @@ export default function Navigation({
           style={{ display: "flex", gap: isMobile ? 6 : 8, pointerEvents: "auto" }}
         >
           <NavButton onClick={onOpenTerminal} isMobile={isMobile}>_ TERMINAL</NavButton>
+          <NavButton onClick={() => window.location.href = "/about"} isMobile={isMobile}>ABOUT</NavButton>
           <NavButton onClick={onOpenContact} isMobile={isMobile}>REACH OUT</NavButton>
         </div>
       </nav>
@@ -127,7 +136,7 @@ export default function Navigation({
   );
 }
 
-// ─── NAV BUTTON ───────────────────────────────────────────────────────────────
+// ─── NAV BUTTON ─────────────────────────────────────────────────────────
 function NavButton({
   onClick,
   children,
