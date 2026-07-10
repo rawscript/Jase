@@ -15,7 +15,7 @@ export const PUBLICATIONS: Publication[] = [
  id: "PAC2025",
   title: "Decentralized Energy Management for African Industries: AI-Controlled TEG Systems with Sensor-Guided Relay Switching",
   venue: "Cairo, Egypt",
-  year: "2024",
+  year: "2025",
   link: "https://ieeexplore-custom.ieee.org/document/11289182",
   },
 ];
