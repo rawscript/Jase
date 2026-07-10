@@ -13,66 +13,42 @@ const RADIUS = 4;
 // longitudes, nudge this value (in degrees) until markers sit correctly.
 const LNG_OFFSET = 0;
 
-// ─── HELPERS ────────────────────────────────────────────────────────────────
-function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector3 {
-  const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lng + 180 + LNG_OFFSET) * (Math.PI / 180);
-  const x = -radius * Math.sin(phi) * Math.cos(theta);
-  const z = radius * Math.sin(phi) * Math.sin(theta);
-  const y = radius * Math.cos(phi);
-  return new THREE.Vector3(x, y, z);
-}
-
 // ─── FIXED GLOBE (No rotation, just planet mesh) ──────────────────────────────
 function PlanetMesh() {
   const fbx = useFBX("/planet/planet.fbx");
   const albedo = useTexture("/planet/albedo.webp");
   const orm = useTexture("/planet/orm.webp");
-  const [error, setError] = useState(false);
 
   const model = useMemo(() => {
-    try {
-      const clone = fbx.clone(true);
+    const clone = fbx.clone(true);
 
-      albedo.colorSpace = THREE.SRGBColorSpace;
-      albedo.wrapS = albedo.wrapT = THREE.RepeatWrapping;
-      orm.wrapS = orm.wrapT = THREE.RepeatWrapping;
-      albedo.anisotropy = 4;
-      orm.anisotropy = 4;
+    albedo.colorSpace = THREE.SRGBColorSpace;
+    albedo.wrapS = albedo.wrapT = THREE.RepeatWrapping;
+    orm.wrapS = orm.wrapT = THREE.RepeatWrapping;
+    albedo.anisotropy = 4;
+    orm.anisotropy = 4;
 
-      // Center + normalize scale so the model always reads as a fixed-size sphere
-      const box = new THREE.Box3().setFromObject(clone);
-      const sphere = new THREE.Sphere();
-      box.getBoundingSphere(sphere);
-      clone.position.sub(sphere.center);
-      clone.scale.setScalar(RADIUS / sphere.radius);
+    // Center + normalize scale so the model always reads as a fixed-size sphere
+    const box = new THREE.Box3().setFromObject(clone);
+    const sphere = new THREE.Sphere();
+    box.getBoundingSphere(sphere);
+    clone.position.sub(sphere.center);
+    clone.scale.setScalar(RADIUS / sphere.radius);
 
-      clone.traverse((child) => {
-        const mesh = child as THREE.Mesh;
-        if ((mesh as THREE.Mesh).isMesh) {
-          mesh.material = new THREE.MeshStandardMaterial({
-            map: albedo,
-            roughnessMap: orm,
-            metalnessMap: orm,
-            roughness: 1,
-            metalness: 1,
-          });
-        }
-      });
+    clone.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if ((mesh as THREE.Mesh).isMesh) {
+        mesh.material = new THREE.MeshStandardMaterial({
+          map: albedo,
+          roughnessMap: orm,
+          metalnessMap: orm,
+          roughness: 1,
+          metalness: 1,
+        });
+      }
+    });
 
-      return clone;
-    } catch (err) {
-      console.error("Failed to load FBX model:", err);
-      setError(true);
-      // Create a simple sphere as fallback
-      const geometry = new THREE.SphereGeometry(RADIUS, 64, 64);
-      const material = new THREE.MeshStandardMaterial({
-        color: 0x1a3f7a,
-        roughness: 0.8,
-        metalness: 0.2,
-      });
-      return new THREE.Mesh(geometry, material);
-    }
+    return clone;
   }, [fbx, albedo, orm]);
 
   return <primitive object={model} />;
@@ -96,187 +72,157 @@ function LoadingFallback() {
   );
 }
 
-// ─── VIDEO GAME POWER-UP MARKER (CSS/HTML style) ──────────────────────────
-function VideoGameMarker({
-  project,
+// ─── ORBIT PARAMETERS ───────────────────────────────────────────────────────
+// Each project's lat/lng seeds a distinct orbital plane so satellites read as
+// a deliberate constellation rather than random floating dots: latitude sets
+// the orbital inclination, longitude sets which way that plane faces.
+interface OrbitParams {
+  project: Project;
+  inclination: number;
+  nodeLongitude: number;
+  orbitRadius: number;
+  speed: number;
+  phase: number;
+}
+
+function buildOrbitParams(projects: Project[]): OrbitParams[] {
+  return projects.map((project, i) => ({
+    project,
+    inclination: THREE.MathUtils.degToRad(project.lat),
+    nodeLongitude: THREE.MathUtils.degToRad(project.lng + 180 + LNG_OFFSET),
+    orbitRadius: RADIUS * (1.35 + (i % 4) * 0.14),
+    speed: 0.12 + (i % 5) * 0.025,
+    phase: THREE.MathUtils.degToRad((i * 53) % 360),
+  }));
+}
+
+// ─── SATELLITE MARKER ───────────────────────────────────────────────────────
+function SatelliteMarker({
+  params,
   hovered,
   active,
   dimmed,
   onHover,
   onClick,
+  registry,
 }: {
-  project: Project;
+  params: OrbitParams;
   hovered: boolean;
   active: boolean;
   dimmed: boolean;
   onHover: (p: Project | null) => void;
   onClick: (proj: Project) => void;
+  registry: React.MutableRefObject<Map<string, THREE.Vector3>>;
 }) {
-  // Position markers ON the surface
-  const pos = useMemo(
-    () => latLngToVector3(project.lat, project.lng, RADIUS * 1.02),
-    [project]
-  );
+  const { project, inclination, nodeLongitude, orbitRadius, speed, phase } = params;
   const col = typeColor(project.type);
-  const scale = active ? 1.6 : hovered ? 1.3 : 1;
+  const revolveRef = useRef<THREE.Group>(null!);
+  const satelliteRef = useRef<THREE.Group>(null!);
+
+  useFrame((_, delta) => {
+    if (revolveRef.current) {
+      revolveRef.current.rotation.y += delta * speed;
+    }
+    if (satelliteRef.current) {
+      const worldPos = new THREE.Vector3();
+      satelliteRef.current.getWorldPosition(worldPos);
+      registry.current.set(project.id, worldPos);
+    }
+  });
+
+  const scale = active ? 1.7 : hovered ? 1.35 : 1;
 
   return (
-    <Html
-      position={pos}
-      distanceFactor={8}
-      style={{ pointerEvents: "none" }}
-      sprite
-    >
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick(project);
-        }}
-        onPointerEnter={() => onHover(project)}
-        onPointerLeave={() => onHover(null)}
-        style={{
-          position: "relative",
-          width: 0,
-          height: 0,
-          cursor: "pointer",
-          pointerEvents: "auto",
-          opacity: dimmed ? 0.4 : 1,
-          transition: "opacity 0.2s, transform 0.2s",
-          transform: `scale(${scale})`,
-          filter: active ? "drop-shadow(0 0 12px rgba(255,255,255,0.8))" : "none",
-        }}
-      >
-        {/* Glowing outer ring (video game power-up effect) */}
-        <div
-          style={{
-            position: "absolute",
-            left: -18,
-            top: -18,
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: `radial-gradient(circle, ${col}40 0%, ${col}20 30%, transparent 70%)`,
-            animation: hovered || active ? "powerupPulse 1.5s ease-in-out infinite" : "none",
-          }}
-        />
-        
-        {/* Outer glow ring */}
-        <div
-          style={{
-            position: "absolute",
-            left: -14,
-            top: -14,
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            border: `2px solid ${col}`,
-            boxShadow: `0 0 8px ${col}, inset 0 0 8px ${col}`,
-            opacity: 0.7,
-          }}
-        />
-        
-        {/* Main power-up body */}
-        <div
-          style={{
-            position: "absolute",
-            left: -10,
-            top: -10,
-            width: 20,
-            height: 20,
-            borderRadius: "50%",
-            background: active ? col : `linear-gradient(135deg, #fff 0%, ${col}30 100%)`,
-            border: active ? `2px solid #fff` : `2px solid ${col}`,
-            boxShadow: active 
-              ? `0 0 12px ${col}, inset 0 0 6px #fff` 
-              : `0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.6)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
-          }}
-        >
-          {/* Inner glow */}
-          <div
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: active ? "#fff" : col,
-              boxShadow: active ? `0 0 6px #fff` : "none",
-            }}
+    <group rotation={[0, nodeLongitude, 0]}>
+      <group rotation={[inclination, 0, 0]}>
+        {/* Orbit path */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[orbitRadius - 0.008, orbitRadius + 0.008, 128]} />
+          <meshBasicMaterial
+            color={col}
+            transparent
+            opacity={dimmed ? 0.06 : active || hovered ? 0.35 : 0.16}
+            side={THREE.DoubleSide}
+            depthWrite={false}
           />
-        </div>
-        
-        {/* Connection line to surface */}
-        <div
-          style={{
-            position: "absolute",
-            left: -1,
-            top: 12,
-            width: 2,
-            height: 16,
-            background: `linear-gradient(to bottom, ${col}80, ${col}20)`,
-            borderRadius: "1px",
-            transform: "rotate(45deg)",
-            transformOrigin: "top center",
-          }}
-        />
-        
-        {/* Project type indicator */}
-        <div
-          style={{
-            position: "absolute",
-            left: -6,
-            top: -30,
-            width: 12,
-            height: 12,
-            borderRadius: "2px",
-            background: col,
-            transform: "rotate(45deg)",
-            opacity: 0.9,
-            display: hovered || active ? "block" : "none",
-          }}
-        />
-        
-        {/* Tooltip */}
-        {hovered && !active && (
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              bottom: 32,
-              transform: "translateX(-50%)",
-              background: "rgba(17, 17, 17, 0.95)",
-              backdropFilter: "blur(4px)",
-              color: "#FAF8F4",
-              padding: "10px 16px",
-              whiteSpace: "nowrap",
-              zIndex: 35,
-              borderRadius: "4px",
-              border: `1px solid ${col}80`,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-              fontFamily: "'Syne', sans-serif",
-              fontWeight: 700,
-              fontSize: 14,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            {project.name}
-            <div
-              style={{
-                marginTop: "3px",
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10,
-                color: "#9CA3AF",
-                letterSpacing: "0.08em",
+        </mesh>
+        {/* Revolving satellite */}
+        <group ref={revolveRef} rotation={[0, phase, 0]}>
+          <group ref={satelliteRef} position={[orbitRadius, 0, 0]}>
+            <mesh
+              scale={scale}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick(project);
+              }}
+              onPointerEnter={(e) => {
+                e.stopPropagation();
+                onHover(project);
+                document.body.style.cursor = "pointer";
+              }}
+              onPointerLeave={() => {
+                onHover(null);
+                document.body.style.cursor = "auto";
               }}
             >
-              {project.region}
-            </div>
-          </div>
-        )}
-      </div>
-    </Html>
+              <octahedronGeometry args={[0.09, 0]} />
+              <meshStandardMaterial
+                color={active ? col : "#ffffff"}
+                emissive={col}
+                emissiveIntensity={active ? 1.1 : hovered ? 0.7 : 0.4}
+                metalness={0.5}
+                roughness={0.35}
+              />
+            </mesh>
+            <mesh rotation={[Math.PI / 2, 0, 0]} scale={scale}>
+              <ringGeometry args={[0.13, 0.155, 32]} />
+              <meshBasicMaterial
+                color={col}
+                transparent
+                opacity={active || hovered ? 0.65 : 0.3}
+                side={THREE.DoubleSide}
+                depthWrite={false}
+              />
+            </mesh>
+            {(hovered || active) && (
+              <Html distanceFactor={7} occlude style={{ pointerEvents: "none" }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "50%",
+                    bottom: 26,
+                    transform: "translateX(-50%)",
+                    background: "#111",
+                    color: "#FAF8F4",
+                    padding: "10px 16px",
+                    whiteSpace: "nowrap",
+                    fontFamily: "'Syne', sans-serif",
+                    fontWeight: 700,
+                    fontSize: 14,
+                    letterSpacing: "-0.01em",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+                  }}
+                >
+                  {project.name}
+                  <div
+                    style={{
+                      marginTop: 3,
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontWeight: 400,
+                      fontSize: 10,
+                      color: "#9CA3AF",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    {project.region}
+                  </div>
+                </div>
+              </Html>
+            )}
+          </group>
+        </group>
+      </group>
+    </group>
   );
 }
 
@@ -298,20 +244,26 @@ function GlobeScene({
 }) {
   const { camera } = useThree();
   const focusTarget = useRef<THREE.Vector3 | null>(null);
+  const prevActiveId = useRef<string | null>(null);
+  const satellitePositions = useRef<Map<string, THREE.Vector3>>(new Map());
+  const orbitParams = useMemo(() => buildOrbitParams(PROJECTS), []);
 
-  // Camera focus on selected project
-  useEffect(() => {
-    if (activeProject) {
-      const dir = latLngToVector3(activeProject.lat, activeProject.lng, 1).normalize();
-      const dist = camera.position.length();
-      focusTarget.current = dir.multiplyScalar(dist);
-    } else {
-      focusTarget.current = null;
-    }
-  }, [activeProject, camera]);
-
-  // Smooth camera movement to focus target
+  // Smooth camera movement toward whichever satellite was just selected.
+  // Position is read from the live registry (satellites keep moving), so the
+  // camera settles on wherever that satellite actually is at selection time.
   useFrame((_, delta) => {
+    if (activeProject && activeProject.id !== prevActiveId.current) {
+      const pos = satellitePositions.current.get(activeProject.id);
+      if (pos) {
+        const dir = pos.clone().normalize();
+        const dist = Math.max(camera.position.length(), RADIUS * 1.9);
+        focusTarget.current = dir.multiplyScalar(dist);
+      }
+      prevActiveId.current = activeProject.id;
+    } else if (!activeProject) {
+      prevActiveId.current = null;
+    }
+
     if (focusTarget.current) {
       camera.position.lerp(focusTarget.current, Math.min(1, delta * 2.2));
       controlsRef.current?.update();
@@ -327,20 +279,21 @@ function GlobeScene({
       <directionalLight position={[4, 3, 5]} intensity={1.35} />
       <directionalLight position={[-5, -2, -4]} intensity={0.25} />
       <Suspense fallback={<LoadingFallback />}>
-        {/* Globe is fixed - rotation controlled by OrbitControls */}
+        {/* Globe is fixed on its axis - rotation controlled only by OrbitControls */}
         <PlanetMesh />
-        {/* Video game power-up markers on surface */}
-        {PROJECTS.map((p) => (
-          <VideoGameMarker
-            key={p.id}
-            project={p}
-            hovered={hoveredPin?.id === p.id}
-            active={activeProject?.id === p.id}
-            dimmed={!!activeProject && activeProject.id !== p.id}
+        {/* Projects orbit the planet as satellites */}
+        {orbitParams.map((op) => (
+          <SatelliteMarker
+            key={op.project.id}
+            params={op}
+            hovered={hoveredPin?.id === op.project.id}
+            active={activeProject?.id === op.project.id}
+            dimmed={!!activeProject && activeProject.id !== op.project.id}
             onHover={setHoveredPin}
             onClick={(proj) =>
               onSelectProject(activeProject?.id === proj.id ? null : proj)
             }
+            registry={satellitePositions}
           />
         ))}
       </Suspense>
@@ -456,22 +409,8 @@ export default function PlanetGlobe({
     controlsRef.current?.reset();
   };
 
-  const [webglError, setWebglError] = useState(false);
-
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <style>{`
-        @keyframes powerupPulse {
-          0% { transform: scale(0.8); opacity: 0.6; }
-          50% { transform: scale(1.2); opacity: 0.3; }
-          100% { transform: scale(0.8); opacity: 0.6; }
-        }
-        
-        @keyframes innerGlow {
-          0% { opacity: 0.6; transform: scale(0.9); }
-          100% { opacity: 1; transform: scale(1.1); }
-        }
-      `}</style>
       <div
         style={{
           width: "100%",
@@ -553,7 +492,7 @@ export default function PlanetGlobe({
             zIndex: 20,
           }}
         >
-          DRAG TO SPIN GLOBE · SCROLL TO ZOOM · CLICK PROJECT PINS
+          DRAG TO SPIN GLOBE · SCROLL TO ZOOM · CLICK A SATELLITE
         </div>
       )}
 

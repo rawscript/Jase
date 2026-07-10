@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Linkedin, Instagram, Twitter } from "lucide-react";
+import { Linkedin, Instagram, Twitter, Download, ArrowUpRight } from "lucide-react";
 import Footer from "@/components/footer";
+import { PUBLICATIONS } from "@/lib/publications-data";
 
 export default function About() {
   const socialLinks = [
@@ -79,6 +80,20 @@ export default function About() {
                   </motion.a>
                 ))}
               </div>
+
+              {/* Resume Download */}
+              <div className="pt-2">
+                <motion.a
+                  href="/resume.pdf"
+                  download
+                  className="inline-flex items-center gap-2 border-2 border-black px-6 py-3 text-sm font-mono tracking-widest hover:bg-black hover:text-white transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Download size={16} />
+                  DOWNLOAD RESUME
+                </motion.a>
+              </div>
             </div>
           </motion.div>
 
@@ -104,6 +119,54 @@ export default function About() {
           </motion.div>
         </div>
       </div>
+
+      {/* Publications */}
+      {PUBLICATIONS.length > 0 && (
+        <div className="container mx-auto px-8 pb-16 md:pb-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <h2
+              className="text-2xl md:text-3xl font-bold mb-2"
+              style={{ fontFamily: "'Syne', sans-serif", letterSpacing: "-0.02em" }}
+            >
+              Publications
+            </h2>
+            <div className="w-16 h-1 bg-black mb-10"></div>
+
+            <div className="divide-y divide-black/10 border-t border-b border-black/10">
+              {PUBLICATIONS.map((pub) => (
+                <a
+                  key={pub.id}
+                  href={pub.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between gap-6 py-6 hover:bg-black/[0.02] transition-colors"
+                >
+                  <div>
+                    <p
+                      className="text-lg font-semibold group-hover:underline"
+                      style={{ fontFamily: "'Syne', sans-serif" }}
+                    >
+                      {pub.title}
+                    </p>
+                    <p className="text-sm text-gray-500 font-mono tracking-widest mt-1">
+                      {pub.venue.toUpperCase()} · {pub.year}
+                    </p>
+                  </div>
+                  <ArrowUpRight
+                    size={22}
+                    className="shrink-0 text-gray-400 group-hover:text-black transition-colors"
+                  />
+                </a>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Footer with About-specific message */}
       <Footer pageContext="about" />

@@ -84,7 +84,7 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
     } catch (error) {
       toast({
         title: "Something went wrong",
-        description: error.message,
+        description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });
     } finally {
