@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Github, Linkedin, Twitter, Instagram } from "lucide-react";
+import TimelineScroller from "./timeline-scroller";
 
 export default function AboutSection() {
   const socialLinks = [
@@ -12,6 +13,20 @@ export default function AboutSection() {
   return (
     <section id="about" className="section-spacing" style={{ backgroundColor: 'var(--portfolio-secondary)' }}>
       <div className="container mx-auto px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true }}
+          className="mb-20"
+        >
+          <h2 className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text text-center">Journey Timeline</h2>
+          <p className="text-lg body-text mb-12 leading-relaxed text-center max-w-2xl mx-auto">
+            Scroll through my professional journey—from data analyst beginnings to global engineering work.
+          </p>
+          <TimelineScroller />
+        </motion.div>
+
         <div className="grid md:grid-cols-2 gap-20 items-center">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -24,7 +39,7 @@ export default function AboutSection() {
               I'm a passionate Geo spatial Data Engineer
             </p>
             <p className="text-lg body-text mb-12 leading-relaxed">
-              My journey began with a fascination for technology and  Spatial Data. 
+              My journey began with a fascination for technology and Spatial Data. 
             </p>
             <div className="flex space-x-6">
               {socialLinks.map((social) => (

@@ -11,11 +11,11 @@ export interface Publication {
 }
 
 export const PUBLICATIONS: Publication[] = [
-  // {
-  //   id: "example-slug",
-  //   title: "Title of the publication",
-  //   venue: "Where it was published",
-  //   year: "2024",
-  //   link: "https://example.com/article",
-  // },
+   {
+ id: "PAC2025",
+  title: "Decentralized Energy Management for African Industries: AI-Controlled TEG Systems with Sensor-Guided Relay Switching",
+  venue: "Cairo, Egypt",
+  year: "2024",
+  link: "https://ieeexplore-custom.ieee.org/document/11289182",
+  },
 ];
