@@ -73,7 +73,7 @@ function LoadingFallback() {
 }
 
 // ─── ORBIT PARAMETERS ───────────────────────────────────────────────────────
-// Each project's lat/lng seeds a distinct orbital plane so satellites read as
+// Each project's lat/lng seeds a distinct orbital plane so rocks/moons read as
 // a deliberate constellation rather than random floating dots: latitude sets
 // the orbital inclination, longitude sets which way that plane faces.
 interface OrbitParams {
@@ -96,8 +96,8 @@ function buildOrbitParams(projects: Project[]): OrbitParams[] {
   }));
 }
 
-// ─── SATELLITE MARKER ───────────────────────────────────────────────────────
-function SatelliteMarker({
+// ─── ROCK/MOON MARKER ───────────────────────────────────────────────────────
+function RockMoonMarker({
   params,
   hovered,
   active,
@@ -117,15 +117,15 @@ function SatelliteMarker({
   const { project, inclination, nodeLongitude, orbitRadius, speed, phase } = params;
   const col = typeColor(project.type);
   const revolveRef = useRef<THREE.Group>(null!);
-  const satelliteRef = useRef<THREE.Group>(null!);
+  const rockMoonRef = useRef<THREE.Group>(null!);
 
   useFrame((_, delta) => {
     if (revolveRef.current) {
       revolveRef.current.rotation.y += delta * speed;
     }
-    if (satelliteRef.current) {
+    if (rockMoonRef.current) {
       const worldPos = new THREE.Vector3();
-      satelliteRef.current.getWorldPosition(worldPos);
+      rockMoonRef.current.getWorldPosition(worldPos);
       registry.current.set(project.id, worldPos);
     }
   });
@@ -135,33 +135,75 @@ function SatelliteMarker({
   return (
     <group rotation={[0, nodeLongitude, 0]}>
       <group rotation={[inclination, 0, 0]}>
-        {/* Orbit path - Clickable */}
-        <mesh 
-          rotation={[-Math.PI / 2, 0, 0]}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick(project);
-          }}
-          onPointerEnter={(e) => {
-            e.stopPropagation();
-            onHover(project);
-            document.body.style.cursor = "pointer";
-          }}
-          onPointerLeave={() => {
-            onHover(null);
-            document.body.style.cursor = "auto";
-          }}
-        >
-          <ringGeometry args={[orbitRadius - 0.008, orbitRadius + 0.008, 128]} />
-          <meshBasicMaterial
-            color={col}
-            transparent
-            opacity={dimmed ? 0.02 : active ? 0.6 : hovered ? 0.4 : 0.2}
-            side={THREE.DoubleSide}
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
-          />
-        </mesh>
+        {/* Orbit path - Clickable - Made to look like scattered rocks/moons along the path */}
+        <group>
+          {/* Main orbit ring */}
+          <mesh 
+            rotation={[-Math.PI / 2, 0, 0]}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick(project);
+            }}
+            onPointerEnter={(e) => {
+              e.stopPropagation();
+              onHover(project);
+              document.body.style.cursor = "pointer";
+            }}
+            onPointerLeave={() => {
+              onHover(null);
+              document.body.style.cursor = "auto";
+            }}
+          >
+            <ringGeometry args={[orbitRadius - 0.008, orbitRadius + 0.008, 128]} />
+            <meshBasicMaterial
+              color={col}
+              transparent
+              opacity={dimmed ? 0.02 : active ? 0.6 : hovered ? 0.4 : 0.2}
+              side={THREE.DoubleSide}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+          
+          {/* Scattered "rocks/moons" along the orbit - each clickable */}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const angle = (i / 12) * Math.PI * 2;
+            const rockSize = 0.04 + Math.random() * 0.02;
+            const rockX = Math.cos(angle) * orbitRadius;
+            const rockZ = Math.sin(angle) * orbitRadius;
+            
+            return (
+              <mesh
+                key={`rock-${i}`}
+                position={[rockX, 0, rockZ]}
+                rotation={[Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI]}
+                scale={[rockSize, rockSize * 0.8, rockSize]}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick(project);
+                }}
+                onPointerEnter={(e) => {
+                  e.stopPropagation();
+                  onHover(project);
+                  document.body.style.cursor = "pointer";
+                }}
+                onPointerLeave={() => {
+                  onHover(null);
+                  document.body.style.cursor = "auto";
+                }}
+              >
+                <dodecahedronGeometry args={[1, 0]} />
+                <meshStandardMaterial
+                  color={col}
+                  emissive={col}
+                  emissiveIntensity={active ? 0.8 : hovered ? 0.5 : 0.2}
+                  metalness={0.7}
+                  roughness={0.8}
+                />
+              </mesh>
+            );
+          })}
+        </group>
         
         {/* Enhanced orbit visualization when active */}
         {active && (
@@ -177,9 +219,9 @@ function SatelliteMarker({
             />
           </mesh>
         )}
-        {/* Revolving satellite */}
+        {/* Revolving rock/moon */}
         <group ref={revolveRef} rotation={[0, phase, 0]}>
-          <group ref={satelliteRef} position={[orbitRadius, 0, 0]}>
+          <group ref={rockMoonRef} position={[orbitRadius, 0, 0]}>
             <mesh
               scale={scale}
               onClick={(e) => {
@@ -200,34 +242,48 @@ function SatelliteMarker({
               <meshStandardMaterial
                 color={active ? col : "#ffffff"}
                 emissive={col}
-                emissiveIntensity={active ? 1.5 : hovered ? 1.0 : 0.6}
-                metalness={0.8}
-                roughness={0.2}
+                emissiveIntensity={active ? 2.0 : hovered ? 1.3 : 0.8} {/* Increased intensity */}
+                metalness={0.9} {/* More metallic */}
+                roughness={0.1} {/* Shinier */}
                 emissiveMap={null}
               />
             </mesh>
-            <mesh rotation={[Math.PI / 2, 0, 0]} scale={scale}>
-              <ringGeometry args={[0.13, 0.155, 32]} />
+            <mesh rotation={[Math.PI / 2, 0, 0]} scale={scale * 1.1}> {/* Larger ring */}
+              <ringGeometry args={[0.13, 0.165, 32]} />
               <meshBasicMaterial
                 color={col}
                 transparent
-                opacity={active || hovered ? 0.65 : 0.3}
+                opacity={active ? 0.8 : hovered ? 0.6 : 0.4} {/* More visible */}
                 side={THREE.DoubleSide}
                 depthWrite={false}
               />
             </mesh>
-            {/* Glowing aura for active satellite */}
+            {/* Enhanced glowing aura for active rock/moon with pulsing */}
             {active && (
-              <mesh scale={1.8}>
-                <sphereGeometry args={[0.08, 16, 16]} />
-                <meshBasicMaterial
-                  color={col}
-                  transparent
-                  opacity={0.2}
-                  depthWrite={false}
-                  blending={THREE.AdditiveBlending}
-                />
-              </mesh>
+              <>
+                <mesh scale={2.0}>
+                  <sphereGeometry args={[0.08, 16, 16]} />
+                  <meshBasicMaterial
+                    color={col}
+                    transparent
+                    opacity={0.3}
+                    depthWrite={false}
+                    blending={THREE.AdditiveBlending}
+                  />
+                </mesh>
+                {/* Pulsing outer ring */}
+                <mesh rotation={[Math.PI / 2, 0, 0]} scale={1.5}>
+                  <ringGeometry args={[0.2, 0.25, 32]} />
+                  <meshBasicMaterial
+                    color={col}
+                    transparent
+                    opacity={0.15}
+                    side={THREE.DoubleSide}
+                    depthWrite={false}
+                    blending={THREE.AdditiveBlending}
+                  />
+                </mesh>
+              </>
             )}
 
             {(hovered || active) && (
@@ -292,7 +348,7 @@ function GlobeScene({
   const { camera } = useThree();
   const focusTarget = useRef<THREE.Vector3 | null>(null);
   const prevActiveId = useRef<string | null>(null);
-  const satellitePositions = useRef<Map<string, THREE.Vector3>>(new Map());
+  const rockMoonPositions = useRef<Map<string, THREE.Vector3>>(new Map());
   const orbitParams = useMemo(() => buildOrbitParams(PROJECTS), []);
 
   // Smooth camera movement toward whichever satellite was just selected.
@@ -300,7 +356,7 @@ function GlobeScene({
   // camera settles on wherever that satellite actually is at selection time.
   useFrame((_, delta) => {
     if (activeProject && activeProject.id !== prevActiveId.current) {
-      const pos = satellitePositions.current.get(activeProject.id);
+      const pos = rockMoonPositions.current.get(activeProject.id);
       if (pos) {
         const dir = pos.clone().normalize();
         const dist = Math.max(camera.position.length(), RADIUS * 1.9);
@@ -340,7 +396,7 @@ function GlobeScene({
             onClick={(proj) =>
               onSelectProject(activeProject?.id === proj.id ? null : proj)
             }
-            registry={satellitePositions}
+            registry={rockMoonPositions}
           />
         ))}
       </Suspense>
@@ -527,7 +583,7 @@ export default function PlanetGlobe({
         />
       )}
 
-      {/* Hint text */}
+      {/* Hint text - Always show on mobile, conditionally on desktop */}
       {!isContactOpen && !activeProject && (
         <div
           style={{
@@ -536,15 +592,27 @@ export default function PlanetGlobe({
             left: "50%",
             transform: "translateX(-50%)",
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9,
+            fontSize: isMobile ? 8 : 9,
             color: "#9CA3AF",
             letterSpacing: "0.14em",
             pointerEvents: "none",
             whiteSpace: "nowrap",
             zIndex: 20,
+            background: isMobile ? "rgba(0, 0, 0, 0.7)" : "transparent",
+            padding: isMobile ? "8px 12px" : "0",
+            borderRadius: isMobile ? "20px" : "0",
+            backdropFilter: isMobile ? "blur(4px)" : "none",
+            textAlign: "center",
           }}
         >
-          DRAG TO SPIN GLOBE · SCROLL TO ZOOM · CLICK A SATELLITE
+          {isMobile ? (
+            <>
+              DRAG TO SPIN · PINCH TO ZOOM<br />
+              TAP SATELLITES OR ROCKS FOR DETAILS
+            </>
+          ) : (
+            "DRAG TO SPIN GLOBE · SCROLL TO ZOOM · CLICK SATELLITES OR ROCKS"
+          )}
         </div>
       )}
 

@@ -214,8 +214,16 @@ export default function About() {
               <div className="w-16 h-1 bg-black mb-10 mx-auto"></div>
               
               <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
-                Explore my projects orbiting the planet. Click on any satellite or its orbit to view detailed information about each project.
+                Explore my projects orbiting the planet. Click on any satellite, its orbit path, or the scattered rocks to view detailed information about each project.
               </p>
+              
+              <div className="text-gray-500 text-sm text-center max-w-2xl mx-auto mb-8">
+                <p className="font-mono text-xs tracking-widest mb-1">NOTE ABOUT INTERACTIVITY</p>
+                <p className="text-gray-600">
+                  The planet itself isn't clickable by design — it serves as the central anchor while the orbiting elements 
+                  (satellites and rocks) represent interactive projects. This prevents conflicts with the drag-to-rotate controls.
+                </p>
+              </div>
             </motion.div>
 
             {/* Interactive Globe Container */}
@@ -233,7 +241,7 @@ export default function About() {
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
                 <div className="bg-black/80 text-white px-4 py-2 rounded-full backdrop-blur-sm">
                   <p className="text-xs font-mono tracking-widest">
-                    CLICK ANY SATELLITE OR ORBIT TO VIEW PROJECT DETAILS
+                    CLICK ANY SATELLITE, ORBIT, OR ROCKS TO VIEW PROJECT DETAILS
                   </p>
                 </div>
               </div>
