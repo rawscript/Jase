@@ -135,8 +135,23 @@ function SatelliteMarker({
   return (
     <group rotation={[0, nodeLongitude, 0]}>
       <group rotation={[inclination, 0, 0]}>
-        {/* Orbit path */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        {/* Orbit path - Clickable */}
+        <mesh 
+          rotation={[-Math.PI / 2, 0, 0]}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick(project);
+          }}
+          onPointerEnter={(e) => {
+            e.stopPropagation();
+            onHover(project);
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerLeave={() => {
+            onHover(null);
+            document.body.style.cursor = "auto";
+          }}
+        >
           <ringGeometry args={[orbitRadius - 0.008, orbitRadius + 0.008, 128]} />
           <meshBasicMaterial
             color={col}
@@ -537,9 +552,7 @@ export default function PlanetGlobe({
       {activeProject && (
         <ProjectPanel project={activeProject} onClose={() => onSelectProject(null)} />
       )}
-    </div>
-  );
-}
+
       {/* Add CSS for pulse animation */}
       <style>{`
         @keyframes pulse {
