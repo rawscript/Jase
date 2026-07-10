@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Github, Linkedin, Twitter, Instagram } from "lucide-react";
 import TimelineScroller from "./timeline-scroller";
+import VerticalScroller from "./vertical-scroller";
 
 export default function AboutSection() {
   const socialLinks = [
@@ -36,10 +37,16 @@ export default function AboutSection() {
           >
             <h2 className="text-4xl md:text-5xl minimal-heading mb-8 gradient-text">About</h2>
             <p className="text-lg body-text mb-8 leading-relaxed">
-              I'm a passionate Geo spatial Data Engineer
+              I'm a passionate Geo spatial Data Engineer with expertise in cloud-native architecture, data pipelines, and scalable application development.
             </p>
+            
+            {/* Vertical Scroller Integration */}
+            <div className="mb-8">
+              <VerticalScroller />
+            </div>
+            
             <p className="text-lg body-text mb-12 leading-relaxed">
-              My journey began with a fascination for technology and Spatial Data. 
+              My journey began with a fascination for technology and Spatial Data, evolving into a career focused on building resilient, scalable systems that solve real-world problems.
             </p>
             <div className="flex space-x-6">
               {socialLinks.map((social) => (

@@ -110,6 +110,43 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
         overflowY: "auto",
       }}
     >
+      {/* Scroll indicator arrow */}
+      {showScrollIndicator && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 32,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 100,
+            animation: "bounce 2s infinite",
+            pointerEvents: "none",
+          }}
+        >
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 5L12 19M12 19L6 13M12 19L18 13"
+              stroke="#D4500A"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      )}
+      <style>{`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+          40% { transform: translateX(-50%) translateY(-10px); }
+          60% { transform: translateX(-50%) translateY(-5px); }
+        }
+      `}</style>
       <button
         onClick={onClose}
         onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}

@@ -141,11 +141,27 @@ function SatelliteMarker({
           <meshBasicMaterial
             color={col}
             transparent
-            opacity={dimmed ? 0.06 : active || hovered ? 0.35 : 0.16}
+            opacity={dimmed ? 0.02 : active ? 0.6 : hovered ? 0.4 : 0.2}
             side={THREE.DoubleSide}
             depthWrite={false}
+            blending={THREE.AdditiveBlending}
           />
         </mesh>
+        
+        {/* Enhanced orbit visualization when active */}
+        {active && (
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[orbitRadius - 0.012, orbitRadius + 0.012, 64]} />
+            <meshBasicMaterial
+              color="#ffffff"
+              transparent
+              opacity={0.15}
+              side={THREE.DoubleSide}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        )}
         {/* Revolving satellite */}
         <group ref={revolveRef} rotation={[0, phase, 0]}>
           <group ref={satelliteRef} position={[orbitRadius, 0, 0]}>
@@ -165,13 +181,14 @@ function SatelliteMarker({
                 document.body.style.cursor = "auto";
               }}
             >
-              <octahedronGeometry args={[0.09, 0]} />
+              <octahedronGeometry args={[0.11, 0]} />
               <meshStandardMaterial
                 color={active ? col : "#ffffff"}
                 emissive={col}
-                emissiveIntensity={active ? 1.1 : hovered ? 0.7 : 0.4}
-                metalness={0.5}
-                roughness={0.35}
+                emissiveIntensity={active ? 1.5 : hovered ? 1.0 : 0.6}
+                metalness={0.8}
+                roughness={0.2}
+                emissiveMap={null}
               />
             </mesh>
             <mesh rotation={[Math.PI / 2, 0, 0]} scale={scale}>
@@ -184,6 +201,20 @@ function SatelliteMarker({
                 depthWrite={false}
               />
             </mesh>
+            {/* Glowing aura for active satellite */}
+            {active && (
+              <mesh scale={1.8}>
+                <sphereGeometry args={[0.08, 16, 16]} />
+                <meshBasicMaterial
+                  color={col}
+                  transparent
+                  opacity={0.2}
+                  depthWrite={false}
+                  blending={THREE.AdditiveBlending}
+                />
+              </mesh>
+            )}
+
             {(hovered || active) && (
               <Html distanceFactor={7} occlude style={{ pointerEvents: "none" }}>
                 <div
@@ -201,6 +232,7 @@ function SatelliteMarker({
                     fontSize: 14,
                     letterSpacing: "-0.01em",
                     boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+                    animation: active ? "pulse 2s infinite" : "none",
                   }}
                 >
                   {project.name}
@@ -453,8 +485,10 @@ export default function PlanetGlobe({
             enableZoom={true}
             minDistance={RADIUS * 1.15}
             maxDistance={RADIUS * 4.5}
-            rotateSpeed={0.8}
-            zoomSpeed={0.8}
+            rotateSpeed={1.2} // Smoother rotation
+            zoomSpeed={1.2} // Smoother zoom
+            dampingFactor={0.08} // Add damping for smoother controls
+            enableDamping={true} // Enable momentum-based controls
             enabled={!isContactOpen}
             // Allow horizontal rotation around the globe
             // Fixed vertical angle (no tilting up/down)
@@ -462,6 +496,9 @@ export default function PlanetGlobe({
             maxPolarAngle={Math.PI / 2}
             // Orbit around the globe center
             target={[0, 0, 0]}
+            // Add auto-rotation when not interacting
+            autoRotate={!activeProject && !hoveredPin && !dragging && !isContactOpen}
+            autoRotateSpeed={0.3} // Gentle auto-rotation
           />
         </Canvas>
       </div>
@@ -500,6 +537,17 @@ export default function PlanetGlobe({
       {activeProject && (
         <ProjectPanel project={activeProject} onClose={() => onSelectProject(null)} />
       )}
+    </div>
+  );
+}
+      {/* Add CSS for pulse animation */}
+      <style>{`
+        @keyframes pulse {
+          0% { opacity: 0.9; transform: translateX(-50%) scale(1); }
+          50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+          100% { opacity: 0.9; transform: translateX(-50%) scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
