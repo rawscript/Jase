@@ -242,18 +242,18 @@ function RockMoonMarker({
               <meshStandardMaterial
                 color={active ? col : "#ffffff"}
                 emissive={col}
-                emissiveIntensity={active ? 2.0 : hovered ? 1.3 : 0.8} {/* Increased intensity */}
-                metalness={0.9} {/* More metallic */}
-                roughness={0.1} {/* Shinier */}
+                emissiveIntensity={active ? 2.0 : hovered ? 1.3 : 0.8}
+                metalness={0.9}
+                roughness={0.1}
                 emissiveMap={null}
               />
             </mesh>
-            <mesh rotation={[Math.PI / 2, 0, 0]} scale={scale * 1.1}> {/* Larger ring */}
+            <mesh rotation={[Math.PI / 2, 0, 0]} scale={scale * 1.1}>
               <ringGeometry args={[0.13, 0.165, 32]} />
               <meshBasicMaterial
                 color={col}
                 transparent
-                opacity={active ? 0.8 : hovered ? 0.6 : 0.4} {/* More visible */}
+                opacity={active ? 0.8 : hovered ? 0.6 : 0.4}
                 side={THREE.DoubleSide}
                 depthWrite={false}
               />
