@@ -386,7 +386,7 @@ function GlobeScene({
         <PlanetMesh />
         {/* Projects orbit the planet as satellites */}
         {orbitParams.map((op) => (
-          <SatelliteMarker
+          <RockMoonMarker
             key={op.project.id}
             params={op}
             hovered={hoveredPin?.id === op.project.id}
@@ -477,13 +477,34 @@ export default function PlanetGlobe({
   const [hoveredPin, setHoveredPin] = useState<Project | null>(null);
   const [dragging, setDragging] = useState(false);
   const controlsRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isMobile, setIsMobile] = useState(false);
 
+  // Responsive container sizing - updates on resize
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const { clientWidth, clientHeight } = containerRef.current;
+        setDimensions({ width: clientWidth, height: clientHeight });
+      }
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    updateDimensions();
+    
+    // Use ResizeObserver for responsive updates like RevolverMaps
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    window.addEventListener("resize", updateDimensions);
+    
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateDimensions);
+    };
   }, []);
 
   useEffect(() => {
@@ -512,20 +533,39 @@ export default function PlanetGlobe({
     controlsRef.current?.reset();
   };
 
+  // Calculate responsive FOV based on aspect ratio (like RevolverMaps)
+  const getResponsiveFOV = () => {
+    if (dimensions.width === 0 || dimensions.height === 0) return 42;
+    const aspectRatio = dimensions.width / dimensions.height;
+    // Adjust FOV based on aspect ratio for optimal viewing
+    if (aspectRatio > 1.5) return 38; // Wide screens
+    if (aspectRatio < 0.8) return 48; // Tall/mobile screens
+    return 42; // Default
+  };
+
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <div 
+      ref={containerRef}
+      style={{ 
+        position: "relative", 
+        width: "100%", 
+        height: "100%",
+        overflow: "hidden" // Prevent scrollbars like RevolverMaps
+      }}
+    >
       <div
         style={{
           width: "100%",
           height: "100%",
           cursor: isContactOpen ? "default" : dragging ? "grabbing" : "grab",
+          touchAction: "none", // Improve touch handling on mobile
         }}
         onPointerDown={() => setDragging(true)}
         onPointerUp={() => setDragging(false)}
         onPointerLeave={() => setDragging(false)}
       >
         <Canvas
-          camera={{ position: [0, 0, 5.5], fov: 42 }}
+          camera={{ position: [0, 0, 5.5], fov: getResponsiveFOV() }}
           dpr={[1, 2]}
           gl={{ 
             antialias: true, 
@@ -556,20 +596,20 @@ export default function PlanetGlobe({
             enableZoom={true}
             minDistance={RADIUS * 1.15}
             maxDistance={RADIUS * 4.5}
-            rotateSpeed={1.2} // Smoother rotation
-            zoomSpeed={1.2} // Smoother zoom
-            dampingFactor={0.08} // Add damping for smoother controls
-            enableDamping={true} // Enable momentum-based controls
+            rotateSpeed={isMobile ? 0.8 : 1.2} // Slower on mobile for better control
+            zoomSpeed={isMobile ? 0.8 : 1.2} // Slower on mobile
+            dampingFactor={0.08}
+            enableDamping={true}
             enabled={!isContactOpen}
-            // Allow horizontal rotation around the globe
-            // Fixed vertical angle (no tilting up/down)
             minPolarAngle={Math.PI / 2}
             maxPolarAngle={Math.PI / 2}
-            // Orbit around the globe center
             target={[0, 0, 0]}
-            // Add auto-rotation when not interacting
             autoRotate={!activeProject && !hoveredPin && !dragging && !isContactOpen}
-            autoRotateSpeed={0.3} // Gentle auto-rotation
+            autoRotateSpeed={0.3}
+            touches={{
+              ONE: THREE.TOUCH.ROTATE,
+              TWO: THREE.TOUCH.DOLLY_ROTATE // Enable pinch-to-zoom on mobile
+            }}
           />
         </Canvas>
       </div>
@@ -583,26 +623,27 @@ export default function PlanetGlobe({
         />
       )}
 
-      {/* Hint text - Always show on mobile, conditionally on desktop */}
+      {/* Hint text - Responsive positioning */}
       {!isContactOpen && !activeProject && (
         <div
           style={{
             position: "absolute",
-            bottom: 38,
+            bottom: isMobile ? 20 : 38,
             left: "50%",
             transform: "translateX(-50%)",
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: isMobile ? 8 : 9,
+            fontSize: isMobile ? 9 : 11,
             color: "#9CA3AF",
-            letterSpacing: "0.14em",
+            letterSpacing: "0.12em",
             pointerEvents: "none",
             whiteSpace: "nowrap",
             zIndex: 20,
-            background: isMobile ? "rgba(0, 0, 0, 0.7)" : "transparent",
-            padding: isMobile ? "8px 12px" : "0",
-            borderRadius: isMobile ? "20px" : "0",
-            backdropFilter: isMobile ? "blur(4px)" : "none",
+            background: isMobile ? "rgba(0, 0, 0, 0.75)" : "transparent",
+            padding: isMobile ? "10px 16px" : "0",
+            borderRadius: isMobile ? "24px" : "0",
+            backdropFilter: isMobile ? "blur(8px)" : "none",
             textAlign: "center",
+            maxWidth: isMobile ? "90%" : "100%",
           }}
         >
           {isMobile ? (
