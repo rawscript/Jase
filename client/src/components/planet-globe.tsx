@@ -480,6 +480,7 @@ export default function PlanetGlobe({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isMobile, setIsMobile] = useState(false);
+  const [userInteracting, setUserInteracting] = useState(false);
 
   // Responsive container sizing - updates on resize
   useEffect(() => {
@@ -558,11 +559,21 @@ export default function PlanetGlobe({
           width: "100%",
           height: "100%",
           cursor: isContactOpen ? "default" : dragging ? "grabbing" : "grab",
-          touchAction: "none", // Improve touch handling on mobile
+          touchAction: "none",
         }}
-        onPointerDown={() => setDragging(true)}
-        onPointerUp={() => setDragging(false)}
-        onPointerLeave={() => setDragging(false)}
+        onPointerDown={() => {
+          setDragging(true);
+          setUserInteracting(true);
+        }}
+        onPointerUp={() => {
+          setDragging(false);
+          // Delay resetting user interaction to allow momentum to finish
+          setTimeout(() => setUserInteracting(false), 3000);
+        }}
+        onPointerLeave={() => {
+          setDragging(false);
+          setTimeout(() => setUserInteracting(false), 3000);
+        }}
       >
         <Canvas
           camera={{ position: [0, 0, 5.5], fov: getResponsiveFOV() }}
@@ -596,19 +607,20 @@ export default function PlanetGlobe({
             enableZoom={true}
             minDistance={RADIUS * 1.15}
             maxDistance={RADIUS * 4.5}
-            rotateSpeed={isMobile ? 0.8 : 1.2} // Slower on mobile for better control
-            zoomSpeed={isMobile ? 0.8 : 1.2} // Slower on mobile
-            dampingFactor={0.08}
+            rotateSpeed={isMobile ? 0.5 : 0.7}
+            zoomSpeed={isMobile ? 0.6 : 0.8}
+            dampingFactor={0.05}
             enableDamping={true}
             enabled={!isContactOpen}
-            minPolarAngle={Math.PI / 2}
-            maxPolarAngle={Math.PI / 2}
+            // Allow full rotation in all directions like RevolverMaps
+            minPolarAngle={0}
+            maxPolarAngle={Math.PI}
             target={[0, 0, 0]}
-            autoRotate={!activeProject && !hoveredPin && !dragging && !isContactOpen}
-            autoRotateSpeed={0.3}
+            autoRotate={!activeProject && !hoveredPin && !dragging && !isContactOpen && !userInteracting}
+            autoRotateSpeed={0.5}
             touches={{
               ONE: THREE.TOUCH.ROTATE,
-              TWO: THREE.TOUCH.DOLLY_ROTATE // Enable pinch-to-zoom on mobile
+              TWO: THREE.TOUCH.DOLLY_ROTATE
             }}
           />
         </Canvas>
