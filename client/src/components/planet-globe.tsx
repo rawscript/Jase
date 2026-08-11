@@ -122,8 +122,8 @@ function AsteroidModel({ scale }: { scale: number }) {
     return clone;
   }, [fbx, texture]);
   
-  // Make the asteroids much smaller - reduced from 0.11 to 0.022 (20% of original)
-  return <primitive object={model} scale={scale * 0.022} />;
+  // Shrink asteroids to 7% of their original size (0.11 * 0.07 = 0.0077)
+  return <primitive object={model} scale={scale * 0.0077} />;
 }
 
 // ─── ROCK/MOON MARKER ───────────────────────────────────────────────────────
