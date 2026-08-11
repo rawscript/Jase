@@ -96,6 +96,41 @@ function buildOrbitParams(projects: Project[]): OrbitParams[] {
   }));
 }
 
+// ─── ASTEROID MODEL LOADER ───────────────────────────────────────────────────
+function AsteroidModel({ scale }: { scale: number }) {
+  const fbx = useFBX("/asteroids/output.fbx");
+  const texture = useTexture("/asteroids/textured_mesh.jpg");
+  
+  const model = useMemo(() => {
+    const clone = fbx.clone(true);
+    
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.anisotropy = 4;
+    
+    // Normalize scale to a consistent size
+    const box = new THREE.Box3().setFromObject(clone);
+    const sphere = new THREE.Sphere();
+    box.getBoundingSphere(sphere);
+    clone.scale.setScalar(0.15 / sphere.radius); // Adjust 0.15 to control asteroid size
+    
+    clone.traverse((child) => {
+      const mesh = child as THREE.Mesh;
+      if ((mesh as THREE.Mesh).isMesh) {
+        mesh.material = new THREE.MeshStandardMaterial({
+          map: texture,
+          roughness: 0.8,
+          metalness: 0.2,
+        });
+      }
+    });
+    
+    return clone;
+  }, [fbx, texture]);
+  
+  return <primitive object={model} scale={scale} />;
+}
+
 // ─── ROCK/MOON MARKER ───────────────────────────────────────────────────────
 function RockMoonMarker({
   params,
@@ -222,8 +257,7 @@ function RockMoonMarker({
         {/* Revolving rock/moon */}
         <group ref={revolveRef} rotation={[0, phase, 0]}>
           <group ref={rockMoonRef} position={[orbitRadius, 0, 0]}>
-            <mesh
-              scale={scale}
+            <group
               onClick={(e) => {
                 e.stopPropagation();
                 onClick(project);
@@ -238,16 +272,10 @@ function RockMoonMarker({
                 document.body.style.cursor = "auto";
               }}
             >
-              <octahedronGeometry args={[0.11, 0]} />
-              <meshStandardMaterial
-                color={active ? col : "#ffffff"}
-                emissive={col}
-                emissiveIntensity={active ? 2.0 : hovered ? 1.3 : 0.8}
-                metalness={0.9}
-                roughness={0.1}
-                emissiveMap={null}
-              />
-            </mesh>
+              <Suspense fallback={null}>
+                <AsteroidModel scale={scale} />
+              </Suspense>
+            </group>
             <mesh rotation={[Math.PI / 2, 0, 0]} scale={scale * 1.1}>
               <ringGeometry args={[0.13, 0.165, 32]} />
               <meshBasicMaterial
