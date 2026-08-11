@@ -122,10 +122,8 @@ function AsteroidModel({ scale }: { scale: number }) {
     return clone;
   }, [fbx, texture]);
   
-  // Scale the primitive directly - the FBX model will be normalized
-  // The scale prop from parent controls the final size
-  // Base size multiplied by the scale factor (1, 1.35, or 1.7)
-  return <primitive object={model} scale={scale * 0.11} />;
+  // Make the asteroids much smaller - reduced from 0.11 to 0.022 (20% of original)
+  return <primitive object={model} scale={scale * 0.022} />;
 }
 
 // ─── ROCK/MOON MARKER ───────────────────────────────────────────────────────
