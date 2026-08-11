@@ -108,18 +108,6 @@ function AsteroidModel({ scale }: { scale: number }) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.anisotropy = 4;
     
-    // Get the bounding box size
-    const box = new THREE.Box3().setFromObject(clone);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const maxDimension = Math.max(size.x, size.y, size.z);
-    
-    // Make it tiny - about 0.11 units to match the original octahedron
-    // Since the planet radius is 4, and orbit radius is ~5.4-5.96, 
-    // asteroids should be very small (like 0.11 units)
-    const targetSize = 0.11;
-    clone.scale.setScalar(targetSize / maxDimension);
-    
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if ((mesh as THREE.Mesh).isMesh) {
@@ -134,7 +122,10 @@ function AsteroidModel({ scale }: { scale: number }) {
     return clone;
   }, [fbx, texture]);
   
-  return <primitive object={model} scale={scale} />;
+  // Scale the primitive directly - the FBX model will be normalized
+  // The scale prop from parent controls the final size
+  // Base size multiplied by the scale factor (1, 1.35, or 1.7)
+  return <primitive object={model} scale={scale * 0.11} />;
 }
 
 // ─── ROCK/MOON MARKER ───────────────────────────────────────────────────────
