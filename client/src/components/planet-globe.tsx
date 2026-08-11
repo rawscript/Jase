@@ -108,11 +108,13 @@ function AsteroidModel({ scale }: { scale: number }) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.anisotropy = 4;
     
-    // Normalize scale to match the original octahedron size (0.11 radius)
+    // Normalize scale - make much smaller to match orbit scale
     const box = new THREE.Box3().setFromObject(clone);
-    const sphere = new THREE.Sphere();
-    box.getBoundingSphere(sphere);
-    clone.scale.setScalar(0.11 / sphere.radius); // Match octahedron size
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDimension = Math.max(size.x, size.y, size.z);
+    // Scale to 0.011 which is 10% of the original octahedron size
+    clone.scale.setScalar(0.011 / maxDimension);
     
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
