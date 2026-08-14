@@ -1,4 +1,4 @@
-# Portfolio Website
+# Portfolio
 
 My modern, full-stack portfolio website built with React, TypeScript, Express.js, and PostgreSQL. Features an elegant, minimalist design with contact form functionality and database persistence.
 
