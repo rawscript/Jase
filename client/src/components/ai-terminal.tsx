@@ -426,13 +426,16 @@ Or ask more specific questions about his work, technologies, or experience.`;
     <div
       style={{
         position: "fixed",
-        inset: 0,
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: isMobile ? "100dvh" : "100vh",
         zIndex: 50,
         background: isMobile ? "#0D1117" : "rgba(0,0,0,0.7)",
         backdropFilter: isMobile ? "none" : "blur(6px)",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: isMobile ? "stretch" : "center",
+        justifyContent: isMobile ? "stretch" : "center",
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -442,7 +445,8 @@ Or ask more specific questions about his work, technologies, or experience.`;
       <div
         style={{
           width: isMobile ? "100%" : "min(820px, 96vw)",
-          height: isMobile ? "100dvh" : "min(540px, 90vh)",
+          height: isMobile ? "100%" : "min(540px, 90vh)",
+          maxHeight: "100%",
           background: "#0D1117",
           border: isMobile ? "none" : "1px solid #30363D",
           boxShadow: isMobile ? "none" : "0 32px 96px rgba(0,0,0,0.7)",
@@ -513,7 +517,7 @@ Or ask more specific questions about his work, technologies, or experience.`;
             flex: 1,
             overflowY: "auto",
             overflowX: "hidden",
-            padding: "16px 20px",
+            padding: isMobile ? "10px 12px" : "16px 20px",
             lineHeight: "1.6",
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
@@ -584,40 +588,44 @@ Or ask more specific questions about his work, technologies, or experience.`;
         <div
           style={{
             borderTop: "1px solid #30363D",
-            padding: "10px 20px",
+            padding: isMobile ? "8px 12px" : "10px 20px",
             display: "flex",
             alignItems: "center",
             background: "#0D1117",
           }}
         >
+          {!isMobile && (
+            <>
+              <span
+                style={{
+                  color: "#3FB950",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 13,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                jm
+              </span>
+              <span
+                style={{
+                  color: "#8B949E",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 13,
+                }}
+              >
+                @portfolio
+              </span>
+            </>
+          )}
           <span
             style={{
-              color: "#3FB950",
+              color: isMobile ? "#3FB950" : "#E6EDF3",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 13,
-              whiteSpace: "nowrap",
-            }}
-          >
-            jm
-          </span>
-          <span
-            style={{
-              color: "#8B949E",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 13,
-            }}
-          >
-            @portfolio
-          </span>
-          <span
-            style={{
-              color: "#E6EDF3",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 13,
+              fontSize: isMobile ? 12 : 13,
               marginRight: 6,
             }}
           >
-            :~$
+            {isMobile ? "$ " : ":~$"}
           </span>
           <input
             ref={inputRef}
@@ -629,12 +637,13 @@ Or ask more specific questions about his work, technologies, or experience.`;
             spellCheck={false}
             style={{
               flex: 1,
+              minWidth: 0,
               background: "none",
               border: "none",
               outline: "none",
               color: "#E6EDF3",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 13,
+              fontSize: isMobile ? 12 : 13,
               caretColor: "#3FB950",
             }}
           />
