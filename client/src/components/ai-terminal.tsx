@@ -390,7 +390,7 @@ Or ask more specific questions about his work, technologies, or experience.`;
         } finally {
           setLoading(false);
         }
-      }, 800); // Simulate AI thinking time
+      }, 50); // Snappy response
       
       return;
     }
@@ -442,7 +442,7 @@ Or ask more specific questions about his work, technologies, or experience.`;
       <div
         style={{
           width: isMobile ? "100%" : "min(820px, 96vw)",
-          height: isMobile ? "100%" : "min(540px, 90vh)",
+          height: isMobile ? "100dvh" : "min(540px, 90vh)",
           background: "#0D1117",
           border: isMobile ? "none" : "1px solid #30363D",
           boxShadow: isMobile ? "none" : "0 32px 96px rgba(0,0,0,0.7)",
@@ -450,6 +450,7 @@ Or ask more specific questions about his work, technologies, or experience.`;
           flexDirection: "column",
           fontFamily: "'IBM Plex Mono', monospace",
           fontSize: isMobile ? 12 : 13,
+          overflow: "hidden",
         }}
       >
         {/* Title bar */}
@@ -511,15 +512,18 @@ Or ask more specific questions about his work, technologies, or experience.`;
           style={{
             flex: 1,
             overflowY: "auto",
+            overflowX: "hidden",
             padding: "16px 20px",
             lineHeight: "1.6",
+            wordBreak: "break-word",
+            whiteSpace: "pre-wrap",
           }}
           onClick={() => inputRef.current?.focus()}
         >
           {history.map((block, bi) => {
             if (block.type === "banner") {
               return (
-                <div key={bi} style={{ color: "#3FB950", marginBottom: 8 }}>
+                <div key={bi} style={{ color: "#3FB950", marginBottom: 8, overflowX: "auto", whiteSpace: "pre" }}>
                   {block.lines!.map((l, li) => (
                     <div key={li}>{l || "\u00A0"}</div>
                   ))}

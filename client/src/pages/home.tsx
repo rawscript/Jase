@@ -25,7 +25,7 @@ export default function Home() {
     <div
       style={{
         width: "100vw",
-        height: "100vh",
+        height: "100dvh",
         overflow: "hidden",
         background: "#FAF8F4",
         position: "relative",

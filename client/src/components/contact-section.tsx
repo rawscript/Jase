@@ -98,9 +98,13 @@ export default function ContactScreen({ onClose }: ContactScreenProps) {
 
   return (
     <div
+      ref={containerRef}
       style={{
         position: "fixed",
-        inset: 0,
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100dvh",
         zIndex: 50,
         background: "rgba(250, 248, 244, 0.85)",
         backdropFilter: "blur(6px)",
