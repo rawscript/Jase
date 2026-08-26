@@ -7,7 +7,7 @@ import ProjectPanel from "@/components/project-panel";
 
 type Project = (typeof PROJECTS)[number];
 
-// ─── CONFIG ─────────────────────────────────────────────────────────────────
+// ─── CONFIG ──────────────────────────────────────────────────────────
 const RADIUS = 4;
 // If the generated planet's texture doesn't line up with real-world
 // longitudes, nudge this value (in degrees) until markers sit correctly.
@@ -123,7 +123,7 @@ function AsteroidModel({ scale }: { scale: number }) {
   }, [fbx, texture]);
   
   // Shrink asteroids to 1% of their already shrunk size (0.0077 * 0.01 = 0.000077)
-  return <primitive object={model} scale={scale * 0.00097} />;
+  return <primitive object={model} scale={scale * 0.0027} />;
 }
 
 // ─── ROCK/MOON MARKER ───────────────────────────────────────────────────────
@@ -162,26 +162,76 @@ function RockMoonMarker({
 
   const scale = active ? 1.7 : hovered ? 1.35 : 1;
 
+  // Small movement threshold to distinguish click vs drag (in pixels)
+  const CLICK_MOVE_THRESHOLD = 6;
+  const pointerDownRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Seeded deterministic generator to keep rocks stable across renders
+  const seededRocks = useMemo(() => {
+    // Simple deterministic hash from project id
+    let seed = 0;
+    for (let i = 0; i < project.id.length; i++) {
+      seed = (seed * 31 + project.id.charCodeAt(i)) >>> 0;
+    }
+    // include orbitRadius so different radii change rock positions/size slightly
+    seed = (seed + Math.round(orbitRadius * 1000)) >>> 0;
+
+    const rand = () => {
+      // linear congruential generator
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return (seed & 0xfffffff) / 0xfffffff;
+    };
+
+    return Array.from({ length: 12 }).map((_, i) => {
+      const angle = (i / 12) * Math.PI * 2;
+      const rockSize = 0.04 + rand() * 0.02;
+      const rockX = Math.cos(angle) * orbitRadius;
+      const rockZ = Math.sin(angle) * orbitRadius;
+      const rot = [rand() * Math.PI, rand() * Math.PI, rand() * Math.PI] as [number, number, number];
+      return { i, angle, rockSize, rockX, rockZ, rot };
+    });
+  }, [project.id, orbitRadius]);
+
+  // helper to set cursor only for mouse pointers
+  const setPointerCursorIfMouse = (e: any, cursor: string) => {
+    try {
+      if (e && e.pointerType === "mouse") {
+        document.body.style.cursor = cursor;
+      }
+    } catch {
+      // ignore - defensive
+    }
+  };
+
   return (
     <group rotation={[0, nodeLongitude, 0]}>
       <group rotation={[inclination, 0, 0]}>
-        {/* Orbit path - Clickable - Made to look like scattered rocks/moons along the path */}
+        {/* Orbit path - Clickable */}
         <group>
           {/* Main orbit ring */}
-          <mesh 
+          <mesh
             rotation={[-Math.PI / 2, 0, 0]}
-            onClick={(e) => {
+            onPointerDown={(e) => {
               e.stopPropagation();
-              onClick(project);
+              pointerDownRef.current = { x: (e as any).clientX, y: (e as any).clientY };
+            }}
+            onPointerUp={(e) => {
+              e.stopPropagation();
+              const pd = pointerDownRef.current;
+              pointerDownRef.current = null;
+              if (!pd || Math.hypot((e as any).clientX - pd.x, (e as any).clientY - pd.y) < CLICK_MOVE_THRESHOLD) {
+                onClick(project);
+              }
             }}
             onPointerEnter={(e) => {
               e.stopPropagation();
               onHover(project);
-              document.body.style.cursor = "pointer";
+              setPointerCursorIfMouse(e, "pointer");
             }}
-            onPointerLeave={() => {
+            onPointerLeave={(e) => {
+              e.stopPropagation();
               onHover(null);
-              document.body.style.cursor = "auto";
+              setPointerCursorIfMouse(e, "auto");
             }}
           >
             <ringGeometry args={[orbitRadius - 0.008, orbitRadius + 0.008, 128]} />
@@ -194,47 +244,49 @@ function RockMoonMarker({
               blending={THREE.AdditiveBlending}
             />
           </mesh>
-          
+
           {/* Scattered "rocks/moons" along the orbit - each clickable */}
-          {Array.from({ length: 12 }).map((_, i) => {
-            const angle = (i / 12) * Math.PI * 2;
-            const rockSize = 0.04 + Math.random() * 0.02;
-            const rockX = Math.cos(angle) * orbitRadius;
-            const rockZ = Math.sin(angle) * orbitRadius;
-            
-            return (
-              <mesh
-                key={`rock-${i}`}
-                position={[rockX, 0, rockZ]}
-                rotation={[Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI]}
-                scale={[rockSize, rockSize * 0.8, rockSize]}
-                onClick={(e) => {
-                  e.stopPropagation();
+          {seededRocks.map(({ i, rockSize, rockX, rockZ, rot }) => (
+            <mesh
+              key={`rock-${project.id}-${i}`}
+              position={[rockX, 0, rockZ]}
+              rotation={rot}
+              scale={[rockSize, rockSize * 0.8, rockSize]}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                pointerDownRef.current = { x: (e as any).clientX, y: (e as any).clientY };
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                const pd = pointerDownRef.current;
+                pointerDownRef.current = null;
+                if (!pd || Math.hypot((e as any).clientX - pd.x, (e as any).clientY - pd.y) < CLICK_MOVE_THRESHOLD) {
                   onClick(project);
-                }}
-                onPointerEnter={(e) => {
-                  e.stopPropagation();
-                  onHover(project);
-                  document.body.style.cursor = "pointer";
-                }}
-                onPointerLeave={() => {
-                  onHover(null);
-                  document.body.style.cursor = "auto";
-                }}
-              >
-                <dodecahedronGeometry args={[1, 0]} />
-                <meshStandardMaterial
-                  color={col}
-                  emissive={col}
-                  emissiveIntensity={active ? 0.8 : hovered ? 0.5 : 0.2}
-                  metalness={0.7}
-                  roughness={0.8}
-                />
-              </mesh>
-            );
-          })}
+                }
+              }}
+              onPointerEnter={(e) => {
+                e.stopPropagation();
+                onHover(project);
+                setPointerCursorIfMouse(e, "pointer");
+              }}
+              onPointerLeave={(e) => {
+                e.stopPropagation();
+                onHover(null);
+                setPointerCursorIfMouse(e, "auto");
+              }}
+            >
+              <dodecahedronGeometry args={[1, 0]} />
+              <meshStandardMaterial
+                color={col}
+                emissive={col}
+                emissiveIntensity={active ? 0.8 : hovered ? 0.5 : 0.2}
+                metalness={0.7}
+                roughness={0.8}
+              />
+            </mesh>
+          ))}
         </group>
-        
+
         {/* Enhanced orbit visualization when active */}
         {active && (
           <mesh rotation={[-Math.PI / 2, 0, 0]}>
@@ -249,22 +301,32 @@ function RockMoonMarker({
             />
           </mesh>
         )}
+
         {/* Revolving rock/moon */}
         <group ref={revolveRef} rotation={[0, phase, 0]}>
           <group ref={rockMoonRef} position={[orbitRadius, 0, 0]}>
             <group
-              onClick={(e) => {
+              onPointerDown={(e) => {
                 e.stopPropagation();
-                onClick(project);
+                pointerDownRef.current = { x: (e as any).clientX, y: (e as any).clientY };
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                const pd = pointerDownRef.current;
+                pointerDownRef.current = null;
+                if (!pd || Math.hypot((e as any).clientX - pd.x, (e as any).clientY - pd.y) < CLICK_MOVE_THRESHOLD) {
+                  onClick(project);
+                }
               }}
               onPointerEnter={(e) => {
                 e.stopPropagation();
                 onHover(project);
-                document.body.style.cursor = "pointer";
+                setPointerCursorIfMouse(e, "pointer");
               }}
-              onPointerLeave={() => {
+              onPointerLeave={(e) => {
+                e.stopPropagation();
                 onHover(null);
-                document.body.style.cursor = "auto";
+                setPointerCursorIfMouse(e, "auto");
               }}
             >
               <Suspense fallback={null}>
@@ -427,7 +489,7 @@ function GlobeScene({
   );
 }
 
-// ─── ZOOM CONTROLS ──────────────────────────────────────────────────────────
+// ─── ZOOM CONTROLS ────────────────────────────────────────────────────────
 function ZoomControls({
   onZoomIn,
   onZoomOut,
@@ -485,7 +547,7 @@ function ZoomControls({
   );
 }
 
-// ─── MAIN EXPORT ────────────────────────────────────────────────────────────
+// ─── MAIN EXPORT ────────────────────────────────────────────────────────
 interface PlanetGlobeProps {
   onSelectProject: (p: Project | null) => void;
   activeProject: Project | null;
