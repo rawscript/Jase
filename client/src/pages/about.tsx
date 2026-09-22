@@ -6,28 +6,24 @@ import {
   Twitter,
   Download,
   ArrowUpRight,
-  X,
   ChevronLeft,
   ChevronRight,
   RotateCw,
 } from "lucide-react";
-import PlanetGlobe from "@/components/planet-globe";
 import Footer from "@/components/footer";
 import { PUBLICATIONS } from "@/lib/publications-data";
 import { PROJECTS } from "@/lib/world-data";
 
 type Project = (typeof PROJECTS)[number];
-type Section = "about-me" | "projects-globe" | "publications";
+type Section = "about-me" | "projects" | "publications";
 
 export default function About() {
-  const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [activeSection, setActiveSection] = useState<Section>("about-me");
   const [isMobile, setIsMobile] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Deck Shuffling State
   const [projectDeck, setProjectDeck] = useState<Project[]>(PROJECTS);
-  const [deckIndex, setDeckIndex] = useState(0);
 
   const cardContainerRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +43,7 @@ export default function About() {
   // ─── Scroll tracking for nav dots & active sections ─────────────────────
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
     "about-me": null,
-    "projects-globe": null,
+    projects: null,
     publications: null,
   });
 
@@ -59,7 +55,7 @@ export default function About() {
   );
 
   useEffect(() => {
-    const sections: Section[] = ["about-me", "projects-globe", "publications"];
+    const sections: Section[] = ["about-me", "projects", "publications"];
 
     const observerOptions = {
       root: null,
@@ -144,16 +140,6 @@ export default function About() {
     };
   }, [handleWheel]);
 
-  // Handle orbit click
-  const handleOrbitClick = (project: Project) => {
-    setActiveProject(project);
-    // Move selected project to top of deck
-    setProjectDeck((prev) => {
-      const filtered = prev.filter((p) => p.name !== project.name);
-      return [project, ...filtered];
-    });
-  };
-
   return (
     <div className="relative min-h-screen" style={{ backgroundColor: "#FAF8F4" }}>
       {/* ─── Sticky Navigation ────────────────────────────────────────── */}
@@ -227,34 +213,32 @@ export default function About() {
             </button>
           ) : (
             <div className="flex gap-6">
-              {(["about-me", "projects-globe", "publications"] as Section[]).map(
-                (id) => (
-                  <button
-                    key={id}
-                    onClick={() => scrollToSection(id)}
-                    style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 10,
-                      letterSpacing: "0.18em",
-                      color: activeSection === id ? "#111" : "#9CA3AF",
-                      fontWeight: activeSection === id ? 600 : 400,
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                      borderBottom:
-                        activeSection === id ? "2px solid #111" : "2px solid transparent",
-                      paddingBottom: 2,
-                    }}
-                  >
-                    {id === "about-me"
-                      ? "ABOUT"
-                      : id === "projects-globe"
-                      ? "PROJECTS"
-                      : "PUBLICATIONS"}
-                  </button>
-                )
-              )}
+              {(["about-me", "projects", "publications"] as Section[]).map((id) => (
+                <button
+                  key={id}
+                  onClick={() => scrollToSection(id)}
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.18em",
+                    color: activeSection === id ? "#111" : "#9CA3AF",
+                    fontWeight: activeSection === id ? 600 : 400,
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    borderBottom:
+                      activeSection === id ? "2px solid #111" : "2px solid transparent",
+                    paddingBottom: 2,
+                  }}
+                >
+                  {id === "about-me"
+                    ? "ABOUT"
+                    : id === "projects"
+                    ? "PROJECTS"
+                    : "PUBLICATIONS"}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -270,51 +254,49 @@ export default function About() {
               gap: 8,
             }}
           >
-            {(["about-me", "projects-globe", "publications"] as Section[]).map(
-              (id) => (
-                <button
-                  key={id}
-                  onClick={() => scrollToSection(id)}
-                  style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 11,
-                    letterSpacing: "0.18em",
-                    color: activeSection === id ? "#111" : "#6B7280",
-                    fontWeight: activeSection === id ? 600 : 400,
-                    background: activeSection === id ? "rgba(0,0,0,0.04)" : "none",
-                    border: "none",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    padding: "10px 12px",
-                    borderRadius: 8,
-                    transition: "all 0.2s",
-                  }}
-                >
-                  {id === "about-me"
-                    ? "ABOUT"
-                    : id === "projects-globe"
-                    ? "PROJECTS"
-                    : "PUBLICATIONS"}
-                </button>
-              )
-            )}
+            {(["about-me", "projects", "publications"] as Section[]).map((id) => (
+              <button
+                key={id}
+                onClick={() => scrollToSection(id)}
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.18em",
+                  color: activeSection === id ? "#111" : "#6B7280",
+                  fontWeight: activeSection === id ? 600 : 400,
+                  background: activeSection === id ? "rgba(0,0,0,0.04)" : "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  transition: "all 0.2s",
+                }}
+              >
+                {id === "about-me"
+                  ? "ABOUT"
+                  : id === "projects"
+                  ? "PROJECTS"
+                  : "PUBLICATIONS"}
+              </button>
+            ))}
           </div>
         )}
       </nav>
 
-      {/* ─── Scroll indicator dots (Fixed & Centered, Non-clipped) ──────────────── */}
+      {/* ─── Scroll indicator dots ────────────────────────────────────────── */}
       <div
         className="fixed right-4 md:right-8 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 bg-white/60 backdrop-blur-md p-2 rounded-full border border-black/5 shadow-sm"
         style={{ pointerEvents: "auto" }}
       >
-        {(["about-me", "projects-globe", "publications"] as Section[]).map((id) => (
+        {(["about-me", "projects", "publications"] as Section[]).map((id) => (
           <button
             key={id}
             onClick={() => scrollToSection(id)}
             title={
               id === "about-me"
                 ? "About"
-                : id === "projects-globe"
+                : id === "projects"
                 ? "Projects"
                 : "Publications"
             }
@@ -338,7 +320,7 @@ export default function About() {
             />
             {/* Tooltip on hover */}
             <span className="absolute right-6 px-2 py-1 bg-black text-white text-[9px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap uppercase tracking-widest font-mono">
-              {id.replace("-globe", "").replace("-", " ")}
+              {id.replace("-", " ")}
             </span>
           </button>
         ))}
@@ -506,245 +488,252 @@ export default function About() {
         </div>
       </section>
 
-      {/* ─── Projects Globe & Shuffling Cards Section ────────────────── */}
+      {/* ─── Projects (Shuffling Cards Deck Container) Section ────────────────── */}
       <section
-        ref={setRef("projects-globe")}
-        id="projects-globe"
+        ref={setRef("projects")}
+        id="projects"
         style={{
           padding: isMobile ? "40px 16px 60px" : "80px 48px 100px",
           background: "linear-gradient(to bottom, #FAF8F4, #F3F1EC)",
         }}
       >
-      
-
-          {/* ─── Shuffling Deck Project Section ───────────────────────────── */}
-          <div className="mt-12">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3
-                  style={{
-                    fontFamily: "'Syne', sans-serif",
-                    fontWeight: 700,
-                    fontSize: isMobile ? 18 : 22,
-                  }}
-                >
-                  Project Deck
-                </h3>
-                <p
-                  className="text-gray-500"
-                  style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 10,
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  SWIPE, SCROLL MOUSE UP/DOWN, OR DRAG CARDS TO SHUFFLE
-                </p>
-              </div>
-
-              {/* Shuffle Controls */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={shuffleBack}
-                  className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors"
-                  title="Previous Card"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  onClick={shuffleDeck}
-                  className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors flex items-center gap-1"
-                  title="Shuffle Deck"
-                >
-                  <RotateCw size={14} />
-                  <span className="font-mono text-[10px] hidden sm:inline">SHUFFLE</span>
-                </button>
-                <button
-                  onClick={shuffleDeck}
-                  className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors"
-                  title="Next Card"
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-
-            {/* Postal Card Stack Container */}
-            <div
-              ref={cardContainerRef}
-              className="relative w-full flex justify-center items-center py-6 select-none"
-              style={{ minHeight: isMobile ? 380 : 420 }}
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2
+              className="text-center"
+              style={{
+                fontFamily: "'Syne', sans-serif",
+                fontWeight: 800,
+                fontSize: isMobile ? 24 : "clamp(28px, 4vw, 36px)",
+                letterSpacing: "-0.02em",
+                marginBottom: 8,
+              }}
             >
-              <AnimatePresence mode="popLayout">
-                {projectDeck.slice(0, 4).map((project, index) => {
-                  const isTop = index === 0;
-                  // Card stacking offset math
-                  const offsetScale = 1 - index * 0.04;
-                  const offsetY = index * 12;
-                  const rotation = isTop ? 0 : (index % 2 === 0 ? 1 : -1) * (index * 3);
+              Projects Deck
+            </h2>
+            <div className="w-12 h-1 bg-black mx-auto" style={{ marginBottom: isMobile ? 16 : 24 }} />
 
-                  return (
-                    <motion.div
-                      key={project.name}
-                      style={{
-                        position: index === 0 ? "relative" : "absolute",
-                        width: "100%",
-                        maxWidth: 620,
-                        zIndex: projectDeck.length - index,
-                        cursor: isTop ? "grab" : "pointer",
-                      }}
-                      initial={{ scale: 0.9, y: 30, opacity: 0 }}
-                      animate={{
-                        scale: offsetScale,
-                        y: offsetY,
-                        rotate: rotation,
-                        opacity: 1 - index * 0.15,
-                      }}
-                      exit={{
-                        x: 300,
-                        opacity: 0,
-                        rotate: 20,
-                        transition: { duration: 0.35 },
-                      }}
-                      transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                      drag={isTop ? "x" : false}
-                      dragConstraints={{ left: 0, right: 0 }}
-                      dragElastic={0.7}
-                      onDragEnd={(_, info) => {
-                        if (Math.abs(info.offset.x) > 100) {
-                          shuffleDeck();
-                        }
-                      }}
-                      onClick={() => {
-                        if (!isTop) {
-                          // Bring clicked card to top
-                          setProjectDeck((prev) => {
-                            const found = prev.find((p) => p.name === project.name);
-                            if (!found) return prev;
-                            return [found, ...prev.filter((p) => p.name !== project.name)];
-                          });
-                        }
-                      }}
-                    >
-                      <div className="bg-white border-2 border-black rounded-xl p-6 shadow-2xl relative overflow-hidden backdrop-blur-sm">
-                        {/* Stamp/Postal Accent */}
-                        <div className="absolute top-4 right-4 border border-black/20 p-1.5 rounded text-[9px] font-mono tracking-widest text-gray-400 uppercase">
-                          CARD #{PROJECTS.findIndex((p) => p.name === project.name) + 1}
-                        </div>
+            <p
+              className="text-center text-gray-500 mx-auto"
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: isMobile ? 10 : 11,
+                maxWidth: 520,
+                marginBottom: isMobile ? 20 : 32,
+              }}
+            >
+              SWIPE LEFT/RIGHT, SCROLL MOUSE UP/DOWN, OR DRAG CARDS TO SHUFFLE
+            </p>
+          </motion.div>
 
-                        <div className="flex items-center gap-3 mb-3">
-                          <div
-                            className="w-3.5 h-3.5 rounded-full border border-black/10"
+          {/* Shuffle Header Controls */}
+          <div className="flex items-center justify-end mb-6 max-w-2xl mx-auto">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={shuffleBack}
+                className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors bg-white/50 backdrop-blur-sm"
+                title="Previous Card"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                onClick={shuffleDeck}
+                className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors bg-white/50 backdrop-blur-sm flex items-center gap-1"
+                title="Shuffle Deck"
+              >
+                <RotateCw size={14} />
+                <span className="font-mono text-[10px] hidden sm:inline">SHUFFLE</span>
+              </button>
+              <button
+                onClick={shuffleDeck}
+                className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors bg-white/50 backdrop-blur-sm"
+                title="Next Card"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Postal Card Stack Container */}
+          <div
+            ref={cardContainerRef}
+            className="relative w-full flex justify-center items-center py-6 select-none"
+            style={{ minHeight: isMobile ? 420 : 460 }}
+          >
+            <AnimatePresence mode="popLayout">
+              {projectDeck.slice(0, 4).map((project, index) => {
+                const isTop = index === 0;
+                // Card stacking offset math
+                const offsetScale = 1 - index * 0.04;
+                const offsetY = index * 12;
+                const rotation = isTop ? 0 : (index % 2 === 0 ? 1 : -1) * (index * 3);
+
+                return (
+                  <motion.div
+                    key={project.name}
+                    style={{
+                      position: index === 0 ? "relative" : "absolute",
+                      width: "100%",
+                      maxWidth: 620,
+                      zIndex: projectDeck.length - index,
+                      cursor: isTop ? "grab" : "pointer",
+                    }}
+                    initial={{ scale: 0.9, y: 30, opacity: 0 }}
+                    animate={{
+                      scale: offsetScale,
+                      y: offsetY,
+                      rotate: rotation,
+                      opacity: 1 - index * 0.15,
+                    }}
+                    exit={{
+                      x: 300,
+                      opacity: 0,
+                      rotate: 20,
+                      transition: { duration: 0.35 },
+                    }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                    drag={isTop ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.7}
+                    onDragEnd={(_, info) => {
+                      if (Math.abs(info.offset.x) > 100) {
+                        shuffleDeck();
+                      }
+                    }}
+                    onClick={() => {
+                      if (!isTop) {
+                        // Bring clicked card to top
+                        setProjectDeck((prev) => {
+                          const found = prev.find((p) => p.name === project.name);
+                          if (!found) return prev;
+                          return [found, ...prev.filter((p) => p.name !== project.name)];
+                        });
+                      }
+                    }}
+                  >
+                    <div className="bg-white border-2 border-black rounded-xl p-6 md:p-8 shadow-2xl relative overflow-hidden backdrop-blur-sm">
+                      {/* Stamp/Postal Accent */}
+                      <div className="absolute top-4 right-4 border border-black/20 p-1.5 rounded text-[9px] font-mono tracking-widest text-gray-400 uppercase">
+                        CARD #{PROJECTS.findIndex((p) => p.name === project.name) + 1}
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-3">
+                        <div
+                          className="w-3.5 h-3.5 rounded-full border border-black/10"
+                          style={{
+                            backgroundColor:
+                              project.type === "Cloud Infrastructure"
+                                ? "#D4500A"
+                                : project.type === "Data Engineering"
+                                ? "#1A6B3C"
+                                : project.type === "Full-Stack + AI"
+                                ? "#1A3F7A"
+                                : "#6B21A8",
+                          }}
+                        />
+                        <div>
+                          <h4
+                            className="font-bold"
                             style={{
-                              backgroundColor:
-                                project.type === "Cloud Infrastructure"
-                                  ? "#D4500A"
-                                  : project.type === "Data Engineering"
-                                  ? "#1A6B3C"
-                                  : project.type === "Full-Stack + AI"
-                                  ? "#1A3F7A"
-                                  : "#6B21A8",
-                            }}
-                          />
-                          <div>
-                            <h4
-                              className="font-bold"
-                              style={{
-                                fontFamily: "'Syne', sans-serif",
-                                fontSize: isMobile ? 17 : 20,
-                              }}
-                            >
-                              {project.name}
-                            </h4>
-                            <p
-                              style={{
-                                fontFamily: "'IBM Plex Mono', monospace",
-                                fontSize: 10,
-                                letterSpacing: "0.15em",
-                                color: "#9CA3AF",
-                              }}
-                            >
-                              {project.region} · {project.year}
-                            </p>
-                          </div>
-                        </div>
-
-                        <p
-                          className="text-gray-700 leading-relaxed mb-4"
-                          style={{ fontSize: isMobile ? 13 : 14 }}
-                        >
-                          {project.description}
-                        </p>
-
-                        <div className="mb-4">
-                          <p
-                            style={{
-                              fontFamily: "'IBM Plex Mono', monospace",
-                              fontSize: 9,
-                              letterSpacing: "0.2em",
-                              color: "#9CA3AF",
-                              marginBottom: 2,
+                              fontFamily: "'Syne', sans-serif",
+                              fontSize: isMobile ? 18 : 22,
                             }}
                           >
-                            IMPACT
-                          </p>
-                          <p className="text-gray-900 font-semibold text-xs md:text-sm">
-                            {project.impact}
-                          </p>
-                        </div>
-
-                        <div className="mb-5">
+                            {project.name}
+                          </h4>
                           <p
-                            style={{
-                              fontFamily: "'IBM Plex Mono', monospace",
-                              fontSize: 9,
-                              letterSpacing: "0.2em",
-                              color: "#9CA3AF",
-                              marginBottom: 6,
-                            }}
-                          >
-                            TECH STACK
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {project.stack.map((tech) => (
-                              <span
-                                key={tech}
-                                className="bg-gray-100 text-gray-800 rounded-full border border-black/5"
-                                style={{
-                                  fontFamily: "'IBM Plex Mono', monospace",
-                                  fontSize: 9,
-                                  letterSpacing: "0.08em",
-                                  padding: "3px 8px",
-                                }}
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {project.link && (
-                          <a
-                            href={project.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 bg-black text-white hover:bg-gray-800 transition-colors rounded-full"
                             style={{
                               fontFamily: "'IBM Plex Mono', monospace",
                               fontSize: 10,
                               letterSpacing: "0.15em",
-                              padding: "8px 16px",
+                              color: "#9CA3AF",
                             }}
                           >
-                            VISIT PROJECT <ArrowUpRight size={12} />
-                          </a>
-                        )}
+                            {project.region} · {project.year}
+                          </p>
+                        </div>
                       </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
+
+                      <p
+                        className="text-gray-700 leading-relaxed mb-4"
+                        style={{ fontSize: isMobile ? 13 : 15 }}
+                      >
+                        {project.description}
+                      </p>
+
+                      <div className="mb-4">
+                        <p
+                          style={{
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: 9,
+                            letterSpacing: "0.2em",
+                            color: "#9CA3AF",
+                            marginBottom: 2,
+                          }}
+                        >
+                          IMPACT
+                        </p>
+                        <p className="text-gray-900 font-semibold text-xs md:text-sm">
+                          {project.impact}
+                        </p>
+                      </div>
+
+                      <div className="mb-5">
+                        <p
+                          style={{
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: 9,
+                            letterSpacing: "0.2em",
+                            color: "#9CA3AF",
+                            marginBottom: 6,
+                          }}
+                        >
+                          TECH STACK
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {project.stack.map((tech) => (
+                            <span
+                              key={tech}
+                              className="bg-gray-100 text-gray-800 rounded-full border border-black/5"
+                              style={{
+                                fontFamily: "'IBM Plex Mono', monospace",
+                                fontSize: 9,
+                                letterSpacing: "0.08em",
+                                padding: "3px 8px",
+                              }}
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {project.link && (
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 bg-black text-white hover:bg-gray-800 transition-colors rounded-full"
+                          style={{
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: 10,
+                            letterSpacing: "0.15em",
+                            padding: "8px 16px",
+                          }}
+                        >
+                          VISIT PROJECT <ArrowUpRight size={12} />
+                        </a>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         </div>
       </section>
