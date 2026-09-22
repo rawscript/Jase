@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Linkedin, Instagram, Twitter, Download, ArrowUpRight, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Linkedin,
+  Instagram,
+  Twitter,
+  Download,
+  ArrowUpRight,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  RotateCw,
+} from "lucide-react";
 import PlanetGlobe from "@/components/planet-globe";
 import Footer from "@/components/footer";
 import { PUBLICATIONS } from "@/lib/publications-data";
@@ -15,6 +25,12 @@ export default function About() {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
+  // Deck Shuffling State
+  const [projectDeck, setProjectDeck] = useState<Project[]>(PROJECTS);
+  const [deckIndex, setDeckIndex] = useState(0);
+
+  const cardContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768);
     check();
@@ -28,11 +44,11 @@ export default function About() {
     { icon: Twitter, href: "https://x.com/JaseMwaura", label: "Twitter" },
   ];
 
-  // ─── Scroll tracking for nav dots ─────────────────────────────────────────
+  // ─── Scroll tracking for nav dots & active sections ─────────────────────
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
     "about-me": null,
     "projects-globe": null,
-    "publications": null,
+    publications: null,
   });
 
   const setRef = useCallback(
@@ -42,32 +58,35 @@ export default function About() {
     []
   );
 
-  // Track which section is most visible using IntersectionObserver
   useEffect(() => {
-    const observers: IntersectionObserver[] = [];
     const sections: Section[] = ["about-me", "projects-globe", "publications"];
+
+    const observerOptions = {
+      root: null,
+      rootMargin: "-20% 0px -20% 0px",
+      threshold: [0.1, 0.3, 0.5, 0.8],
+    };
+
+    const handleIntersect: IntersectionObserverCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id as Section;
+          setActiveSection(id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, observerOptions);
 
     sections.forEach((id) => {
       const el = sectionRefs.current[id];
-      if (!el) return;
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
-              setActiveSection(id);
-            }
-          });
-        },
-        { threshold: 0.3 }
-      );
-      observer.observe(el);
-      observers.push(observer);
+      if (el) observer.observe(el);
     });
 
-    return () => observers.forEach((o) => o.disconnect());
+    return () => observer.disconnect();
   }, []);
 
-  // Smooth scroll — use native scrollIntoView with 'center' block to show full section
+  // Smooth scroll
   const scrollToSection = (id: Section) => {
     const el = sectionRefs.current[id];
     if (el) {
@@ -77,13 +96,66 @@ export default function About() {
     setMobileNavOpen(false);
   };
 
+  // ─── Card Deck Shuffling Functionality ───────────────────────────────────
+  const shuffleDeck = useCallback(() => {
+    setProjectDeck((prev) => {
+      if (prev.length <= 1) return prev;
+      const [topCard, ...rest] = prev;
+      return [...rest, topCard];
+    });
+  }, []);
+
+  const shuffleBack = useCallback(() => {
+    setProjectDeck((prev) => {
+      if (prev.length <= 1) return prev;
+      const lastCard = prev[prev.length - 1];
+      const rest = prev.slice(0, prev.length - 1);
+      return [lastCard, ...rest];
+    });
+  }, []);
+
+  // Mouse Wheel / Trackpad Scroll interaction over project cards
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      if (!cardContainerRef.current) return;
+      if (cardContainerRef.current.contains(e.target as Node)) {
+        if (Math.abs(e.deltaY) > 20) {
+          e.preventDefault();
+          if (e.deltaY > 0) {
+            shuffleDeck();
+          } else {
+            shuffleBack();
+          }
+        }
+      }
+    },
+    [shuffleDeck, shuffleBack]
+  );
+
+  useEffect(() => {
+    const cardEl = cardContainerRef.current;
+    if (cardEl) {
+      cardEl.addEventListener("wheel", handleWheel, { passive: false });
+    }
+    return () => {
+      if (cardEl) {
+        cardEl.removeEventListener("wheel", handleWheel);
+      }
+    };
+  }, [handleWheel]);
+
   // Handle orbit click
   const handleOrbitClick = (project: Project) => {
     setActiveProject(project);
+    // Move selected project to top of deck
+    setProjectDeck((prev) => {
+      const filtered = prev.filter((p) => p.name !== project.name);
+      return [project, ...filtered];
+    });
   };
 
   return (
-    <div className="relative" style={{ backgroundColor: "#FAF8F4" }}>
+    <div className="relative min-h-screen" style={{ backgroundColor: "#FAF8F4" }}>
       {/* ─── Sticky Navigation ────────────────────────────────────────── */}
       <nav
         className="sticky top-0 z-50"
@@ -170,11 +242,16 @@ export default function About() {
                       border: "none",
                       cursor: "pointer",
                       transition: "all 0.2s",
-                      borderBottom: activeSection === id ? "2px solid #111" : "2px solid transparent",
+                      borderBottom:
+                        activeSection === id ? "2px solid #111" : "2px solid transparent",
                       paddingBottom: 2,
                     }}
                   >
-                    {id === "about-me" ? "ABOUT" : id === "projects-globe" ? "PROJECTS" : "PUBLICATIONS"}
+                    {id === "about-me"
+                      ? "ABOUT"
+                      : id === "projects-globe"
+                      ? "PROJECTS"
+                      : "PUBLICATIONS"}
                   </button>
                 )
               )}
@@ -213,7 +290,11 @@ export default function About() {
                     transition: "all 0.2s",
                   }}
                 >
-                  {id === "about-me" ? "ABOUT" : id === "projects-globe" ? "PROJECTS" : "PUBLICATIONS"}
+                  {id === "about-me"
+                    ? "ABOUT"
+                    : id === "projects-globe"
+                    ? "PROJECTS"
+                    : "PUBLICATIONS"}
                 </button>
               )
             )}
@@ -221,30 +302,47 @@ export default function About() {
         )}
       </nav>
 
-      {/* ─── Scroll indicator dots (desktop only) ─────────────────────── */}
-      {!isMobile && (
-        <div className="fixed right-8 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3">
-          {(["about-me", "projects-globe", "publications"] as Section[]).map(
-            (id) => (
-              <button
-                key={id}
-                onClick={() => scrollToSection(id)}
-                title={id === "about-me" ? "About" : id === "projects-globe" ? "Projects" : "Publications"}
-                className="transition-all"
-                style={{
-                  width: activeSection === id ? 10 : 8,
-                  height: activeSection === id ? 10 : 8,
-                  borderRadius: "50%",
-                  backgroundColor: activeSection === id ? "#111" : "#D1D5DB",
-                  border: "none",
-                  cursor: "pointer",
-                  transform: activeSection === id ? "scale(1.2)" : "scale(1)",
-                }}
-              />
-            )
-          )}
-        </div>
-      )}
+      {/* ─── Scroll indicator dots (Fixed & Centered, Non-clipped) ──────────────── */}
+      <div
+        className="fixed right-4 md:right-8 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 bg-white/60 backdrop-blur-md p-2 rounded-full border border-black/5 shadow-sm"
+        style={{ pointerEvents: "auto" }}
+      >
+        {(["about-me", "projects-globe", "publications"] as Section[]).map((id) => (
+          <button
+            key={id}
+            onClick={() => scrollToSection(id)}
+            title={
+              id === "about-me"
+                ? "About"
+                : id === "projects-globe"
+                ? "Projects"
+                : "Publications"
+            }
+            className="transition-all duration-300 relative group flex items-center justify-center"
+            style={{
+              width: 14,
+              height: 14,
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+            }}
+          >
+            <span
+              style={{
+                width: activeSection === id ? 10 : 6,
+                height: activeSection === id ? 10 : 6,
+                borderRadius: "50%",
+                backgroundColor: activeSection === id ? "#111" : "#9CA3AF",
+                transition: "all 0.3s ease",
+              }}
+            />
+            {/* Tooltip on hover */}
+            <span className="absolute right-6 px-2 py-1 bg-black text-white text-[9px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap uppercase tracking-widest font-mono">
+              {id.replace("-globe", "").replace("-", " ")}
+            </span>
+          </button>
+        ))}
+      </div>
 
       {/* ─── About Me Section ─────────────────────────────────────────── */}
       <section
@@ -296,29 +394,27 @@ export default function About() {
                 <p>
                   I'm a passionate <strong>Geo Spatial Data Engineer</strong> and{" "}
                   <strong>Cloud Systems Architect</strong> with a deep fascination for
-                  bridging the gap between complex data infrastructure and meaningful
-                  user experiences.
+                  bridging the gap between complex data infrastructure and meaningful user
+                  experiences.
                 </p>
                 <p>
-                  My journey began with a fascination for technology and spatial data
-                  systems. Over the years, I've developed expertise in cloud
-                  infrastructure, data engineering, and full-stack development. I
-                  specialize in building scalable systems that turn raw data into
-                  actionable insights.
+                  My journey began with a fascination for technology and spatial data systems.
+                  Over the years, I've developed expertise in cloud infrastructure, data
+                  engineering, and full-stack development. I specialize in building scalable
+                  systems that turn raw data into actionable insights.
                 </p>
                 {!isMobile && (
                   <>
                     <p>
                       I'm driven by the challenge of solving problems that require both
-                      technical depth and creative thinking. Whether it's architecting
-                      cloud solutions, optimizing data pipelines, or building intuitive
-                      interfaces, I approach every project with meticulous attention to
-                      detail.
+                      technical depth and creative thinking. Whether it's architecting cloud
+                      solutions, optimizing data pipelines, or building intuitive interfaces,
+                      I approach every project with meticulous attention to detail.
                     </p>
                     <p>
                       Outside of work, I'm constantly exploring new technologies,
-                      contributing to open-source projects, and sharing knowledge with
-                      the developer community.
+                      contributing to open-source projects, and sharing knowledge with the
+                      developer community.
                     </p>
                   </>
                 )}
@@ -410,7 +506,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ─── Projects Globe Section ───────────────────────────────────── */}
+      {/* ─── Projects Globe & Shuffling Cards Section ────────────────── */}
       <section
         ref={setRef("projects-globe")}
         id="projects-globe"
@@ -462,15 +558,14 @@ export default function About() {
                 marginBottom: isMobile ? 20 : 32,
               }}
             >
-              The planet is drag-to-rotate — interactive elements are the orbiting
-              satellites and rocks.
+              The planet is drag-to-rotate — interactive elements are the orbiting satellites and rocks.
             </p>
           </motion.div>
 
           {/* Globe */}
           <div
             className="relative rounded-2xl overflow-hidden border-2 border-gray-200 shadow-xl"
-            style={{ height: isMobile ? 360 : 600 }}
+            style={{ height: isMobile ? 360 : 500 }}
           >
             <PlanetGlobe
               activeProject={activeProject}
@@ -494,121 +589,235 @@ export default function About() {
             </div>
           </div>
 
-          {/* Project Details */}
-          {activeProject && (
-            <motion.div
-              id="project-details"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white border border-gray-200 rounded-xl shadow-lg"
-              style={{ marginTop: isMobile ? 16 : 24, padding: isMobile ? 16 : 24 }}
-            >
-              <div className="flex items-center justify-between" style={{ marginBottom: isMobile ? 12 : 16 }}>
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{
-                      backgroundColor:
-                        activeProject.type === "Cloud Infrastructure" ? "#D4500A" :
-                        activeProject.type === "Data Engineering" ? "#1A6B3C" :
-                        activeProject.type === "Full-Stack + AI" ? "#1A3F7A" : "#6B21A8",
-                    }}
-                  />
-                  <div>
-                    <h4 className="font-bold" style={{ fontSize: isMobile ? 16 : 18 }}>
-                      {activeProject.name}
-                    </h4>
-                    <p
-                      style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: isMobile ? 9 : 11,
-                        letterSpacing: "0.15em",
-                        color: "#9CA3AF",
-                      }}
-                    >
-                      {activeProject.region} · {activeProject.year}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setActiveProject(null)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          {/* ─── Shuffling Deck Project Section ───────────────────────────── */}
+          <div className="mt-12">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3
+                  style={{
+                    fontFamily: "'Syne', sans-serif",
+                    fontWeight: 700,
+                    fontSize: isMobile ? 18 : 22,
+                  }}
                 >
-                  <X size={18} />
+                  Project Deck
+                </h3>
+                <p
+                  className="text-gray-500"
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  SWIPE, SCROLL MOUSE UP/DOWN, OR DRAG CARDS TO SHUFFLE
+                </p>
+              </div>
+
+              {/* Shuffle Controls */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={shuffleBack}
+                  className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors"
+                  title="Previous Card"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={shuffleDeck}
+                  className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors flex items-center gap-1"
+                  title="Shuffle Deck"
+                >
+                  <RotateCw size={14} />
+                  <span className="font-mono text-[10px] hidden sm:inline">SHUFFLE</span>
+                </button>
+                <button
+                  onClick={shuffleDeck}
+                  className="p-2 border border-black/20 rounded-full hover:bg-black hover:text-white transition-colors"
+                  title="Next Card"
+                >
+                  <ChevronRight size={16} />
                 </button>
               </div>
+            </div>
 
-              <p className="text-gray-700" style={{ fontSize: isMobile ? 14 : 15, marginBottom: 12 }}>
-                {activeProject.description}
-              </p>
+            {/* Postal Card Stack Container */}
+            <div
+              ref={cardContainerRef}
+              className="relative w-full flex justify-center items-center py-6 select-none"
+              style={{ minHeight: isMobile ? 380 : 420 }}
+            >
+              <AnimatePresence mode="popLayout">
+                {projectDeck.slice(0, 4).map((project, index) => {
+                  const isTop = index === 0;
+                  // Card stacking offset math
+                  const offsetScale = 1 - index * 0.04;
+                  const offsetY = index * 12;
+                  const rotation = isTop ? 0 : (index % 2 === 0 ? 1 : -1) * (index * 3);
 
-              <div style={{ marginBottom: 12 }}>
-                <p
-                  style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: "0.2em",
-                    color: "#9CA3AF",
-                    marginBottom: 4,
-                  }}
-                >
-                  IMPACT
-                </p>
-                <p className="text-gray-800 font-medium" style={{ fontSize: isMobile ? 13 : 14 }}>
-                  {activeProject.impact}
-                </p>
-              </div>
-
-              <div style={{ marginBottom: 12 }}>
-                <p
-                  style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: "0.2em",
-                    color: "#9CA3AF",
-                    marginBottom: 6,
-                  }}
-                >
-                  TECH STACK
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {activeProject.stack.map((tech) => (
-                    <span
-                      key={tech}
-                      className="bg-gray-100 text-gray-700 rounded-full"
+                  return (
+                    <motion.div
+                      key={project.name}
                       style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: isMobile ? 9 : 10,
-                        letterSpacing: "0.1em",
-                        padding: "4px 10px",
+                        position: index === 0 ? "relative" : "absolute",
+                        width: "100%",
+                        maxWidth: 620,
+                        zIndex: projectDeck.length - index,
+                        cursor: isTop ? "grab" : "pointer",
+                      }}
+                      initial={{ scale: 0.9, y: 30, opacity: 0 }}
+                      animate={{
+                        scale: offsetScale,
+                        y: offsetY,
+                        rotate: rotation,
+                        opacity: 1 - index * 0.15,
+                      }}
+                      exit={{
+                        x: 300,
+                        opacity: 0,
+                        rotate: 20,
+                        transition: { duration: 0.35 },
+                      }}
+                      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                      drag={isTop ? "x" : false}
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0.7}
+                      onDragEnd={(_, info) => {
+                        if (Math.abs(info.offset.x) > 100) {
+                          shuffleDeck();
+                        }
+                      }}
+                      onClick={() => {
+                        if (!isTop) {
+                          // Bring clicked card to top
+                          setProjectDeck((prev) => {
+                            const found = prev.find((p) => p.name === project.name);
+                            if (!found) return prev;
+                            return [found, ...prev.filter((p) => p.name !== project.name)];
+                          });
+                        }
                       }}
                     >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
+                      <div className="bg-white border-2 border-black rounded-xl p-6 shadow-2xl relative overflow-hidden backdrop-blur-sm">
+                        {/* Stamp/Postal Accent */}
+                        <div className="absolute top-4 right-4 border border-black/20 p-1.5 rounded text-[9px] font-mono tracking-widest text-gray-400 uppercase">
+                          CARD #{PROJECTS.findIndex((p) => p.name === project.name) + 1}
+                        </div>
 
-              {activeProject.link && (
-                <a
-                  href={activeProject.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-black text-white hover:bg-gray-800 transition-colors rounded-full"
-                  style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: isMobile ? 10 : 11,
-                    letterSpacing: "0.15em",
-                    padding: "8px 16px",
-                    marginTop: 4,
-                  }}
-                >
-                  VISIT PROJECT <ArrowUpRight size={12} />
-                </a>
-              )}
-            </motion.div>
-          )}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div
+                            className="w-3.5 h-3.5 rounded-full border border-black/10"
+                            style={{
+                              backgroundColor:
+                                project.type === "Cloud Infrastructure"
+                                  ? "#D4500A"
+                                  : project.type === "Data Engineering"
+                                  ? "#1A6B3C"
+                                  : project.type === "Full-Stack + AI"
+                                  ? "#1A3F7A"
+                                  : "#6B21A8",
+                            }}
+                          />
+                          <div>
+                            <h4
+                              className="font-bold"
+                              style={{
+                                fontFamily: "'Syne', sans-serif",
+                                fontSize: isMobile ? 17 : 20,
+                              }}
+                            >
+                              {project.name}
+                            </h4>
+                            <p
+                              style={{
+                                fontFamily: "'IBM Plex Mono', monospace",
+                                fontSize: 10,
+                                letterSpacing: "0.15em",
+                                color: "#9CA3AF",
+                              }}
+                            >
+                              {project.region} · {project.year}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p
+                          className="text-gray-700 leading-relaxed mb-4"
+                          style={{ fontSize: isMobile ? 13 : 14 }}
+                        >
+                          {project.description}
+                        </p>
+
+                        <div className="mb-4">
+                          <p
+                            style={{
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 9,
+                              letterSpacing: "0.2em",
+                              color: "#9CA3AF",
+                              marginBottom: 2,
+                            }}
+                          >
+                            IMPACT
+                          </p>
+                          <p className="text-gray-900 font-semibold text-xs md:text-sm">
+                            {project.impact}
+                          </p>
+                        </div>
+
+                        <div className="mb-5">
+                          <p
+                            style={{
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 9,
+                              letterSpacing: "0.2em",
+                              color: "#9CA3AF",
+                              marginBottom: 6,
+                            }}
+                          >
+                            TECH STACK
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {project.stack.map((tech) => (
+                              <span
+                                key={tech}
+                                className="bg-gray-100 text-gray-800 rounded-full border border-black/5"
+                                style={{
+                                  fontFamily: "'IBM Plex Mono', monospace",
+                                  fontSize: 9,
+                                  letterSpacing: "0.08em",
+                                  padding: "3px 8px",
+                                }}
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {project.link && (
+                          <a
+                            href={project.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-black text-white hover:bg-gray-800 transition-colors rounded-full"
+                            style={{
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 10,
+                              letterSpacing: "0.15em",
+                              padding: "8px 16px",
+                            }}
+                          >
+                            VISIT PROJECT <ArrowUpRight size={12} />
+                          </a>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
       </section>
 
