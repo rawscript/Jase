@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { PROJECTS } from "@/lib/world-data";
 
-// NVIDIA API Configuration - uses environment variables
+// NVIDIA API Configuration
 const NVIDIA_CONFIG = {
   baseUrl: import.meta.env.VITE_NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1",
   model: import.meta.env.VITE_NVIDIA_MODEL || "deepseek-ai/deepseek-v4-pro",
@@ -10,30 +10,50 @@ const NVIDIA_CONFIG = {
   maxTokens: 2000,
 };
 
-// System prompt for context about James Mwaura
-const SYSTEM_PROMPT = `You are an AI assistant for James Mwaura's portfolio website. James is a:
-- Full-Stack Engineer specializing in cloud infrastructure and data engineering
-- Based in Nairobi, Kenya (UTC+3)
-- Works on: Cloud (AWS/GCP), Data Engineering (PostGIS/Python), Full-Stack (React/Node.js), AI/ML integration
-- Key projects: Msitubora (forest monitoring), Aurora Energy (grid optimization), Mailforge AI (presentation generation)
-- Skills: TypeScript, Python, PostgreSQL, Docker, Kubernetes, GIS, Satellite APIs, GenAI
-- Experience: 6+ years in software engineering, data engineering, and cloud architecture
-- Contact: jasemwaura@gmail.com, GitHub: rawscript, LinkedIn: jase-mwaura
+// Available Themes Palette
+const THEMES: Record<string, { bg: string; text: string; primary: string; border: string; header: string }> = {
+  default: {
+    bg: "#0D1117",
+    text: "#FFFFFF",
+    primary: "#3FB950",
+    border: "#30363D",
+    header: "#161B22",
+  },
+  dracula: {
+    bg: "#282a36",
+    text: "#f8f8f2",
+    primary: "#50fa7b",
+    border: "#6272a4",
+    header: "#21222c",
+  },
+  monokai: {
+    bg: "#272822",
+    text: "#f8f8f2",
+    primary: "#a6e22e",
+    border: "#49483e",
+    header: "#1e1f1c",
+  },
+  matrix: {
+    bg: "#0d0d0d",
+    text: "#00ff66",
+    primary: "#00ff66",
+    border: "#003311",
+    header: "#051A05",
+  },
+};
 
-Always be helpful, concise, and professional. If asked about topics outside James's expertise, politely redirect to relevant skills or offer to help with related topics.`;
-
-// ─── STATIC COMMAND DATA ──────────────────────────────────────────────────────
 const HELP_TEXT = [
   "Available commands:",
-  "  about          — Who is James Mwaura",
-  "  skills         — Technical skills & stack",
-  "  projects       — List all projects",
-  "  project <id>   — Detail on a project  (e.g. project msitubora)",
-  "  experience     — Work history",
-  "  contact        — How to reach James",
+  "  about         — Who is James Mwaura",
+  "  skills        — Technical skills & stack",
+  "  projects      — List all projects",
+  "  project <id>  — Detail on a project  (e.g. project msitubora)",
+  "  experience    — Work history",
+  "  contact       — How to reach James",
+  "  theme [-g] <name> — Change terminal or global theme",
   "  ask <question> — Ask anything via AI (DeepSeek V4 Pro)",
-  "  clear          — Clear terminal",
-  "  help           — Show this menu",
+  "  clear         — Clear terminal",
+  "  help          — Show this menu",
 ];
 
 const STATIC_COMMANDS: Record<string, string[]> = {
@@ -72,7 +92,6 @@ const STATIC_COMMANDS: Record<string, string[]> = {
   ],
 };
 
-// ─── TYPES ────────────────────────────────────────────────────────────────────
 type BlockType = "banner" | "cmd" | "output" | "error" | "loading";
 
 interface HistoryBlock {
@@ -81,22 +100,23 @@ interface HistoryBlock {
   lines?: string[];
 }
 
-// ─── BLINK CURSOR ─────────────────────────────────────────────────────────────
-function BlinkCursor() {
+function BlinkCursor({ color }: { color: string }) {
   const [on, setOn] = useState(true);
   useEffect(() => {
     const t = setInterval(() => setOn((v) => !v), 530);
     return () => clearInterval(t);
   }, []);
-  return <span style={{ color: "#3FB950" }}>{on ? "█" : "\u00A0"}</span>;
+  return <span style={{ color }}>{on ? "█" : "\u00A0"}</span>;
 }
 
-// ─── TERMINAL ─────────────────────────────────────────────────────────────────
 interface TerminalProps {
   onClose: () => void;
 }
 
 export default function AITerminal({ onClose }: TerminalProps) {
+  const [themeKey, setThemeKey] = useState<string>("default");
+  const activeTheme = THEMES[themeKey] || THEMES.default;
+
   const [history, setHistory] = useState<HistoryBlock[]>([
     {
       type: "banner",
@@ -142,6 +162,14 @@ export default function AITerminal({ onClose }: TerminalProps) {
     ]);
   };
 
+  const applyGlobalTheme = (selectedTheme: typeof activeTheme) => {
+    document.body.style.backgroundColor = selectedTheme.bg;
+    document.body.style.color = selectedTheme.text;
+    document.documentElement.style.setProperty("--bg-color", selectedTheme.bg);
+    document.documentElement.style.setProperty("--text-color", selectedTheme.text);
+    document.documentElement.style.setProperty("--primary-color", selectedTheme.primary);
+  };
+
   const run = useCallback(async () => {
     const raw = input.trim();
     if (!raw) return;
@@ -149,9 +177,8 @@ export default function AITerminal({ onClose }: TerminalProps) {
     setCmdHistory((h) => [raw, ...h]);
     setHistIdx(-1);
 
-    const parts = raw.toLowerCase().split(/\s+/);
-    const cmd = parts[0];
-    const args = parts.slice(1).join(" ");
+    const parts = raw.split(/\s+/);
+    const cmd = parts[0].toLowerCase();
 
     if (cmd === "clear") {
       setHistory([]);
@@ -161,13 +188,60 @@ export default function AITerminal({ onClose }: TerminalProps) {
       push(raw, HELP_TEXT);
       return;
     }
+
+    // Theme Command Handling
+    if (cmd === "theme" || cmd === "themes") {
+      const isGlobal = parts.includes("-g");
+      const filteredParts = parts.filter((p) => p !== "-g" && p.toLowerCase() !== "theme" && p.toLowerCase() !== "themes");
+      const targetTheme = filteredParts[0]?.toLowerCase();
+
+      if (!targetTheme) {
+        push(
+          raw,
+          [
+            "Error: Missing theme name.",
+            "",
+            "Usage:",
+            "  theme <theme_name>       — Change terminal theme",
+            "  theme -g <theme_name>    — Change theme everywhere (including landing page)",
+            "",
+            `Available themes: ${Object.keys(THEMES).join(", ")}`,
+          ],
+          "error"
+        );
+        return;
+      }
+
+      if (!THEMES[targetTheme]) {
+        push(
+          raw,
+          [
+            `Error: Unknown theme '${targetTheme}'.`,
+            `Available themes: ${Object.keys(THEMES).join(", ")}`,
+          ],
+          "error"
+        );
+        return;
+      }
+
+      setThemeKey(targetTheme);
+      if (isGlobal) {
+        applyGlobalTheme(THEMES[targetTheme]);
+        push(raw, [`Global theme updated to '${targetTheme}'.`]);
+      } else {
+        push(raw, [`Terminal theme changed to '${targetTheme}'.`]);
+      }
+      return;
+    }
+
     if (STATIC_COMMANDS[cmd]) {
       push(raw, STATIC_COMMANDS[cmd]);
       return;
     }
 
     if (cmd === "project") {
-      const proj = PROJECTS.find((p) => p.id === args.trim());
+      const args = parts.slice(1).join(" ");
+      const proj = PROJECTS.find((p) => p.id === args.trim().toLowerCase());
       if (!proj) {
         push(
           raw,
@@ -189,209 +263,53 @@ export default function AITerminal({ onClose }: TerminalProps) {
     }
 
     if (cmd === "ask") {
+      const args = parts.slice(1).join(" ");
       if (!args) {
         push(raw, ["Usage: ask <your question>"], "error");
         return;
       }
-      
-      // Show loading
+
       setHistory((h) => [
         ...h,
         { type: "cmd", text: raw },
         { type: "loading", lines: [] },
       ]);
       setLoading(true);
-      
-      // Simulate AI thinking with timeout
+
       setTimeout(() => {
         try {
-          // Get question in lowercase for matching
           const question = args.toLowerCase();
           let response = "";
-          
-          // Handle common questions with intelligent responses
+
           if (question.includes("project") || question.includes("work on") || question.includes("built")) {
-            response = `James has worked on ${PROJECTS.length} key projects globally:
-
-1. MSITUBORA - Forest monitoring with satellite APIs & blockchain
-   • Location: Nairobi, Kenya
-   • Tech: Blockchain, IoT, React, Satellite APIs
-   • Impact: Planetary conservation monitoring
-
-2. AURORA ENERGY - Energy grid optimization
-   • Location: London, UK
-   • Tech: Node.js, PostgreSQL, React
-   • Impact: Energy optimization across grid networks
-
-3. MAILFORGE AI - AI presentation generation
-   • Location: San Francisco, USA
-   • Tech: AI, GenAI, PostgreSQL, React
-   • Impact: Rapid structural presentation generation
-
-4. NESTIE - Real estate platform
-   • Location: Nairobi, Kenya
-   • Tech: Node.js, React, Next.js, Stripe
-   • Impact: Advanced habitat allocation
-
-5. GEO-SPATIAL LAB - Satellite data processing
-   • Location: Berlin, Germany
-   • Tech: Satellite APIs, GIS, PostGIS, Python
-   • Impact: Geo-spatial data engineering
-
-6. CLOUD INFRASTRUCTURE - Multi-cloud deployment
-   • Location: Cape Town, South Africa
-   • Tech: AWS, GCP, Docker, Kubernetes
-   • Impact: Scalable structural deployment
-
-All projects combine cloud infrastructure, data engineering, and full-stack development with global impact.`;
-          
+            response = `James has worked on ${PROJECTS.length} key projects globally:\n\n1. MSITUBORA - Forest monitoring\n2. AURORA ENERGY - Energy grid optimization\n3. MAILFORGE AI - AI presentation generation`;
           } else if (question.includes("skill") || question.includes("tech") || question.includes("stack")) {
-            response = `James specializes in 7 core technical areas:
-
-CLOUD INFRASTRUCTURE
-• AWS, GCP, Docker, Kubernetes, CI/CD
-• Multi-cloud deployment architectures
-• Serverless & containerized applications
-
-DATA ENGINEERING
-• PostgreSQL, PostGIS, Python, GDAL
-• GIS & spatial data processing
-• Satellite API integration
-
-FULL-STACK DEVELOPMENT
-• TypeScript, JavaScript, Node.js
-• React, Next.js, REST, GraphQL
-• Modern web applications
-
-AI/ML INTEGRATION
-• GenAI & LLM implementation
-• Model monitoring & deployment
-• AI-powered applications
-
-BLOCKCHAIN & IOT
-• Smart contract development
-• IoT device integration
-• Decentralized applications
-
-DATABASES
-• PostgreSQL, Redis, MongoDB
-• BigQuery, data warehousing
-• Database optimization
-
-DEVOPS & TOOLING
-• CI/CD pipelines, Git, Docker
-• Infrastructure as Code
-• Monitoring & observability
-
-He combines these skills to build scalable, data-intensive applications across multiple continents.`;
-          
-          } else if (question.includes("experience") || question.includes("work history") || question.includes("career")) {
-            response = `James has 6+ years of progressive engineering experience:
-
-2022–PRESENT  • FULL-STACK ENGINEER (Remote, Global Clients)
-• Building cloud-native applications for international clients
-• Specializing in data pipelines & AI integration
-• Technologies: TypeScript, Python, AWS, PostgreSQL
-
-2022–2023     • CLOUD SOLUTIONS ARCHITECT (Nairobi + Cape Town)
-• Designed multi-cloud deployment architectures
-• Led migration projects for enterprise clients
-• Technologies: AWS, GCP, Kubernetes, Docker
-
-2020–2022     • FULL-STACK ENGINEER (Nairobi)
-• Developed full-stack applications for local enterprises
-• Implemented data visualization & analytics platforms
-• Technologies: React, Node.js, MongoDB, Python
-
-2018–2020     • DATA ANALYST (Nairobi)
-• Data analysis & reporting for business intelligence
-• Built early data pipelines & dashboards
-• Technologies: Python, SQL, Tableau, Excel
-
-He has progressed from data analysis to full-stack development to cloud architecture, building expertise across the entire technology stack.`;
-          
-          } else if (question.includes("contact") || question.includes("reach") || question.includes("email")) {
-            response = `You can contact James through:
-
-PRIMARY CONTACT
-• Email: jasemwaura@gmail.com
-• Phone: +254 114 841 437 (Kenya, UTC+3)
-• Location: Nairobi, Kenya
-
-PROFESSIONAL PROFILES
-• GitHub: github.com/rawscript (code & projects)
-• LinkedIn: linkedin.com/in/jase-mwaura (professional)
-• Portfolio: jase.vercel.app (current site)
-
-PREFERRED COMMUNICATION
-• Email for detailed inquiries
-• LinkedIn for professional connections
-• GitHub for technical discussions
-
-RESPONSE TIME
-• Typically responds within 24 hours
-• Available for technical consultations
-• Open to collaboration on interesting projects
-
-Best to email jasemwaura@gmail.com with specific questions about projects, collaboration, or technical work.`;
-          
+            response = `James specializes in 7 core technical areas including Cloud Infrastructure, Data Engineering, Full-Stack Dev, and AI/ML Integration.`;
+          } else if (question.includes("contact") || question.includes("reach")) {
+            response = `Email: jasemwaura@gmail.com\nGitHub: github.com/rawscript\nLinkedIn: linkedin.com/in/jase-mwaura`;
           } else {
-            // Generic intelligent response
-            response = `James Mwaura is a full-stack, cloud, and data engineer based in Nairobi, Kenya.
-
-Based on your question "${args}", here's what I can tell you:
-
-James specializes in building scalable applications that combine:
-• Cloud infrastructure (AWS/GCP/Docker/Kubernetes)
-• Data engineering (PostgreSQL/PostGIS/Python/GIS)
-• Full-stack development (React/Node.js/TypeScript)
-• AI/ML integration (GenAI/LLMs/model deployment)
-
-He has worked on projects across 4 continents including:
-• Environmental monitoring in East Africa
-• Energy grid optimization in Europe
-• AI presentation tools in North America
-• Cloud infrastructure in South Africa
-
-For specific information, try these commands:
-• "projects" - List all projects
-• "skills" - Technical skills & stack
-• "experience" - Work history timeline
-• "contact" - How to reach James
-• "about" - Overview of background
-
-Or ask more specific questions about his work, technologies, or experience.`;
+            response = `James Mwaura is a full-stack, cloud, and data engineer based in Nairobi, Kenya.\n\nType 'help' to explore specific commands.`;
           }
-          
-          // Format the response
-          const lines = response
-            .split("\n")
-            .slice(0, 14)
-            .map(line => line.trim());
-          
+
+          const lines = response.split("\n").map((line) => line.trim());
+
           setHistory((h) => [
             ...h.slice(0, -1),
             { type: "output", lines },
           ]);
-          
         } catch (error) {
-          console.error("AI Error:", error);
           setHistory((h) => [
             ...h.slice(0, -1),
-            { 
-              type: "error", 
-              lines: [
-                "AI service temporarily unavailable",
-                "Try again in a moment, or use other commands:",
-                "  about, skills, projects, experience, contact"
-              ]
+            {
+              type: "error",
+              lines: ["AI service temporarily unavailable."],
             },
           ]);
         } finally {
           setLoading(false);
         }
-      }, 50); // Snappy response
-      
+      }, 50);
+
       return;
     }
 
@@ -400,7 +318,7 @@ Or ask more specific questions about his work, technologies, or experience.`;
       [`${cmd}: command not found. Type 'help' for available commands.`],
       "error"
     );
-  }, [input]);
+  }, [input, themeKey]);
 
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -421,8 +339,28 @@ Or ask more specific questions about his work, technologies, or experience.`;
     }
   };
 
+  // Syntax highlighting parser for command input
+  const renderHighlightedCommand = (fullText: string) => {
+    const words = fullText.split(" ");
+    return words.map((word, idx) => {
+      let color = "#FFFFFF"; // Default white for arguments
+      if (idx === 0) {
+        color = "#3FB950"; // Green for the command itself
+      } else if (word.startsWith("-")) {
+        color = "#D29922"; // Yellow for flags
+      } else {
+        color = "#58A6FF"; // Cyan for values
+      }
+
+      return (
+        <span key={idx} style={{ color }}>
+          {word}{idx < words.length - 1 ? " " : ""}
+        </span>
+      );
+    });
+  };
+
   return (
-    /* Backdrop */
     <div
       style={{
         position: "fixed",
@@ -431,8 +369,8 @@ Or ask more specific questions about his work, technologies, or experience.`;
         width: "100vw",
         height: isMobile ? "100dvh" : "100vh",
         zIndex: 50,
-        background: isMobile ? "#0D1117" : "rgba(0,0,0,0.7)",
-        backdropFilter: isMobile ? "none" : "blur(6px)",
+        background: isMobile ? activeTheme.bg : "rgba(0,0,0,0.75)",
+        backdropFilter: isMobile ? "none" : "blur(8px)",
         display: "flex",
         alignItems: isMobile ? "stretch" : "center",
         justifyContent: isMobile ? "stretch" : "center",
@@ -441,18 +379,19 @@ Or ask more specific questions about his work, technologies, or experience.`;
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* Window */}
+      {/* Terminal Window with Rounded Corners */}
       <div
         style={{
           width: isMobile ? "100%" : "min(820px, 96vw)",
           height: isMobile ? "100%" : "min(540px, 90vh)",
           maxHeight: "100%",
-          background: "#0D1117",
-          border: isMobile ? "none" : "1px solid #30363D",
-          boxShadow: isMobile ? "none" : "0 32px 96px rgba(0,0,0,0.7)",
+          background: activeTheme.bg,
+          border: isMobile ? "none" : `1px solid ${activeTheme.border}`,
+          borderRadius: isMobile ? "0px" : "12px",
+          boxShadow: isMobile ? "none" : "0 32px 96px rgba(0,0,0,0.8)",
           display: "flex",
           flexDirection: "column",
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'DejaVu Sans Mono', 'Liberation Mono', 'Ubuntu Mono', 'Courier New', monospace",
           fontSize: isMobile ? 12 : 13,
           overflow: "hidden",
         }}
@@ -464,8 +403,8 @@ Or ask more specific questions about his work, technologies, or experience.`;
             alignItems: "center",
             gap: 8,
             padding: "10px 16px",
-            background: "#161B22",
-            borderBottom: "1px solid #30363D",
+            background: activeTheme.header,
+            borderBottom: `1px solid ${activeTheme.border}`,
             userSelect: "none",
           }}
         >
@@ -481,22 +420,8 @@ Or ask more specific questions about his work, technologies, or experience.`;
                 cursor: "pointer",
               }}
             />
-            <div
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: "50%",
-                background: "#FEBC2E",
-              }}
-            />
-            <div
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: "50%",
-                background: "#28C840",
-              }}
-            />
+            <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#FEBC2E" }} />
+            <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#28C840" }} />
           </div>
           <span
             style={{
@@ -527,7 +452,7 @@ Or ask more specific questions about his work, technologies, or experience.`;
           {history.map((block, bi) => {
             if (block.type === "banner") {
               return (
-                <div key={bi} style={{ color: "#3FB950", marginBottom: 8, overflowX: "auto", whiteSpace: "pre" }}>
+                <div key={bi} style={{ color: activeTheme.primary, marginBottom: 8, overflowX: "auto", whiteSpace: "pre" }}>
                   {block.lines!.map((l, li) => (
                     <div key={li}>{l || "\u00A0"}</div>
                   ))}
@@ -536,45 +461,33 @@ Or ask more specific questions about his work, technologies, or experience.`;
             }
             if (block.type === "cmd") {
               return (
-                <div
-                  key={bi}
-                  style={{ color: "#E6EDF3", marginTop: 6 }}
-                >
-                  <span style={{ color: "#3FB950" }}>jm</span>
+                <div key={bi} style={{ marginTop: 6 }}>
+                  <span style={{ color: activeTheme.primary }}>jm</span>
                   <span style={{ color: "#8B949E" }}>@portfolio</span>
-                  <span style={{ color: "#E6EDF3" }}>:~$ </span>
-                  <span>{block.text}</span>
+                  <span style={{ color: activeTheme.text }}>:~$ </span>
+                  {renderHighlightedCommand(block.text || "")}
                 </div>
               );
             }
             if (block.type === "loading") {
               return (
-                <div
-                  key={bi}
-                  style={{ color: "#8B949E", marginTop: 2 }}
-                >
-                  <BlinkCursor />
+                <div key={bi} style={{ marginTop: 2 }}>
+                  <BlinkCursor color={activeTheme.primary} />
                 </div>
               );
             }
             if (block.type === "error") {
               return (
-                <div
-                  key={bi}
-                  style={{ color: "#F85149", marginTop: 2 }}
-                >
+                <div key={bi} style={{ color: "#F85149", marginTop: 2 }}>
                   {block.lines!.map((l, li) => (
                     <div key={li}>{l || "\u00A0"}</div>
                   ))}
                 </div>
               );
             }
-            // output
+            // Default output
             return (
-              <div
-                key={bi}
-                style={{ color: "#C9D1D9", marginTop: 2 }}
-              >
+              <div key={bi} style={{ color: activeTheme.text, marginTop: 2 }}>
                 {block.lines!.map((l, li) => (
                   <div key={li}>{l || "\u00A0"}</div>
                 ))}
@@ -587,40 +500,26 @@ Or ask more specific questions about his work, technologies, or experience.`;
         {/* Input row */}
         <div
           style={{
-            borderTop: "1px solid #30363D",
+            borderTop: `1px solid ${activeTheme.border}`,
             padding: isMobile ? "8px 12px" : "10px 20px",
             display: "flex",
             alignItems: "center",
-            background: "#0D1117",
+            background: activeTheme.bg,
           }}
         >
           {!isMobile && (
             <>
-              <span
-                style={{
-                  color: "#3FB950",
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 13,
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <span style={{ color: activeTheme.primary, fontSize: 13, whiteSpace: "nowrap" }}>
                 jm
               </span>
-              <span
-                style={{
-                  color: "#8B949E",
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 13,
-                }}
-              >
+              <span style={{ color: "#8B949E", fontSize: 13 }}>
                 @portfolio
               </span>
             </>
           )}
           <span
             style={{
-              color: isMobile ? "#3FB950" : "#E6EDF3",
-              fontFamily: "'IBM Plex Mono', monospace",
+              color: isMobile ? activeTheme.primary : activeTheme.text,
               fontSize: isMobile ? 12 : 13,
               marginRight: 6,
             }}
@@ -641,10 +540,9 @@ Or ask more specific questions about his work, technologies, or experience.`;
               background: "none",
               border: "none",
               outline: "none",
-              color: "#E6EDF3",
-              fontFamily: "'IBM Plex Mono', monospace",
+              color: "#3FB950", // Entered text turns green
               fontSize: isMobile ? 12 : 13,
-              caretColor: "#3FB950",
+              caretColor: activeTheme.primary,
             }}
           />
         </div>
