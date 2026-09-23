@@ -56,37 +56,44 @@ export default function About() {
 
   useEffect(() => {
     const sections: Section[] = ["about-me", "projects", "publications"];
+    let frame = 0;
+    const updateActiveSection = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const marker = window.innerHeight * 0.38;
+        const nearest = sections.reduce<{ id: Section; distance: number } | null>((best, id) => {
+          const section = sectionRefs.current[id];
+          if (!section) return best;
+          const rect = section.getBoundingClientRect();
+          const distance = marker < rect.top
+            ? rect.top - marker
+            : marker > rect.bottom
+              ? marker - rect.bottom
+              : 0;
+          return !best || distance < best.distance ? { id, distance } : best;
+        }, null);
 
-    const observerOptions = {
-      root: null,
-      rootMargin: "-20% 0px -20% 0px",
-      threshold: [0.1, 0.3, 0.5, 0.8],
-    };
-
-    const handleIntersect: IntersectionObserverCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id as Section;
-          setActiveSection(id);
-        }
+        if (nearest) setActiveSection(nearest.id);
       });
     };
 
-    const observer = new IntersectionObserver(handleIntersect, observerOptions);
-
-    sections.forEach((id) => {
-      const el = sectionRefs.current[id];
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("resize", updateActiveSection);
+    updateActiveSection();
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", updateActiveSection);
+      window.removeEventListener("resize", updateActiveSection);
+    };
   }, []);
 
   // Smooth scroll
   const scrollToSection = (id: Section) => {
     const el = sectionRefs.current[id];
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      const navHeight = document.querySelector("nav")?.getBoundingClientRect().height ?? 64;
+      const top = window.scrollY + el.getBoundingClientRect().top - navHeight - 16;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       setActiveSection(id);
     }
     setMobileNavOpen(false);
@@ -109,36 +116,6 @@ export default function About() {
       return [lastCard, ...rest];
     });
   }, []);
-
-  // Mouse Wheel / Trackpad Scroll interaction over project cards
-  const handleWheel = useCallback(
-    (e: WheelEvent) => {
-      if (!cardContainerRef.current) return;
-      if (cardContainerRef.current.contains(e.target as Node)) {
-        if (Math.abs(e.deltaY) > 20) {
-          e.preventDefault();
-          if (e.deltaY > 0) {
-            shuffleDeck();
-          } else {
-            shuffleBack();
-          }
-        }
-      }
-    },
-    [shuffleDeck, shuffleBack]
-  );
-
-  useEffect(() => {
-    const cardEl = cardContainerRef.current;
-    if (cardEl) {
-      cardEl.addEventListener("wheel", handleWheel, { passive: false });
-    }
-    return () => {
-      if (cardEl) {
-        cardEl.removeEventListener("wheel", handleWheel);
-      }
-    };
-  }, [handleWheel]);
 
   return (
     <div className="relative min-h-screen" style={{ backgroundColor: "#FAF8F4" }}>
@@ -527,7 +504,7 @@ export default function About() {
                 marginBottom: isMobile ? 20 : 32,
               }}
             >
-              SWIPE LEFT/RIGHT, SCROLL MOUSE UP/DOWN, OR DRAG CARDS TO SHUFFLE
+              USE THE ARROWS, SWIPE LEFT/RIGHT, OR DRAG CARDS TO SHUFFLE
             </p>
           </motion.div>
 
