@@ -365,10 +365,8 @@ export default function AITerminal({ onClose }: TerminalProps) {
       let color = "#FFFFFF"; // Default white for arguments
       if (idx === 0) {
         color = "#3FB950"; // Green for the command itself
-      } else if (word.startsWith("-")) {
-        color = "#D29922"; // Yellow for flags
       } else {
-        color = "#58A6FF"; // Cyan for values
+        color = "#FFFFFF";
       }
 
       return (
@@ -545,25 +543,45 @@ export default function AITerminal({ onClose }: TerminalProps) {
           >
             {isMobile ? "$ " : ":~$"}
           </span>
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKey}
-            disabled={loading}
-            autoComplete="off"
-            spellCheck={false}
-            style={{
-              flex: 1,
-              minWidth: 0,
-              background: "none",
-              border: "none",
-              outline: "none",
-              color: "#3FB950", // Entered text turns green
-              fontSize: isMobile ? 12 : 13,
-              caretColor: activeTheme.primary,
-            }}
-          />
+          <div style={{ position: "relative", flex: 1, minWidth: 0, height: 20, overflow: "hidden" }}>
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                overflow: "hidden",
+                whiteSpace: "pre",
+                fontSize: isMobile ? 12 : 13,
+                pointerEvents: "none",
+              }}
+            >
+              {renderHighlightedCommand(input)}
+            </div>
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKey}
+              disabled={loading}
+              autoComplete="off"
+              spellCheck={false}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                boxSizing: "border-box",
+                padding: 0,
+                background: "none",
+                border: "none",
+                outline: "none",
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+                fontSize: isMobile ? 12 : 13,
+                caretColor: activeTheme.primary,
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
