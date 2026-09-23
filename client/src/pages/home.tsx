@@ -5,6 +5,7 @@ import AITerminal from "@/components/ai-terminal";
 import ContactScreen from "@/components/contact-section";
 import MapSearch from "@/components/map-search";
 import { PROJECTS } from "@/lib/world-data";
+import { Sun, Moon } from "lucide-react";
 
 type Project = (typeof PROJECTS)[number];
 
@@ -12,6 +13,7 @@ export default function Home() {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [showTerminal, setShowTerminal] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [isDay, setIsDay] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -27,7 +29,8 @@ export default function Home() {
         width: "100vw",
         height: "100dvh",
         overflow: "hidden",
-        background: "#FAF8F4",
+        background: isDay ? "#FAF8F4" : "#050914",
+        transition: "background 500ms ease",
         position: "relative",
       }}
     >
@@ -36,6 +39,7 @@ export default function Home() {
         activeProject={activeProject}
         onSelectProject={setActiveProject}
         isContactOpen={showContact}
+        isDay={isDay}
       />
 
       {/* Floating Search Bar Overlay */}
@@ -57,7 +61,18 @@ export default function Home() {
       <Navigation
         onOpenTerminal={() => setShowTerminal(true)}
         onOpenContact={() => setShowContact(true)}
+        isDay={isDay}
       />
+
+      <button
+        type="button"
+        aria-label={isDay ? "Switch to night" : "Switch to day"}
+        title={isDay ? "Switch to night" : "Switch to day"}
+        onClick={() => setIsDay((day) => !day)}
+        style={{ position: "absolute", zIndex: 31, bottom: isMobile ? 20 : 32, left: isMobile ? 16 : 32, width: 40, height: 40, display: "grid", placeItems: "center", border: `1px solid ${isDay ? "#D1D5DB" : "#334155"}`, background: isDay ? "rgba(255,255,255,.82)" : "rgba(15,23,42,.86)", color: isDay ? "#B7791F" : "#F8FAFC", cursor: "pointer", borderRadius: "50%", transition: "all 300ms ease" }}
+      >
+        {isDay ? <Moon size={18} /> : <Sun size={18} />}
+      </button>
 
       {/* Overlays */}
       {showTerminal && (

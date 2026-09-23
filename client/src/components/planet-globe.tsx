@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html, OrbitControls, useFBX, useTexture } from "@react-three/drei";
+import { Html, OrbitControls, Stars, useFBX, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { PROJECTS, typeColor } from "@/lib/world-data";
 import ProjectPanel from "@/components/project-panel";
@@ -135,6 +135,7 @@ function RockMoonMarker({
   onHover,
   onClick,
   registry,
+  isDay,
 }: {
   params: OrbitParams;
   hovered: boolean;
@@ -143,6 +144,7 @@ function RockMoonMarker({
   onHover: (p: Project | null) => void;
   onClick: (proj: Project) => void;
   registry: React.MutableRefObject<Map<string, THREE.Vector3>>;
+  isDay: boolean;
 }) {
   const { project, inclination, nodeLongitude, orbitRadius, speed, phase } = params;
   const col = typeColor(project.type);
@@ -151,7 +153,11 @@ function RockMoonMarker({
 
   useFrame((_, delta) => {
     if (revolveRef.current) {
-      revolveRef.current.rotation.y += delta * speed;
+      const targetSpeed = active ? speed * 0.08 : speed;
+      const currentSpeed = revolveRef.current.userData.orbitSpeed ?? speed;
+      const easedSpeed = THREE.MathUtils.damp(currentSpeed, targetSpeed, 5, delta);
+      revolveRef.current.userData.orbitSpeed = easedSpeed;
+      revolveRef.current.rotation.y += delta * easedSpeed;
     }
     if (rockMoonRef.current) {
       const worldPos = new THREE.Vector3();
@@ -238,7 +244,7 @@ function RockMoonMarker({
             <meshBasicMaterial
               color={col}
               transparent
-              opacity={dimmed ? 0.02 : active ? 0.6 : hovered ? 0.4 : 0.2}
+              opacity={dimmed ? 0.02 : active ? 0.6 : hovered ? 0.4 : isDay ? 0.12 : 0.3}
               side={THREE.DoubleSide}
               depthWrite={false}
               blending={THREE.AdditiveBlending}
@@ -338,7 +344,7 @@ function RockMoonMarker({
               <meshBasicMaterial
                 color={col}
                 transparent
-                opacity={active ? 0.8 : hovered ? 0.6 : 0.4}
+                opacity={active ? 0.8 : hovered ? 0.6 : isDay ? 0.25 : 0.5}
                 side={THREE.DoubleSide}
                 depthWrite={false}
               />
@@ -407,6 +413,11 @@ function RockMoonMarker({
                 </div>
               </Html>
             )}
+            {active && (
+              <Html position={[0, 0, 0]} style={{ pointerEvents: "none" }}>
+                <div className="asteroid-card-beam" />
+              </Html>
+            )}
           </group>
         </group>
       </group>
@@ -420,15 +431,17 @@ function GlobeScene({
   onSelectProject,
   hoveredPin,
   setHoveredPin,
-  isContactOpen,
   controlsRef,
+  isDay,
+  destroyedAsteroids,
 }: {
   activeProject: Project | null;
   onSelectProject: (p: Project | null) => void;
   hoveredPin: Project | null;
   setHoveredPin: (p: Project | null) => void;
-  isContactOpen: boolean;
   controlsRef: React.MutableRefObject<any>;
+  isDay: boolean;
+  destroyedAsteroids: Set<string>;
 }) {
   const { camera } = useThree();
   const focusTarget = useRef<THREE.Vector3 | null>(null);
@@ -463,14 +476,16 @@ function GlobeScene({
 
   return (
     <>
-      <ambientLight intensity={0.75} />
-      <directionalLight position={[4, 3, 5]} intensity={1.35} />
-      <directionalLight position={[-5, -2, -4]} intensity={0.25} />
+      <ambientLight intensity={isDay ? 0.75 : 0.22} color={isDay ? "#ffffff" : "#8499d8"} />
+      <directionalLight position={[4, 3, 5]} intensity={isDay ? 1.35 : 0.42} color={isDay ? "#ffffff" : "#9bb7ff"} />
+      <directionalLight position={[-5, -2, -4]} intensity={isDay ? 0.25 : 0.12} />
+      {!isDay && <Stars />}
       <Suspense fallback={<LoadingFallback />}>
         {/* Globe is fixed on its axis - rotation controlled only by OrbitControls */}
         <PlanetMesh />
         {/* Projects orbit the planet as satellites */}
         {orbitParams.map((op) => (
+          !destroyedAsteroids.has(op.project.id) &&
           <RockMoonMarker
             key={op.project.id}
             params={op}
@@ -482,6 +497,7 @@ function GlobeScene({
               onSelectProject(activeProject?.id === proj.id ? null : proj)
             }
             registry={rockMoonPositions}
+            isDay={isDay}
           />
         ))}
       </Suspense>
@@ -552,12 +568,14 @@ interface PlanetGlobeProps {
   onSelectProject: (p: Project | null) => void;
   activeProject: Project | null;
   isContactOpen?: boolean;
+  isDay?: boolean;
 }
 
 export default function PlanetGlobe({
   onSelectProject,
   activeProject,
   isContactOpen = false,
+  isDay = true,
 }: PlanetGlobeProps) {
   const [hoveredPin, setHoveredPin] = useState<Project | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -566,6 +584,16 @@ export default function PlanetGlobe({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isMobile, setIsMobile] = useState(false);
   const [userInteracting, setUserInteracting] = useState(false);
+  const [destroyedAsteroids, setDestroyedAsteroids] = useState<Set<string>>(() => new Set());
+  const previousProjectId = useRef<string | null>(null);
+
+  useEffect(() => {
+    const previousId = previousProjectId.current;
+    if (previousId && previousId !== activeProject?.id) {
+      setDestroyedAsteroids((current) => new Set(current).add(previousId));
+    }
+    previousProjectId.current = activeProject?.id ?? null;
+  }, [activeProject?.id]);
 
   // Responsive container sizing - updates on resize
   useEffect(() => {
@@ -683,8 +711,9 @@ export default function PlanetGlobe({
             onSelectProject={onSelectProject}
             hoveredPin={hoveredPin}
             setHoveredPin={setHoveredPin}
-            isContactOpen={isContactOpen}
             controlsRef={controlsRef}
+            isDay={isDay}
+            destroyedAsteroids={destroyedAsteroids}
           />
           <OrbitControls
             ref={controlsRef}
@@ -756,11 +785,23 @@ export default function PlanetGlobe({
 
       {/* Project panel */}
       {activeProject && (
-        <ProjectPanel project={activeProject} onClose={() => onSelectProject(null)} />
+        <ProjectPanel project={activeProject} onClose={() => onSelectProject(null)} isDay={isDay} />
       )}
 
       {/* Add CSS for pulse animation */}
       <style>{`
+        .asteroid-card-beam {
+          position: absolute;
+          left: 50%;
+          top: 0;
+          width: max(0px, calc(50vw - 210px));
+          height: 2px;
+          transform-origin: left center;
+          background: linear-gradient(90deg, rgba(125,211,252,.95), rgba(125,211,252,.2), transparent);
+          box-shadow: 0 0 10px #7dd3fc;
+          animation: beamPulse 1.8s ease-in-out infinite;
+        }
+        @keyframes beamPulse { 50% { opacity: .45; } }
         @keyframes pulse {
           0% { opacity: 0.9; transform: translateX(-50%) scale(1); }
           50% { opacity: 1; transform: translateX(-50%) scale(1.05); }

@@ -13,11 +13,13 @@ const LEGEND_TYPES = [
 interface NavigationProps {
   onOpenTerminal: () => void;
   onOpenContact: () => void;
+  isDay?: boolean;
 }
 
 export default function Navigation({
   onOpenTerminal,
   onOpenContact,
+  isDay = true,
 }: NavigationProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [location] = useLocation();
@@ -49,7 +51,7 @@ export default function Navigation({
           padding: isMobile ? "14px 16px" : "22px 32px",
           zIndex: 20,
           background:
-            "linear-gradient(to bottom, rgba(250,248,244,0.95) 70%, transparent)",
+            isDay ? "linear-gradient(to bottom, rgba(250,248,244,0.95) 70%, transparent)" : "linear-gradient(to bottom, rgba(5,9,20,0.94) 70%, transparent)",
           pointerEvents: "none",
         }}
       >
@@ -60,7 +62,7 @@ export default function Navigation({
               fontFamily: "'Syne', sans-serif",
               fontWeight: 800,
               fontSize: isMobile ? 14 : 17,
-              color: "#111",
+              color: isDay ? "#111" : "#F8FAFC",
               letterSpacing: "-0.02em",
               margin: 0,
             }}
@@ -84,9 +86,9 @@ export default function Navigation({
         <div
           style={{ display: "flex", gap: isMobile ? 6 : 8, pointerEvents: "auto" }}
         >
-          <NavButton onClick={onOpenTerminal} isMobile={isMobile}>_ TERMINAL</NavButton>
-          <NavButton onClick={() => window.location.href = "/about"} isMobile={isMobile}>ABOUT</NavButton>
-          <NavButton onClick={onOpenContact} isMobile={isMobile}>REACH OUT</NavButton>
+          <NavButton onClick={onOpenTerminal} isMobile={isMobile} isDay={isDay}>_ TERMINAL</NavButton>
+          <NavButton onClick={() => window.location.href = "/about"} isMobile={isMobile} isDay={isDay}>ABOUT</NavButton>
+          <NavButton onClick={onOpenContact} isMobile={isMobile} isDay={isDay}>REACH OUT</NavButton>
         </div>
       </nav>
 
@@ -114,7 +116,7 @@ export default function Navigation({
                   fontFamily: "'IBM Plex Mono', monospace",
                   fontSize: 9,
                   letterSpacing: "0.12em",
-                  color: "#9CA3AF",
+                  color: isDay ? "#9CA3AF" : "#94A3B8",
                 }}
               >
                 {t}
@@ -141,28 +143,30 @@ function NavButton({
   onClick,
   children,
   isMobile = false,
+  isDay = true,
 }: {
   onClick: () => void;
   children: React.ReactNode;
   isMobile?: boolean;
+  isDay?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "#111";
-        e.currentTarget.style.color = "#111";
-        e.currentTarget.style.background = "rgba(0,0,0,0.02)";
+        e.currentTarget.style.borderColor = isDay ? "#111" : "#E2E8F0";
+        e.currentTarget.style.color = isDay ? "#111" : "#F8FAFC";
+        e.currentTarget.style.background = isDay ? "rgba(0,0,0,0.02)" : "rgba(255,255,255,0.08)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = "#D1D5DB";
-        e.currentTarget.style.color = "#6B7280";
+        e.currentTarget.style.borderColor = isDay ? "#D1D5DB" : "#475569";
+        e.currentTarget.style.color = isDay ? "#6B7280" : "#CBD5E1";
         e.currentTarget.style.background = "none";
       }}
       style={{
         background: "none",
-        border: "1px solid #D1D5DB",
-        color: "#6B7280",
+        border: `1px solid ${isDay ? "#D1D5DB" : "#475569"}`,
+        color: isDay ? "#6B7280" : "#CBD5E1",
         padding: isMobile ? "6px 10px" : "9px 18px",
         fontFamily: "'IBM Plex Mono', monospace",
         fontSize: isMobile ? 8 : 10,

@@ -1,4 +1,4 @@
-import { typeColor, latLngToXY } from "@/lib/world-data";
+import { typeColor } from "@/lib/world-data";
 import type { PROJECTS } from "@/lib/world-data";
 
 type Project = (typeof PROJECTS)[number];
@@ -6,9 +6,10 @@ type Project = (typeof PROJECTS)[number];
 interface ProjectPanelProps {
   project: Project;
   onClose: () => void;
+  isDay?: boolean;
 }
 
-export default function ProjectPanel({ project, onClose }: ProjectPanelProps) {
+export default function ProjectPanel({ project, onClose, isDay = true }: ProjectPanelProps) {
   return (
     <>
       <style>{`
@@ -25,13 +26,13 @@ export default function ProjectPanel({ project, onClose }: ProjectPanelProps) {
           right: 0,
           bottom: 0,
           width: "min(420px, 100vw)",
-          background: "#fff",
-          borderLeft: "1px solid #E5E7EB",
+          background: isDay ? "#fff" : "#0F172A",
+          borderLeft: `1px solid ${isDay ? "#E5E7EB" : "#334155"}`,
           zIndex: 40,
           display: "flex",
           flexDirection: "column",
           fontFamily: "'IBM Plex Mono', monospace",
-          boxShadow: "-24px 0 80px rgba(0,0,0,0.08)",
+          boxShadow: isDay ? "-24px 0 80px rgba(0,0,0,0.08)" : "-24px 0 80px rgba(0,0,0,0.45)",
           animation: "slideIn 0.3s cubic-bezier(0.16,1,0.3,1) forwards",
         }}
       >
@@ -39,7 +40,7 @@ export default function ProjectPanel({ project, onClose }: ProjectPanelProps) {
         <div
           style={{
             padding: "28px 32px 24px",
-            borderBottom: "1px solid #E5E7EB",
+            borderBottom: `1px solid ${isDay ? "#E5E7EB" : "#334155"}`,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-start",
@@ -62,7 +63,7 @@ export default function ProjectPanel({ project, onClose }: ProjectPanelProps) {
                 fontFamily: "'Syne', sans-serif",
                 fontWeight: 800,
                 fontSize: 26,
-                color: "#111",
+                color: isDay ? "#111" : "#F8FAFC",
                 letterSpacing: "-0.02em",
               }}
             >
@@ -114,8 +115,8 @@ export default function ProjectPanel({ project, onClose }: ProjectPanelProps) {
           {/* Impact box */}
           <div
             style={{
-              background: "#F9FAFB",
-              border: "1px solid #E5E7EB",
+              background: isDay ? "#F9FAFB" : "#1E293B",
+              border: `1px solid ${isDay ? "#E5E7EB" : "#334155"}`,
               padding: "16px 20px",
               marginBottom: 28,
             }}
@@ -148,7 +149,7 @@ export default function ProjectPanel({ project, onClose }: ProjectPanelProps) {
             style={{
               fontSize: 13,
               lineHeight: 1.85,
-              color: "#4B5563",
+                color: isDay ? "#4B5563" : "#CBD5E1",
               margin: "0 0 28px",
             }}
           >
@@ -173,10 +174,10 @@ export default function ProjectPanel({ project, onClose }: ProjectPanelProps) {
                 style={{
                   fontSize: 11,
                   letterSpacing: "0.08em",
-                  color: "#374151",
-                  border: "1px solid #D1D5DB",
+                  color: isDay ? "#374151" : "#E2E8F0",
+                  border: `1px solid ${isDay ? "#D1D5DB" : "#475569"}`,
                   padding: "5px 12px",
-                  background: "#fff",
+                  background: isDay ? "#fff" : "#0F172A",
                 }}
               >
                 {s}
