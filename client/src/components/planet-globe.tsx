@@ -64,6 +64,9 @@ function createCityLightsTexture(surfaceImage: HTMLImageElement) {
 
 // ─── FIXED GLOBE (No rotation, just planet mesh) ──────────────────────────────
 function PlanetMesh({ isDay }: { isDay: boolean }) {
+  const sunDirection = useRef(new THREE.Vector3(4, 3, 5).normalize());
+  const shaderUniforms = useRef({ sunDirectionView: new THREE.Vector3(4, 3, 5).normalize() });
+  const { camera } = useThree();
   const fbx = useFBX("/planet/planet.fbx");
   const albedo = useTexture("/planet/albedo.webp");
   const orm = useTexture("/planet/orm.webp");
@@ -91,21 +94,46 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if ((mesh as THREE.Mesh).isMesh) {
-        mesh.material = new THREE.MeshStandardMaterial({
+        const material = new THREE.MeshStandardMaterial({
           map: albedo,
           emissiveMap: cityLights ?? undefined,
           emissive: new THREE.Color("#ffc77d"),
-          emissiveIntensity: isDay ? 0 : 0.85,
+          emissiveIntensity: isDay ? 0 : 1.15,
           roughnessMap: orm,
           metalnessMap: orm,
           roughness: 1,
           metalness: 1,
         });
+        material.onBeforeCompile = (shader) => {
+          shader.uniforms.uSunDirectionView = {
+            value: shaderUniforms.current.sunDirectionView,
+          };
+          shader.fragmentShader = shader.fragmentShader.replace(
+            "#include <emissivemap_fragment>",
+            `#include <emissivemap_fragment>
+              float surfaceSunlight = dot(normalize(vNormal), normalize(uSunDirectionView));
+              float nightSide = 1.0 - smoothstep(-0.08, 0.12, surfaceSunlight);
+              totalEmissiveRadiance *= nightSide;`
+          );
+          shader.fragmentShader = shader.fragmentShader.replace(
+            "#include <common>",
+            `#include <common>
+              uniform vec3 uSunDirectionView;`
+          );
+        };
+        material.customProgramCacheKey = () => "planet-city-lights-terminator-v1";
+        mesh.material = material;
       }
     });
 
     return clone;
   }, [fbx, albedo, orm, cityLights, isDay]);
+
+  useFrame(() => {
+    shaderUniforms.current.sunDirectionView
+      .copy(sunDirection.current)
+      .transformDirection(camera.matrixWorldInverse);
+  });
 
   return <primitive object={model} />;
 }
@@ -533,7 +561,7 @@ function GlobeScene({
   return (
     <>
       <ambientLight intensity={isDay ? 0.75 : 0.22} color={isDay ? "#ffffff" : "#8499d8"} />
-      <directionalLight position={[4, 3, 5]} intensity={isDay ? 1.35 : 0.42} color={isDay ? "#ffffff" : "#9bb7ff"} />
+      <directionalLight position={[4, 3, 5]} intensity={isDay ? 1.35 : 0.5} color={isDay ? "#ffffff" : "#c4d4ff"} />
       <directionalLight position={[-5, -2, -4]} intensity={isDay ? 0.25 : 0.12} />
       {!isDay && <Stars />}
       <Suspense fallback={<LoadingFallback />}>
