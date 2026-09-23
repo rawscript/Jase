@@ -29,7 +29,7 @@ export default function Home() {
         width: "100vw",
         height: "100dvh",
         overflow: "hidden",
-        background: isDay ? "#FAF8F4" : "#050914",
+        background: `var(--global-theme-bg, ${isDay ? "#FAF8F4" : "#050914"})`,
         transition: "background 500ms ease",
         position: "relative",
       }}

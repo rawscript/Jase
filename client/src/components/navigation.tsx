@@ -50,8 +50,7 @@ export default function Navigation({
           justifyContent: "space-between",
           padding: isMobile ? "14px 16px" : "22px 32px",
           zIndex: 20,
-          background:
-            isDay ? "linear-gradient(to bottom, rgba(250,248,244,0.95) 70%, transparent)" : "linear-gradient(to bottom, rgba(5,9,20,0.94) 70%, transparent)",
+          background: `var(--global-theme-header, ${isDay ? "linear-gradient(to bottom, rgba(250,248,244,0.95) 70%, transparent)" : "linear-gradient(to bottom, rgba(5,9,20,0.94) 70%, transparent)"})`,
           pointerEvents: "none",
         }}
       >
@@ -62,7 +61,7 @@ export default function Navigation({
               fontFamily: "'Syne', sans-serif",
               fontWeight: 800,
               fontSize: isMobile ? 14 : 17,
-              color: isDay ? "#111" : "#F8FAFC",
+              color: `var(--global-theme-text, ${isDay ? "#111" : "#F8FAFC"})`,
               letterSpacing: "-0.02em",
               margin: 0,
             }}
@@ -154,19 +153,19 @@ function NavButton({
     <button
       onClick={onClick}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = isDay ? "#111" : "#E2E8F0";
-        e.currentTarget.style.color = isDay ? "#111" : "#F8FAFC";
+        e.currentTarget.style.borderColor = "var(--global-theme-primary, #111)";
+        e.currentTarget.style.color = "var(--global-theme-text, #111)";
         e.currentTarget.style.background = isDay ? "rgba(0,0,0,0.02)" : "rgba(255,255,255,0.08)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = isDay ? "#D1D5DB" : "#475569";
-        e.currentTarget.style.color = isDay ? "#6B7280" : "#CBD5E1";
+        e.currentTarget.style.borderColor = `var(--global-theme-border, ${isDay ? "#D1D5DB" : "#475569"})`;
+        e.currentTarget.style.color = `var(--global-theme-text, ${isDay ? "#6B7280" : "#CBD5E1"})`;
         e.currentTarget.style.background = "none";
       }}
       style={{
         background: "none",
-        border: `1px solid ${isDay ? "#D1D5DB" : "#475569"}`,
-        color: isDay ? "#6B7280" : "#CBD5E1",
+        border: `1px solid var(--global-theme-border, ${isDay ? "#D1D5DB" : "#475569"})`,
+        color: `var(--global-theme-text, ${isDay ? "#6B7280" : "#CBD5E1"})`,
         padding: isMobile ? "6px 10px" : "9px 18px",
         fontFamily: "'IBM Plex Mono', monospace",
         fontSize: isMobile ? 8 : 10,

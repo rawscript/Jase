@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { PROJECTS } from "@/lib/world-data";
+import { applyGlobalTheme } from "@/lib/site-theme";
 
 // NVIDIA API Configuration
 const NVIDIA_CONFIG = {
@@ -10,37 +11,63 @@ const NVIDIA_CONFIG = {
   maxTokens: 2000,
 };
 
-// Available Themes Palette
-const THEMES: Record<string, { bg: string; text: string; primary: string; border: string; header: string }> = {
-  default: {
-    bg: "#0D1117",
-    text: "#FFFFFF",
-    primary: "#3FB950",
-    border: "#30363D",
-    header: "#161B22",
-  },
-  dracula: {
-    bg: "#282a36",
-    text: "#f8f8f2",
-    primary: "#50fa7b",
-    border: "#6272a4",
-    header: "#21222c",
-  },
-  monokai: {
-    bg: "#272822",
-    text: "#f8f8f2",
-    primary: "#a6e22e",
-    border: "#49483e",
-    header: "#1e1f1c",
-  },
-  matrix: {
-    bg: "#0d0d0d",
-    text: "#00ff66",
-    primary: "#00ff66",
-    border: "#003311",
-    header: "#051A05",
-  },
-};
+// name, background, text, accent, border, header
+const THEME_PALETTES: Array<[string, string, string, string, string, string]> = [
+  ["default", "#0D1117", "#FFFFFF", "#3FB950", "#30363D", "#161B22"],
+  ["dracula", "#282A36", "#F8F8F2", "#50FA7B", "#6272A4", "#21222C"],
+  ["monokai", "#272822", "#F8F8F2", "#A6E22E", "#49483E", "#1E1F1C"],
+  ["matrix", "#080D09", "#B8FFC8", "#00FF66", "#174A27", "#0B1B10"],
+  ["nord", "#2E3440", "#ECEFF4", "#88C0D0", "#4C566A", "#3B4252"],
+  ["gruvbox", "#282828", "#EBDBB2", "#FABD2F", "#504945", "#3C3836"],
+  ["solarized-dark", "#002B36", "#EEE8D5", "#B58900", "#586E75", "#073642"],
+  ["solarized-light", "#FDF6E3", "#586E75", "#268BD2", "#D6CEBA", "#EEE8D5"],
+  ["tokyo-night", "#1A1B26", "#C0CAF5", "#7AA2F7", "#3B4261", "#16161E"],
+  ["catppuccin-mocha", "#1E1E2E", "#CDD6F4", "#CBA6F7", "#45475A", "#181825"],
+  ["catppuccin-latte", "#EFF1F5", "#4C4F69", "#8839EF", "#CCD0DA", "#E6E9EF"],
+  ["one-dark", "#282C34", "#ABB2BF", "#61AFEF", "#3E4451", "#21252B"],
+  ["github-dark", "#0D1117", "#E6EDF3", "#2F81F7", "#30363D", "#161B22"],
+  ["github-light", "#FFFFFF", "#1F2328", "#0969DA", "#D1D9E0", "#F6F8FA"],
+  ["cyberpunk", "#100B1D", "#F5E9FF", "#FF2BD6", "#56316D", "#211332"],
+  ["synthwave", "#241B2F", "#F8E9FF", "#FF7EDB", "#6B4D7A", "#342542"],
+  ["ocean", "#071D2B", "#D7F4FF", "#35C9FF", "#16445A", "#0C2B3D"],
+  ["midnight", "#090D1A", "#DDE5FF", "#8AA4FF", "#293454", "#121A30"],
+  ["forest", "#101B16", "#E1F1E7", "#75C98B", "#335344", "#19291F"],
+  ["emerald", "#06251E", "#D8FFF1", "#35D6A2", "#17624D", "#0B382D"],
+  ["rose-pine", "#191724", "#E0DEF4", "#EBBCBA", "#403D52", "#1F1D2E"],
+  ["rose-pine-moon", "#232136", "#E0DEF4", "#EA9A97", "#44415A", "#2A273F"],
+  ["kanagawa", "#1F1F28", "#DCD7BA", "#98BB6C", "#54546D", "#2A2A37"],
+  ["everforest", "#2D353B", "#D3C6AA", "#A7C080", "#4F585E", "#343F44"],
+  ["cobalt", "#002240", "#FFFFFF", "#0088FF", "#14517D", "#003355"],
+  ["night-owl", "#011627", "#D6DEEB", "#82AAFF", "#23415F", "#0B2942"],
+  ["palenight", "#292D3E", "#A6ACCD", "#C792EA", "#444A6A", "#202331"],
+  ["material", "#263238", "#EEFFFF", "#80CBC4", "#455A64", "#1E272C"],
+  ["ayu-dark", "#0B0E14", "#BFBDB6", "#E6B450", "#2D333B", "#11151C"],
+  ["ayu-light", "#FAFAFA", "#575F66", "#399EE6", "#D1D5D8", "#F3F4F5"],
+  ["paper", "#F5F0E8", "#3A342E", "#B45A3C", "#D8CFC2", "#EAE3D8"],
+  ["sepia", "#30261D", "#F2E3C9", "#D29B58", "#65513D", "#3C3024"],
+  ["lavender", "#211B2D", "#F0E8FF", "#B99AFF", "#514269", "#2D243D"],
+  ["mint", "#E9FFF6", "#25483A", "#15966A", "#B9E5D2", "#D8F5E8"],
+  ["sunset", "#271717", "#FFE8D6", "#FF8A5B", "#704238", "#38221F"],
+  ["aurora", "#101A25", "#E3F7F4", "#6DE2C2", "#34535A", "#182B38"],
+  ["neon", "#090A12", "#F4F7FF", "#00F5FF", "#393B5C", "#14162A"],
+  ["terminal-green", "#020B05", "#B5FFB8", "#39FF14", "#1D4A22", "#07160A"],
+  ["terminal-amber", "#110B02", "#FFE7AE", "#FFB000", "#594016", "#211504"],
+  ["terminal-cyan", "#041014", "#C7FAFF", "#00D9FF", "#15505A", "#082027"],
+  ["high-contrast", "#000000", "#FFFFFF", "#FFFF00", "#777777", "#171717"],
+  ["slate", "#1E293B", "#E2E8F0", "#38BDF8", "#475569", "#273449"],
+  ["sandstone", "#302B24", "#F1E8D8", "#D9A441", "#625747", "#40392F"],
+  ["arctic", "#EAF4F8", "#243746", "#168AAD", "#C5D9E2", "#D8EAF0"],
+  ["volcanic", "#1C1111", "#F4E7E5", "#FF5733", "#5C302B", "#2A1918"],
+  ["desert", "#30261C", "#F6E7C8", "#E4A94F", "#68523A", "#403222"],
+  ["coffee", "#211A17", "#EADBC8", "#C08A5B", "#57463B", "#302620"],
+];
+
+const THEMES = Object.fromEntries(
+  THEME_PALETTES.map(([name, bg, text, primary, border, header]) => [
+    name,
+    { bg, text, primary, border, header },
+  ])
+) as Record<string, { bg: string; text: string; primary: string; border: string; header: string }>;
 
 const HELP_TEXT = [
   "Available commands:",
@@ -162,14 +189,6 @@ export default function AITerminal({ onClose }: TerminalProps) {
     ]);
   };
 
-  const applyGlobalTheme = (selectedTheme: typeof activeTheme) => {
-    document.body.style.backgroundColor = selectedTheme.bg;
-    document.body.style.color = selectedTheme.text;
-    document.documentElement.style.setProperty("--bg-color", selectedTheme.bg);
-    document.documentElement.style.setProperty("--text-color", selectedTheme.text);
-    document.documentElement.style.setProperty("--primary-color", selectedTheme.primary);
-  };
-
   const run = useCallback(async () => {
     const raw = input.trim();
     if (!raw) return;
@@ -191,9 +210,9 @@ export default function AITerminal({ onClose }: TerminalProps) {
 
     // Theme Command Handling
     if (cmd === "theme" || cmd === "themes") {
-      const isGlobal = parts.includes("-g");
-      const filteredParts = parts.filter((p) => p !== "-g" && p.toLowerCase() !== "theme" && p.toLowerCase() !== "themes");
-      const targetTheme = filteredParts[0]?.toLowerCase();
+      const themeArgs = parts.slice(1).map((part) => part.toLowerCase());
+      const isGlobal = themeArgs.includes("-g");
+      const targetTheme = themeArgs.find((part) => part !== "-g");
 
       if (!targetTheme) {
         push(
@@ -203,7 +222,7 @@ export default function AITerminal({ onClose }: TerminalProps) {
             "",
             "Usage:",
             "  theme <theme_name>       — Change terminal theme",
-            "  theme -g <theme_name>    — Change theme everywhere (including landing page)",
+            "  theme -g <theme_name>    — Change theme everywhere (also accepts: theme <name> -g)",
             "",
             `Available themes: ${Object.keys(THEMES).join(", ")}`,
           ],

@@ -118,14 +118,14 @@ export default function About() {
   }, []);
 
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: "#FAF8F4" }}>
+    <div className="relative min-h-screen" style={{ backgroundColor: "var(--global-theme-bg, #FAF8F4)" }}>
       {/* ─── Sticky Navigation ────────────────────────────────────────── */}
       <nav
         className="sticky top-0 z-50"
         style={{
-          background: "rgba(250,248,244,0.92)",
+          background: "var(--global-theme-header, rgba(250,248,244,0.92))",
           backdropFilter: "blur(12px)",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          borderBottom: "1px solid var(--global-theme-border, rgba(0,0,0,0.06))",
         }}
       >
         <div
