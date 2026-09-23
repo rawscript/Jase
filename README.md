@@ -10,6 +10,46 @@ Full-stack portfolio website built with React, TypeScript, Express.js, and Postg
 - **Database Integration**: PostgreSQL with Drizzle ORM for contact form persistence
 - **Interactive Components**: Smooth animations, skill bars, project filtering
 - **Contact Form**: Validated form with database storage
+- **Interactive Globe**: Select project asteroids to focus the globe and open project details
+- **Day and Night Modes**: Switch between daylight and a star-filled night sky with city lights on the dark side of the globe
+- **About Page Navigation**: Smooth section links and normal page scrolling, including over the project deck
+- **Terminal Themes**: 47 terminal palettes, with an optional global theme that persists across reloads
+
+## Portfolio Controls
+
+### Globe
+
+- Drag to rotate the globe and scroll or pinch to zoom.
+- Select an asteroid to slow its orbit, highlight it, and open its project card. Closing the card removes that asteroid from the scene.
+- Use the sun/moon control to switch between day and night.
+
+### Terminal
+
+Open the terminal from the top navigation, then enter `help` to see the available commands. Change the terminal palette with:
+
+```text
+theme <name>
+```
+
+Apply a palette to the site as well with either flag placement:
+
+```text
+theme -g <name>
+theme <name> -g
+```
+
+Global themes are saved in browser storage and restored on reload. The 47 available names are:
+
+```text
+default, dracula, monokai, matrix, nord, gruvbox, solarized-dark,
+solarized-light, tokyo-night, catppuccin-mocha, catppuccin-latte,
+one-dark, github-dark, github-light, cyberpunk, synthwave, ocean,
+midnight, forest, emerald, rose-pine, rose-pine-moon, kanagawa,
+everforest, cobalt, night-owl, palenight, material, ayu-dark, ayu-light,
+paper, sepia, lavender, mint, sunset, aurora, neon, terminal-green,
+terminal-amber, terminal-cyan, high-contrast, slate, sandstone, arctic,
+volcanic, desert, coffee
+```
 
 ## Prerequisites
 
