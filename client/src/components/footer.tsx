@@ -33,7 +33,7 @@ export default function Footer({ pageContext = 'home' }: FooterProps) {
   const content = pageMessages[pageContext];
 
   return (
-    <footer className="py-16 border-t border-black/10" style={{ backgroundColor: '#FAF8F4' }}>
+    <footer className="py-16 border-t border-black/10" style={{ backgroundColor: "var(--global-theme-bg, #FAF8F4)", color: "var(--global-theme-text, #111111)", borderColor: "var(--global-theme-border, rgba(0,0,0,0.1))" }}>
       <div className="container mx-auto px-8">
         <div className="text-center">
           <div 
@@ -42,7 +42,7 @@ export default function Footer({ pageContext = 'home' }: FooterProps) {
           >
             {content.title}
           </div>
-          <p className="body-text mb-12 font-light text-gray-600">
+          <p className="body-text mb-12 font-light" style={{ color: "var(--global-theme-text, #4B5563)" }}>
             {content.description}
           </p>
           

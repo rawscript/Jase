@@ -118,7 +118,7 @@ export default function About() {
   }, []);
 
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: "var(--global-theme-bg, #FAF8F4)" }}>
+    <div className="relative min-h-screen" style={{ backgroundColor: "var(--global-theme-bg, #FAF8F4)", color: "var(--global-theme-text, #111111)" }}>
       {/* ─── Sticky Navigation ────────────────────────────────────────── */}
       <nav
         className="sticky top-0 z-50"
@@ -137,6 +137,7 @@ export default function About() {
             href="/"
             className="text-gray-500 hover:text-black transition-colors"
             style={{
+              color: "var(--global-theme-text, #6B7280)",
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: isMobile ? 10 : 11,
               letterSpacing: "0.18em",
@@ -198,14 +199,14 @@ export default function About() {
                     fontFamily: "'IBM Plex Mono', monospace",
                     fontSize: 10,
                     letterSpacing: "0.18em",
-                    color: activeSection === id ? "#111" : "#9CA3AF",
+                  color: activeSection === id ? "var(--global-theme-primary, #111111)" : "var(--global-theme-text, #9CA3AF)",
                     fontWeight: activeSection === id ? 600 : 400,
                     background: "none",
                     border: "none",
                     cursor: "pointer",
                     transition: "all 0.2s",
                     borderBottom:
-                      activeSection === id ? "2px solid #111" : "2px solid transparent",
+                      activeSection === id ? "2px solid var(--global-theme-primary, #111111)" : "2px solid transparent",
                     paddingBottom: 2,
                   }}
                 >
@@ -239,9 +240,9 @@ export default function About() {
                   fontFamily: "'IBM Plex Mono', monospace",
                   fontSize: 11,
                   letterSpacing: "0.18em",
-                  color: activeSection === id ? "#111" : "#6B7280",
+                  color: activeSection === id ? "var(--global-theme-primary, #111111)" : "var(--global-theme-text, #6B7280)",
                   fontWeight: activeSection === id ? 600 : 400,
-                  background: activeSection === id ? "rgba(0,0,0,0.04)" : "none",
+                  background: activeSection === id ? "color-mix(in srgb, var(--global-theme-primary, #111111) 12%, transparent)" : "none",
                   border: "none",
                   cursor: "pointer",
                   textAlign: "left",
@@ -291,7 +292,7 @@ export default function About() {
                 width: activeSection === id ? 10 : 6,
                 height: activeSection === id ? 10 : 6,
                 borderRadius: "50%",
-                backgroundColor: activeSection === id ? "#111" : "#9CA3AF",
+                backgroundColor: activeSection === id ? "var(--global-theme-primary, #111111)" : "var(--global-theme-text, #9CA3AF)",
                 transition: "all 0.3s ease",
               }}
             />
@@ -347,7 +348,7 @@ export default function About() {
                   gap: isMobile ? 14 : 20,
                   fontSize: isMobile ? 15 : 17,
                   lineHeight: 1.7,
-                  color: "#374151",
+                  color: "var(--global-theme-text, #374151)",
                 }}
               >
                 <p>
@@ -471,7 +472,7 @@ export default function About() {
         id="projects"
         style={{
           padding: isMobile ? "40px 16px 60px" : "80px 48px 100px",
-          background: "linear-gradient(to bottom, #FAF8F4, #F3F1EC)",
+          background: "var(--global-theme-header, linear-gradient(to bottom, #FAF8F4, #F3F1EC))",
         }}
       >
         <div className="max-w-6xl mx-auto">
@@ -593,7 +594,7 @@ export default function About() {
                       }
                     }}
                   >
-                    <div className="bg-white border-2 border-black rounded-xl p-6 md:p-8 shadow-2xl relative overflow-hidden backdrop-blur-sm">
+                    <div className="bg-white border-2 border-black rounded-xl p-6 md:p-8 shadow-2xl relative overflow-hidden backdrop-blur-sm" style={{ color: "#111111" }}>
                       {/* Stamp/Postal Accent */}
                       <div className="absolute top-4 right-4 border border-black/20 p-1.5 rounded text-[9px] font-mono tracking-widest text-gray-400 uppercase">
                         CARD #{PROJECTS.findIndex((p) => p.name === project.name) + 1}

@@ -38,7 +38,7 @@ theme -g <name>
 theme <name> -g
 ```
 
-Global themes are saved in browser storage and restored on reload. The 47 available names are:
+Global themes are saved in browser storage and restored on reload. They recolor the navigation and about page while leaving the globe's day/night environment controlled by its sun/moon button. The 47 available names are:
 
 ```text
 default, dracula, monokai, matrix, nord, gruvbox, solarized-dark,

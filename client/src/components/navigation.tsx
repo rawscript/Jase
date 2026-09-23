@@ -115,7 +115,7 @@ export default function Navigation({
                   fontFamily: "'IBM Plex Mono', monospace",
                   fontSize: 9,
                   letterSpacing: "0.12em",
-                  color: isDay ? "#9CA3AF" : "#94A3B8",
+              color: "var(--global-theme-text, #9CA3AF)",
                 }}
               >
                 {t}
