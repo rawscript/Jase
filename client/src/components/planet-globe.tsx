@@ -13,40 +13,48 @@ const RADIUS = 4;
 // longitudes, nudge this value (in degrees) until markers sit correctly.
 const LNG_OFFSET = 0;
 
-const CITY_LIGHTS: Array<[number, number, number]> = [
-  [-74, 41, 1], [-118, 34, 0.8], [-122, 38, 0.55], [-87, 42, 0.55], [-99, 19, 0.75],
-  [-47, -23, 0.8], [-58, -34, 0.55], [-70, -33, 0.45], [-79, 9, 0.35],
-  [-3, 52, 0.65], [2, 49, 0.8], [13, 52, 0.55], [12, 42, 0.55], [29, 41, 0.7], [31, 30, 0.55],
-  [18, -34, 0.45], [3, 6, 0.45], [36, -1, 0.4], [28, -26, 0.45],
-  [72, 19, 0.75], [77, 29, 0.8], [88, 23, 0.7], [67, 24, 0.5], [77, 13, 0.65],
-  [116, 40, 0.8], [121, 31, 0.8], [114, 22, 0.7], [114, 23, 0.6], [127, 38, 0.75],
-  [139, 36, 0.9], [135, 35, 0.65], [103, 1, 0.6], [100, 14, 0.6], [106, -6, 0.65],
-  [121, 14, 0.55], [151, -34, 0.55], [144, -37, 0.45], [28, -27, 0.35],
-  [36, 56, 0.65], [30, 60, 0.45], [55, 25, 0.55], [46, 24, 0.45], [51, 35, 0.55],
-];
-
-function createCityLightsTexture() {
+function createCityLightsTexture(surfaceImage: HTMLImageElement) {
   const canvas = document.createElement("canvas");
-  canvas.width = 2048;
-  canvas.height = 1024;
+  canvas.width = surfaceImage.width;
+  canvas.height = surfaceImage.height;
   const context = canvas.getContext("2d");
   if (!context) return null;
 
-  CITY_LIGHTS.forEach(([longitude, latitude, intensity]) => {
-    const x = ((longitude + 180) / 360) * canvas.width;
-    const y = ((90 - latitude) / 180) * canvas.height;
-    const radius = 8 + intensity * 15;
-    const glow = context.createRadialGradient(x, y, 0, x, y, radius);
-    glow.addColorStop(0, `rgba(255, 196, 104, ${0.95 * intensity})`);
-    glow.addColorStop(0.25, `rgba(255, 166, 68, ${0.5 * intensity})`);
-    glow.addColorStop(1, "rgba(255, 145, 45, 0)");
-    context.fillStyle = glow;
-    context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-    context.beginPath();
-    context.arc(x, y, 1 + intensity * 1.5, 0, Math.PI * 2);
-    context.fillStyle = `rgba(255, 236, 174, ${intensity})`;
-    context.fill();
-  });
+  context.drawImage(surfaceImage, 0, 0, canvas.width, canvas.height);
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  const step = 4;
+  for (let y = step; y < canvas.height - step; y += step) {
+    for (let x = step; x < canvas.width - step; x += step) {
+      const pixel = (y * canvas.width + x) * 4;
+      const red = pixels[pixel];
+      const green = pixels[pixel + 1];
+      const blue = pixels[pixel + 2];
+
+      // The bundled surface map uses blue oceans and green/brown land. Keep
+      // every light on land so the emissive pattern follows the actual UV map.
+      if (blue > red * 1.2 && blue > green * 1.08) continue;
+
+      const regionalDensity =
+        0.5 +
+        0.25 * Math.sin(x * 0.008 + 1.8 * Math.sin(y * 0.005)) +
+        0.25 * Math.cos(y * 0.009 + 1.4 * Math.cos(x * 0.004));
+      if (regionalDensity < 0.39) continue;
+
+      const pointHash = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+      const pointDensity = pointHash - Math.floor(pointHash);
+      if (pointDensity > 0.09) continue;
+
+      const radius = 1.5 + pointDensity * 5;
+      const glow = context.createRadialGradient(x, y, 0, x, y, radius);
+      glow.addColorStop(0, "rgba(255, 215, 150, 0.32)");
+      glow.addColorStop(0.4, "rgba(255, 177, 91, 0.14)");
+      glow.addColorStop(1, "rgba(255, 159, 67, 0)");
+      context.fillStyle = glow;
+      context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+    }
+  }
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -59,7 +67,10 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
   const fbx = useFBX("/planet/planet.fbx");
   const albedo = useTexture("/planet/albedo.webp");
   const orm = useTexture("/planet/orm.webp");
-  const cityLights = useMemo(createCityLightsTexture, []);
+  const cityLights = useMemo(
+    () => createCityLightsTexture(albedo.image as HTMLImageElement),
+    [albedo]
+  );
 
   const model = useMemo(() => {
     const clone = fbx.clone(true);
@@ -83,8 +94,8 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
         mesh.material = new THREE.MeshStandardMaterial({
           map: albedo,
           emissiveMap: cityLights ?? undefined,
-          emissive: new THREE.Color("#ffbd68"),
-          emissiveIntensity: isDay ? 0 : 1.8,
+          emissive: new THREE.Color("#ffc77d"),
+          emissiveIntensity: isDay ? 0 : 0.85,
           roughnessMap: orm,
           metalnessMap: orm,
           roughness: 1,
