@@ -98,11 +98,10 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
           map: albedo,
           emissiveMap: cityLights ?? undefined,
           emissive: new THREE.Color("#ffc77d"),
-          emissiveIntensity: isDay ? 0 : 1.15,
+          emissiveIntensity: isDay ? 0 : 1.8,
           roughnessMap: orm,
-          metalnessMap: orm,
-          roughness: 1,
-          metalness: 1,
+          roughness: 0.76,
+          metalness: 0,
         });
         material.onBeforeCompile = (shader) => {
           shader.uniforms.uSunDirectionView = {
@@ -136,6 +135,32 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
   });
 
   return <primitive object={model} />;
+}
+
+function Atmosphere() {
+  return (
+    <mesh scale={RADIUS * 1.025} renderOrder={1}>
+      <sphereGeometry args={[1, 96, 64]} />
+      <shaderMaterial
+        transparent
+        depthWrite={false}
+        side={THREE.BackSide}
+        blending={THREE.AdditiveBlending}
+        vertexShader={`varying vec3 vNormal; varying vec3 vViewPosition;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            vViewPosition = -mvPosition.xyz;
+            gl_Position = projectionMatrix * mvPosition;
+          }`}
+        fragmentShader={`varying vec3 vNormal; varying vec3 vViewPosition;
+          void main() {
+            float rim = pow(1.0 - max(dot(normalize(vNormal), normalize(vViewPosition)), 0.0), 3.2);
+            gl_FragColor = vec4(0.16, 0.55, 1.0, rim * 0.55);
+          }`}
+      />
+    </mesh>
+  );
 }
 
 function LoadingFallback() {
@@ -256,32 +281,6 @@ function RockMoonMarker({
   const CLICK_MOVE_THRESHOLD = 6;
   const pointerDownRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Seeded deterministic generator to keep rocks stable across renders
-  const seededRocks = useMemo(() => {
-    // Simple deterministic hash from project id
-    let seed = 0;
-    for (let i = 0; i < project.id.length; i++) {
-      seed = (seed * 31 + project.id.charCodeAt(i)) >>> 0;
-    }
-    // include orbitRadius so different radii change rock positions/size slightly
-    seed = (seed + Math.round(orbitRadius * 1000)) >>> 0;
-
-    const rand = () => {
-      // linear congruential generator
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      return (seed & 0xfffffff) / 0xfffffff;
-    };
-
-    return Array.from({ length: 12 }).map((_, i) => {
-      const angle = (i / 12) * Math.PI * 2;
-      const rockSize = 0.04 + rand() * 0.02;
-      const rockX = Math.cos(angle) * orbitRadius;
-      const rockZ = Math.sin(angle) * orbitRadius;
-      const rot = [rand() * Math.PI, rand() * Math.PI, rand() * Math.PI] as [number, number, number];
-      return { i, angle, rockSize, rockX, rockZ, rot };
-    });
-  }, [project.id, orbitRadius]);
-
   // helper to set cursor only for mouse pointers
   const setPointerCursorIfMouse = (e: any, cursor: string) => {
     try {
@@ -324,57 +323,28 @@ function RockMoonMarker({
               setPointerCursorIfMouse(e, "auto");
             }}
           >
-            <ringGeometry args={[orbitRadius - 0.008, orbitRadius + 0.008, 128]} />
+            <ringGeometry args={[orbitRadius - 0.014, orbitRadius + 0.014, 160]} />
             <meshBasicMaterial
               color={col}
               transparent
-              opacity={dimmed ? 0.02 : active ? 0.6 : hovered ? 0.4 : isDay ? 0.12 : 0.3}
+              opacity={dimmed ? 0.05 : active ? 0.9 : hovered ? 0.78 : isDay ? 0.24 : 0.68}
               side={THREE.DoubleSide}
               depthWrite={false}
               blending={THREE.AdditiveBlending}
             />
           </mesh>
 
-          {/* Scattered "rocks/moons" along the orbit - each clickable */}
-          {seededRocks.map(({ i, rockSize, rockX, rockZ, rot }) => (
-            <mesh
-              key={`rock-${project.id}-${i}`}
-              position={[rockX, 0, rockZ]}
-              rotation={rot}
-              scale={[rockSize, rockSize * 0.8, rockSize]}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                pointerDownRef.current = { x: (e as any).clientX, y: (e as any).clientY };
-              }}
-              onPointerUp={(e) => {
-                e.stopPropagation();
-                const pd = pointerDownRef.current;
-                pointerDownRef.current = null;
-                if (!pd || Math.hypot((e as any).clientX - pd.x, (e as any).clientY - pd.y) < CLICK_MOVE_THRESHOLD) {
-                  onClick(project);
-                }
-              }}
-              onPointerEnter={(e) => {
-                e.stopPropagation();
-                onHover(project);
-                setPointerCursorIfMouse(e, "pointer");
-              }}
-              onPointerLeave={(e) => {
-                e.stopPropagation();
-                onHover(null);
-                setPointerCursorIfMouse(e, "auto");
-              }}
-            >
-              <dodecahedronGeometry args={[1, 0]} />
-              <meshStandardMaterial
-                color={col}
-                emissive={col}
-                emissiveIntensity={active ? 0.8 : hovered ? 0.5 : 0.2}
-                metalness={0.7}
-                roughness={0.8}
-              />
-            </mesh>
-          ))}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1}>
+            <ringGeometry args={[orbitRadius - 0.045, orbitRadius + 0.045, 160]} />
+            <meshBasicMaterial
+              color={col}
+              transparent
+              opacity={dimmed ? 0.01 : active ? 0.22 : isDay ? 0.035 : 0.14}
+              side={THREE.DoubleSide}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
         </group>
 
         {/* Enhanced orbit visualization when active */}
@@ -422,6 +392,11 @@ function RockMoonMarker({
               <Suspense fallback={null}>
                 <AsteroidModel scale={scale} />
               </Suspense>
+              {/* Larger transparent shell makes the moving asteroid dependable to tap or click. */}
+              <mesh>
+                <sphereGeometry args={[0.3, 20, 20]} />
+                <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
+              </mesh>
             </group>
             <mesh rotation={[Math.PI / 2, 0, 0]} scale={scale * 1.1}>
               <ringGeometry args={[0.13, 0.165, 32]} />
@@ -560,13 +535,14 @@ function GlobeScene({
 
   return (
     <>
-      <ambientLight intensity={isDay ? 0.75 : 0.22} color={isDay ? "#ffffff" : "#8499d8"} />
-      <directionalLight position={[4, 3, 5]} intensity={isDay ? 1.35 : 0.5} color={isDay ? "#ffffff" : "#c4d4ff"} />
-      <directionalLight position={[-5, -2, -4]} intensity={isDay ? 0.25 : 0.12} />
-      {!isDay && <Stars />}
+      <ambientLight intensity={isDay ? 0.16 : 0.035} color={isDay ? "#b8c8df" : "#22305c"} />
+      <directionalLight position={[7, 4, 6]} intensity={isDay ? 2.8 : 0.75} color={isDay ? "#fff4d6" : "#b9cbff"} />
+      <directionalLight position={[-5, -2, -4]} intensity={isDay ? 0.05 : 0.025} color="#263a77" />
+      {!isDay && <Stars radius={120} depth={60} count={7000} factor={3.2} saturation={0.15} fade speed={0.18} />}
       <Suspense fallback={<LoadingFallback />}>
         {/* Globe is fixed on its axis - rotation controlled only by OrbitControls */}
         <PlanetMesh isDay={isDay} />
+        <Atmosphere />
         {/* Projects orbit the planet as satellites */}
         {orbitParams.map((op) => (
           !destroyedAsteroids.has(op.project.id) &&
