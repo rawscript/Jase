@@ -9,6 +9,11 @@ type Project = (typeof PROJECTS)[number];
 
 // ─── CONFIG ──────────────────────────────────────────────────────────
 const RADIUS = 4;
+// Direction from the planet centre toward the sun. This single vector drives
+// both the direct light and the city-light day/night terminator.
+const SUN_DIRECTION = new THREE.Vector3(7, 4, 6).normalize();
+const CITY_LIGHT_TERMINATOR_START = -0.1;
+const CITY_LIGHT_TERMINATOR_END = 0.06;
 // If the generated planet's texture doesn't line up with real-world
 // longitudes, nudge this value (in degrees) until markers sit correctly.
 const LNG_OFFSET = 0;
@@ -32,11 +37,10 @@ function createCityLightsTexture(surfaceImage: HTMLImageElement) {
       const green = pixels[pixel + 1];
       const blue = pixels[pixel + 2];
 
-      // Keep the blue night-side presence on the ocean surface itself. City
-      // lights are added only after the land mask rejects ocean pixels.
+      // City lights are only placed on land. Ocean colour comes from the
+      // PBR albedo plus the low-intensity moonlight in the scene, rather than
+      // an unphysical ocean emissive map.
       if (blue > red * 1.2 && blue > green * 1.08) {
-        context.fillStyle = "#061a38";
-        context.fillRect(x, y, step, step);
         continue;
       }
 
@@ -68,8 +72,8 @@ function createCityLightsTexture(surfaceImage: HTMLImageElement) {
 
 // ─── FIXED GLOBE (No rotation, just planet mesh) ──────────────────────────────
 function PlanetMesh({ isDay }: { isDay: boolean }) {
-  const sunDirection = useRef(new THREE.Vector3(4, 3, 5).normalize());
-  const shaderUniforms = useRef({ sunDirectionView: new THREE.Vector3(4, 3, 5).normalize() });
+  const sunDirection = useRef(SUN_DIRECTION.clone());
+  const shaderUniforms = useRef({ sunDirectionView: SUN_DIRECTION.clone() });
   const { camera } = useThree();
   const fbx = useFBX("/planet/planet.fbx");
   const albedo = useTexture("/planet/albedo.webp");
@@ -98,7 +102,7 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
     clone.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if ((mesh as THREE.Mesh).isMesh) {
-        const material = new THREE.MeshStandardMaterial({
+        const material = new THREE.MeshPhysicalMaterial({
           map: albedo,
           emissiveMap: cityLights ?? undefined,
           emissive: new THREE.Color("#ffc77d"),
@@ -106,6 +110,8 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
           roughnessMap: orm,
           roughness: 0.76,
           metalness: 0,
+          clearcoat: 0.08,
+          clearcoatRoughness: 0.42,
         });
         material.onBeforeCompile = (shader) => {
           shader.uniforms.uSunDirectionView = {
@@ -114,8 +120,11 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
           shader.fragmentShader = shader.fragmentShader.replace(
             "#include <emissivemap_fragment>",
             `#include <emissivemap_fragment>
+              // NdotL = dot(surface normal, direction toward the sun).
+              // Light emission fades through the solar terminator rather than
+              // appearing on the sunlit side of the planet.
               float surfaceSunlight = dot(normalize(vNormal), normalize(uSunDirectionView));
-              float nightSide = 1.0 - smoothstep(-0.08, 0.12, surfaceSunlight);
+              float nightSide = 1.0 - smoothstep(${CITY_LIGHT_TERMINATOR_START}, ${CITY_LIGHT_TERMINATOR_END}, surfaceSunlight);
               totalEmissiveRadiance *= nightSide;`
           );
           shader.fragmentShader = shader.fragmentShader.replace(
@@ -513,9 +522,9 @@ function GlobeScene({
 
   return (
     <>
-      <ambientLight intensity={isDay ? 0.16 : 0.035} color={isDay ? "#b8c8df" : "#22305c"} />
-      <directionalLight position={[7, 4, 6]} intensity={isDay ? 2.8 : 0.75} color={isDay ? "#fff4d6" : "#b9cbff"} />
-      <directionalLight position={[-5, -2, -4]} intensity={isDay ? 0.05 : 0.025} color="#263a77" />
+      <ambientLight intensity={isDay ? 0.16 : 0.015} color={isDay ? "#b8c8df" : "#172750"} />
+      <directionalLight position={[7, 4, 6]} intensity={isDay ? 3.4 : 0} color="#fff4d6" />
+      <directionalLight position={[-7, 3, -6]} intensity={isDay ? 0.025 : 0.12} color="#8db6ff" />
       {!isDay && <Stars radius={120} depth={60} count={7000} factor={3.2} saturation={0.15} fade speed={0.18} />}
       <Suspense fallback={<LoadingFallback />}>
         {/* Globe is fixed on its axis - rotation controlled only by OrbitControls */}
