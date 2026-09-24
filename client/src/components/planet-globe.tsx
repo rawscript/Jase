@@ -137,26 +137,33 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
   return <primitive object={model} />;
 }
 
-function Atmosphere() {
+function Atmosphere({ isDay }: { isDay: boolean }) {
   return (
-    <mesh scale={RADIUS * 1.025} renderOrder={1}>
+    <mesh scale={RADIUS * 1.006} renderOrder={1}>
       <sphereGeometry args={[1, 96, 64]} />
       <shaderMaterial
         transparent
         depthWrite={false}
         side={THREE.BackSide}
         blending={THREE.AdditiveBlending}
-        vertexShader={`varying vec3 vNormal; varying vec3 vViewPosition;
+        uniforms={{
+          uSunDirection: { value: new THREE.Vector3(7, 4, 6).normalize() },
+          uIntensity: { value: isDay ? 1 : 0.72 },
+        }}
+        vertexShader={`varying vec3 vWorldNormal; varying vec3 vWorldPosition;
           void main() {
-            vNormal = normalize(normalMatrix * normal);
-            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            vViewPosition = -mvPosition.xyz;
-            gl_Position = projectionMatrix * mvPosition;
+            vWorldNormal = normalize(mat3(modelMatrix) * normal);
+            vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+            gl_Position = projectionMatrix * viewMatrix * vec4(vWorldPosition, 1.0);
           }`}
-        fragmentShader={`varying vec3 vNormal; varying vec3 vViewPosition;
+        fragmentShader={`uniform vec3 uSunDirection; uniform float uIntensity;
+          varying vec3 vWorldNormal; varying vec3 vWorldPosition;
           void main() {
-            float rim = pow(1.0 - max(dot(normalize(vNormal), normalize(vViewPosition)), 0.0), 3.2);
-            gl_FragColor = vec4(0.16, 0.55, 1.0, rim * 0.55);
+            vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
+            float rim = pow(1.0 - max(dot(vWorldNormal, viewDirection), 0.0), 5.0);
+            float sunlight = max(dot(vWorldNormal, normalize(uSunDirection)), 0.0);
+            float rayleigh = rim * (0.16 + 0.84 * pow(sunlight, 0.65));
+            gl_FragColor = vec4(0.12, 0.44, 1.0, rayleigh * 0.46 * uIntensity);
           }`}
       />
     </mesh>
@@ -542,7 +549,7 @@ function GlobeScene({
       <Suspense fallback={<LoadingFallback />}>
         {/* Globe is fixed on its axis - rotation controlled only by OrbitControls */}
         <PlanetMesh isDay={isDay} />
-        <Atmosphere />
+        <Atmosphere isDay={isDay} />
         {/* Projects orbit the planet as satellites */}
         {orbitParams.map((op) => (
           !destroyedAsteroids.has(op.project.id) &&
