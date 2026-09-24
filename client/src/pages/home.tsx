@@ -10,20 +10,34 @@ import { Sun, Moon } from "lucide-react";
 type Project = (typeof PROJECTS)[number];
 
 const THEME_OVERRIDE_KEY = "portfolio-globe-theme-override";
-const NAIROBI_LATITUDE = -1.2864;
-const NAIROBI_LONGITUDE = 36.8172;
+const GEOLOCATION_OPTIONS: PositionOptions = {
+  enableHighAccuracy: false,
+  timeout: 10_000,
+  maximumAge: 86_400_000,
+};
 
-function isSeasonalDaylight(now = new Date()) {
+interface SolarLocation {
+  latitude: number;
+  longitude: number;
+}
+
+function getApproximateSolarLocation(now = new Date()): SolarLocation {
+  // Without location access, use the visitor's local solar-time meridian and
+  // an equatorial day length. It gives a dependable local-clock fallback.
+  return { latitude: 0, longitude: -now.getTimezoneOffset() / 4 };
+}
+
+function isSeasonalDaylight(location: SolarLocation, now = new Date()) {
   const startOfYear = new Date(now.getFullYear(), 0, 0);
   const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / 86_400_000);
-  const latitude = (NAIROBI_LATITUDE * Math.PI) / 180;
+  const latitude = (location.latitude * Math.PI) / 180;
   const declination = (-23.44 * Math.cos((2 * Math.PI * (dayOfYear + 10)) / 365) * Math.PI) / 180;
   const hourAngle = Math.acos(-Math.tan(latitude) * Math.tan(declination));
   const daylightMinutes = (2 * hourAngle * 180 * 4) / Math.PI;
   const b = (2 * Math.PI * (dayOfYear - 81)) / 364;
   const equationOfTime = 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);
   const timezoneOffsetMinutes = -now.getTimezoneOffset();
-  const solarNoon = 720 - 4 * NAIROBI_LONGITUDE - equationOfTime + timezoneOffsetMinutes;
+  const solarNoon = 720 - 4 * location.longitude - equationOfTime + timezoneOffsetMinutes;
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   const sunrise = solarNoon - daylightMinutes / 2;
   const sunset = solarNoon + daylightMinutes / 2;
@@ -36,7 +50,12 @@ function getInitialTheme() {
   const override = window.localStorage.getItem(THEME_OVERRIDE_KEY);
   if (override === "day") return true;
   if (override === "night") return false;
-  return isSeasonalDaylight();
+  return isSeasonalDaylight(getApproximateSolarLocation());
+}
+
+function hasSavedThemeOverride() {
+  if (typeof window === "undefined") return false;
+  return ["day", "night"].includes(window.localStorage.getItem(THEME_OVERRIDE_KEY) ?? "");
 }
 
 export default function Home() {
@@ -44,6 +63,8 @@ export default function Home() {
   const [showTerminal, setShowTerminal] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [isDay, setIsDay] = useState(getInitialTheme);
+  const [solarLocation, setSolarLocation] = useState<SolarLocation>(getApproximateSolarLocation);
+  const [hasThemeOverride, setHasThemeOverride] = useState(hasSavedThemeOverride);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -54,17 +75,31 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (window.localStorage.getItem(THEME_OVERRIDE_KEY)) return;
+    if (hasThemeOverride) return;
 
-    const updateAutomaticTheme = () => setIsDay(isSeasonalDaylight());
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => setSolarLocation({ latitude: coords.latitude, longitude: coords.longitude }),
+      () => undefined,
+      GEOLOCATION_OPTIONS,
+    );
+  }, [hasThemeOverride]);
+
+  useEffect(() => {
+    if (hasThemeOverride) return;
+
+    const updateAutomaticTheme = () => setIsDay(isSeasonalDaylight(solarLocation));
+    updateAutomaticTheme();
     const timer = window.setInterval(updateAutomaticTheme, 60_000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [hasThemeOverride, solarLocation]);
 
   const toggleTheme = () => {
     setIsDay((current) => {
       const next = !current;
       window.localStorage.setItem(THEME_OVERRIDE_KEY, next ? "day" : "night");
+      setHasThemeOverride(true);
       return next;
     });
   };
