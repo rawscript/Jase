@@ -32,9 +32,13 @@ function createCityLightsTexture(surfaceImage: HTMLImageElement) {
       const green = pixels[pixel + 1];
       const blue = pixels[pixel + 2];
 
-      // The bundled surface map uses blue oceans and green/brown land. Keep
-      // every light on land so the emissive pattern follows the actual UV map.
-      if (blue > red * 1.2 && blue > green * 1.08) continue;
+      // Keep the blue night-side presence on the ocean surface itself. City
+      // lights are added only after the land mask rejects ocean pixels.
+      if (blue > red * 1.2 && blue > green * 1.08) {
+        context.fillStyle = "#061a38";
+        context.fillRect(x, y, step, step);
+        continue;
+      }
 
       const regionalDensity =
         0.5 +
@@ -48,8 +52,8 @@ function createCityLightsTexture(surfaceImage: HTMLImageElement) {
 
       const radius = 1.5 + pointDensity * 5;
       const glow = context.createRadialGradient(x, y, 0, x, y, radius);
-      glow.addColorStop(0, "rgba(255, 215, 150, 0.32)");
-      glow.addColorStop(0.4, "rgba(255, 177, 91, 0.14)");
+      glow.addColorStop(0, "rgba(255, 230, 178, 0.76)");
+      glow.addColorStop(0.28, "rgba(255, 183, 96, 0.38)");
       glow.addColorStop(1, "rgba(255, 159, 67, 0)");
       context.fillStyle = glow;
       context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
@@ -135,39 +139,6 @@ function PlanetMesh({ isDay }: { isDay: boolean }) {
   });
 
   return <primitive object={model} />;
-}
-
-function Atmosphere({ isDay }: { isDay: boolean }) {
-  return (
-    <mesh scale={RADIUS * 1.006} renderOrder={1}>
-      <sphereGeometry args={[1, 96, 64]} />
-      <shaderMaterial
-        transparent
-        depthWrite={false}
-        side={THREE.BackSide}
-        blending={THREE.AdditiveBlending}
-        uniforms={{
-          uSunDirection: { value: new THREE.Vector3(7, 4, 6).normalize() },
-          uIntensity: { value: isDay ? 1 : 0.72 },
-        }}
-        vertexShader={`varying vec3 vWorldNormal; varying vec3 vWorldPosition;
-          void main() {
-            vWorldNormal = normalize(mat3(modelMatrix) * normal);
-            vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
-            gl_Position = projectionMatrix * viewMatrix * vec4(vWorldPosition, 1.0);
-          }`}
-        fragmentShader={`uniform vec3 uSunDirection; uniform float uIntensity;
-          varying vec3 vWorldNormal; varying vec3 vWorldPosition;
-          void main() {
-            vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
-            float rim = pow(1.0 - max(dot(vWorldNormal, viewDirection), 0.0), 5.0);
-            float sunlight = max(dot(vWorldNormal, normalize(uSunDirection)), 0.0);
-            float rayleigh = rim * (0.16 + 0.84 * pow(sunlight, 0.65));
-            gl_FragColor = vec4(0.12, 0.44, 1.0, rayleigh * 0.46 * uIntensity);
-          }`}
-      />
-    </mesh>
-  );
 }
 
 function LoadingFallback() {
@@ -549,7 +520,6 @@ function GlobeScene({
       <Suspense fallback={<LoadingFallback />}>
         {/* Globe is fixed on its axis - rotation controlled only by OrbitControls */}
         <PlanetMesh isDay={isDay} />
-        <Atmosphere isDay={isDay} />
         {/* Projects orbit the planet as satellites */}
         {orbitParams.map((op) => (
           !destroyedAsteroids.has(op.project.id) &&
