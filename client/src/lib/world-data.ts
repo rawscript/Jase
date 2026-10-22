@@ -84,6 +84,20 @@ export const PROJECTS = [
     impact: "Scalable structural deployment",
     link: "https://github.com/rawscript",
   },
+  {
+    id: "konsalta-hub",
+    name: "Konsalta Hub",
+    lat: -30.56,
+    lng: 22.94,
+    region: "South Africa",
+    type: "Full-Stack + AI",
+    year: "2026",
+    stack: ["React", "TypeScript", "Web Platform"],
+    description:
+      "Digital platform for Konsalta Hub, connecting visitors with its services and resources through a clear, accessible web experience.",
+    impact: "Professional services discovery and engagement",
+    link: "https://konsaltahub.org/",
+  },
 ];
 
 // ─── COLOR MAP ────────────────────────────────────────────────────────────────
