@@ -92,10 +92,10 @@ export const PROJECTS = [
     region: "South Africa",
     type: "Full-Stack + AI",
     year: "2026",
-    stack: ["React", "TypeScript", "Web Platform"],
+    stack: ["HTML", "CSS", "JavaScript", "GSAP"],
     description:
-      "Digital platform for Konsalta Hub, connecting visitors with its services and resources through a clear, accessible web experience.",
-    impact: "Professional services discovery and engagement",
+      "Konsalta is a women-led, Africa-focused research, consulting and advisory firm. We move beyond the slow, overhead-heavy structures of traditional consulting, operating as an agile, network-driven collective shaped around each client's needs to deliver lasting value.",
+    impact: "Agile, network-driven advisory for lasting client value",
     link: "https://konsaltahub.org/",
   },
 ];
