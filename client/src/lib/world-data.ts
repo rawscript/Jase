@@ -98,6 +98,20 @@ export const PROJECTS = [
     impact: "Agile, network-driven advisory for lasting client value",
     link: "https://konsaltahub.org/",
   },
+  {
+    id: "kilimo-bunifu",
+    name: "Kilimo Bunifu",
+    lat: -0.5273,
+    lng: 34.4571,
+    region: "Homa Bay, Kenya",
+    type: "Data Engineering",
+    year: "2026",
+    stack: ["React", "Python", "AT", "Docker", "Tailwind", "FastAPI"],
+    description:
+      "Kilimo Bunifu provides agronomists in East Africa with real-time IoT soil intelligence and satellite NDVI heatmaps, optimized for sustainable push-pull farming systems.",
+    impact: "Real-time intelligence for sustainable East African agriculture",
+    link: "https://icipe.kilimobunifu.org/",
+  },
 ];
 
 // ─── COLOR MAP ────────────────────────────────────────────────────────────────
